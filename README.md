@@ -1,9 +1,19 @@
 # react-intl-universal
 
-## You May Not Need yahoo/react-intl
+## Features
+- Can be used not only in React.Component but also in Vanilla JS.
+- Simple. Only three main API and one optional helper.
+- Display numbers, currency, dates and times for different locales.
+- Pluralize labels in strings.
+- Support variables in message.
+- Support HTML in message.
+- Automatically load [Common Locale Data Repository (CLDR)](http://cldr.unicode.org/) locale data on demand. It's used for displaying numbers, currency, dates and times accordingly.
+- Support for 150+ languages.
+- Runs in the browser and Node.js.
+- Message format is strictly implemented by [ICU standards](http://userguide.icu-project.org/formatparse/messages).
 
-For many apps, we don't need the feature provided by [react-intl](https://github.com/yahoo/react-intl) which is able to change locale data dynamically without reloading page. However, if you don't need this feature, just use [react-intl-universal](https://www.npmjs.com/package/react-intl-universal). It can be used not only in React.Component but also in Vanilla JS.
-
+## Live Demo
+[React Intl Universal Demo](http://g.alicdn.com/alishu/common/0.0.87/intl-example/index.html)
 
 ## Why Another Internationalization Solution for React?
 In case of internationalizing React apps, [react-intl](https://github.com/yahoo/react-intl) is one of most popular package in industry.  [react-intl](https://github.com/yahoo/react-intl) decorate your React.Component with wrapped component which is injected internationalized message dynamically so that the locale data is able to be loaded dynamically without reloading page. However, this approach introduces two major issues.
@@ -27,7 +37,7 @@ class App {
     <MyComponent ref="my"/>
   }
   getMyInstance() {
-	console.log('getMyInstance', this.refs.my);
+    console.log('getMyInstance', this.refs.my);
   }
 }
 ```
@@ -41,35 +51,13 @@ class App {
     <MyComponent ref="my"/>
   }
   getMyInstance() {
-	console.log('getMyInstance', this.refs.my.getWrappedInstance());
+    console.log('getMyInstance', this.refs.my.getWrappedInstance());
   }
 }
 ```
-Furthermore, your React.Component's properties is not inherited in subclass since component is injected by [react-intl](https://github.com/yahoo/react-intl).
+Furthermore, your React.Component's properties is not inherited in subclass since component is injected by [react-intl](https://github.com/yahoo/react-intl). 
 
-
-## react-intl-universal Features
-- Can be used in Vanilla JS, not just in React.Component.
-- Display numbers, currency, dates and times for different locales.
-- Pluralize labels in strings.
-- Support variables in message.
-- Support HTML in message.
-- Automatically load [Common Locale Data Repository (CLDR)](http://cldr.unicode.org/) locale data on demand. It's used for displaying numbers, currency, dates and times.
-- Support for 150+ languages.
-- Runs in the browser and Node.js.
-- Message format is strictly implemented by [ICU standards](http://userguide.icu-project.org/formatparse/messages).
-
-## Live Demo
-[React Intl Universal Demo](http://g.alicdn.com/alishu/common/0.0.87/intl-example/index.html)
-
-
-## Running Examples Locally
-```
-git clone git@github.com:alibaba/react-intl-universal.git
-cd react-intl-universal/examples
-npm install
-npm start
-```
+That's the reason why we create [react-intl-universal](https://www.npmjs.com/package/react-intl-universal).
 
 ## Get Started
 
@@ -86,6 +74,7 @@ Note that you are not necessary to load all locale data, just load the current l
 ```
 import intl from 'react-intl-universal';
 
+// locale data
 const locales = {
   "en-US": require('./locales/en-US.js'),
   "zh-CN": require('./locales/zh-CN.js'),
@@ -223,7 +212,7 @@ if `type` is `time`, `format` has the following values:
 - `long` shows times with hours, minutes, seconds, and timezone
 
 ### Helper
-`react-intl-universal` provides a utility helping developer determine the user's current locale. As the running examples, when user select a new locale, it redirect user new location like `http://localhost:3000?lang=en-US`. Then, we can use `intl.determineLocale` to get the locale from URL. It can also support determine user's locale via cookie and browser default language. Refer to the APIs section for more detail.
+[react-intl-universal](https://www.npmjs.com/package/react-intl-universal) provides a utility helping developer determine the user's current locale. As the running examples, when user select a new locale, it redirect user new location like `http://localhost:3000?lang=en-US`. Then, we can use `intl.determineLocale` to get the locale from URL. It can also support determine user's locale via cookie and browser default language. Refer to the APIs section for more detail.
 
 ## APIs
 
@@ -263,17 +252,18 @@ if `type` is `time`, `format` has the following values:
   determineLocale(options)
 ```
 
-## Code Test Coverage Summary
+
+## Running Examples Locally
 ```
-Statements   : 84.75% ( 50/59 )
-Branches     : 81.58% ( 31/38 )
-Functions    : 90.91% ( 10/11 )
-Lines        : 84.75% ( 50/59 )
+git clone git@github.com:alibaba/react-intl-universal.git
+cd react-intl-universal/examples
+npm install
+npm start
 ```
 
 ## Browser Compatibility
 
-Before using`react-intl-universal`, you need to include scripts below to support IE.
+Before using [react-intl-universal](https://www.npmjs.com/package/react-intl-universal), you need to include scripts below to support IE.
 ```
 <!--[if lt IE 9]>
 <script src="//f.alicdn.com/es5-shim/4.5.7/es5-shim.min.js"></script>
@@ -282,6 +272,15 @@ Before using`react-intl-universal`, you need to include scripts below to support
 <script src="//f.alicdn.com/es6-shim/0.35.1/es6-shim.min.js"></script>
 <![endif]-->
 ```
+
+## Code Test Coverage Summary
+```
+Statements   : 84.75% ( 50/59 )
+Branches     : 81.58% ( 31/38 )
+Functions    : 90.91% ( 10/11 )
+Lines        : 84.75% ( 50/59 )
+```
+
 
 ## License
 This software is free to use under the BSD license.

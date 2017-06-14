@@ -1,6 +1,6 @@
 {
   "name": "react-intl-universal",
-  "version": "1.0.3",
+  "version": "1.0.5",
   "description": "Internationalize React apps. Not only for React.Component but also for Vanilla JS.",
   "keywords": [
     "intl",
@@ -83,5 +83,9 @@
       }
     }
   },
-  "homepage": "https://github.com/alibaba/react-intl-universal"
+  "homepage": "https://github.com/alibaba/react-intl-universal",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alibaba/react-intl-universal.git"
+  }
 }

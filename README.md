@@ -75,7 +75,7 @@ npm start
 
 ### Install
 ```
-npm install react-intl-universal
+npm install react-intl-universal --save
 ```
 
 ### Basic Example

@@ -31,7 +31,7 @@ class App {
   }
 }
 ```
-Instead, use you need to use the method```getWrappedInstance()``` to get that as below.
+Instead, use you need to use the method ```getWrappedInstance()``` to get that as below.
 ```
 class MyComponent {...}
 export default injectIntl(MyComponent, {withRef: true});

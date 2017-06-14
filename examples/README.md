@@ -1,5 +1,5 @@
-## Basic Example
-This example shows the basic example using ReactIntlUniversal.
+# Examples
+This example shows the examples using react-intl-universal.
 
 ## Running
 ```

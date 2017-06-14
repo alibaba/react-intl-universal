@@ -1,0 +1,21 @@
+{
+  "name": "react-intl-universal-example",
+  "version": "1.0.0",
+  "private": true,
+  "author": "chiawei.tcw@alibaba-inc.com",
+  "license": "BSD-3-Clause",
+  "devDependencies": {
+    "react-scripts": "0.8.4"
+  },
+  "dependencies": {
+    "react-intl-universal": "*",
+    "axios": "^0.16.1",
+    "lodash": "^4.17.4",
+    "react": "^15.5.4",
+    "react-dom": "^15.5.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build"
+  }
+}

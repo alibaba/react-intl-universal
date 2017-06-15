@@ -273,6 +273,9 @@ Before using [react-intl-universal](https://www.npmjs.com/package/react-intl-uni
 <![endif]-->
 ```
 
+## Ask Question
+[![Join the chat at https://gitter.im/react-intl-universal/Lobby](https://badges.gitter.im/alibaba/react-intl-universal.svg)](https://gitter.im/react-intl-universal/Lobby)
+
 ## Code Test Coverage Summary
 ```
 Statements   : 84.75% ( 50/59 )
@@ -280,7 +283,6 @@ Branches     : 81.58% ( 31/38 )
 Functions    : 90.91% ( 10/11 )
 Lines        : 84.75% ( 50/59 )
 ```
-
 
 ## License
 This software is free to use under the BSD license.

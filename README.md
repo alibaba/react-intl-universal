@@ -20,7 +20,7 @@ In case of internationalizing React apps, [react-intl](https://github.com/yahoo/
 
 Firstly,  Internationalizing can only be applied in view layer such as React.Component. For Vanilla JS file, there's no way to internationalize it. For example, the following snippet is general form validator used by many React.Component in our apps. We definitely will not have such code separated in different React.Component in order to internationalize the warning message. Sadly, [react-intl](https://github.com/yahoo/react-intl) can't be used in Vanilla JS.
 
-```
+```js
 export default const rules = {
   noSpace(value) {
     if (value.includes(' ')) {
@@ -31,7 +31,7 @@ export default const rules = {
 ```
 
 Secondly,  since your React.Component is wrapped by another class, the behavior is not as expected in many way. For example, to get the instance of React.Component, you can't use the normal way like:
-```
+```js
 class App {
   render() {
     <MyComponent ref="my"/>
@@ -42,7 +42,7 @@ class App {
 }
 ```
 Instead, use you need to use the method ```getWrappedInstance()``` to get that as below.
-```
+```js
 class MyComponent {...}
 export default injectIntl(MyComponent, {withRef: true});
 
@@ -62,7 +62,7 @@ That's the reason why we create [react-intl-universal](https://www.npmjs.com/pac
 ## Get Started
 
 ### Install
-```
+```sh
 npm install react-intl-universal --save
 ```
 
@@ -71,7 +71,7 @@ In the following example, we initialize `intl` with app locale data (`locales`) 
 
 Note that you are not necessary to load all locale data, just load the current locale data on demand. Please refer the [example](https://github.com/alibaba/react-intl-universal/blob/master/examples/src/App.js#L72-L88) for more detail.
 
-```
+```js
 import intl from 'react-intl-universal';
 
 // locale data
@@ -114,18 +114,18 @@ class App extends Component {
 
 ### Message With Variables
 Locale data:
-```
+```json
 { "HELLO": "Hello, {name}. Welcome to {where}!" }
 ```
 JS code:
-```
+```js
 intl.get('HELLO', {name:'Tony', where:'Alibaba'}) // "Hello, Tony. Welcome to Alibaba!"
 ```
 The second argument represents for variables. It will replace variables in the locale data with the value of second argument.
 
 ### Default Message
 JS code:
-```
+```js
 intl.get('not-exist-key').defaultMessage('default message') // "default message"
 ```
 If the key does't exist in current locale, it will return a default message if you append a `defaultMessage` method after `get` method.
@@ -133,22 +133,22 @@ If the key does't exist in current locale, it will return a default message if y
 
 ### HTML Message
 Locale data:
-```
+```json
 { "TIP": "This is <span style='color:red'>HTML</span>" }
 ```
 JS code:
-```
+```js
 intl.getHTML('TIP'); // {React element}
 ```
 
 ### Plural Form and Number Thousands Separators
 
 Locale data:
-```
+```json
 { "PHOTO": "You have {num, plural, =0 {no photos.} =1 {one photo.} other {# photos.}}" }
 ```
 JS code:
-```
+```js
 intl.get('PHOTO', {num:0}); // "You have no photos."
 intl.get('PHOTO', {num:1}); // "You have one photo."
 intl.get('PHOTO', {num:1000000}); // "You have 1,000,000 photos."
@@ -159,11 +159,11 @@ Number thousands separators also varies according to the user's locale. Accordin
 
 ### Display Currency
 Locale data:
-```
+```json
 { "SALE_PRICE": "The price is {price, number, USD}" }
 ```
 JS code:
-```
+```js
 intl.get('SALE_PRICE', {price:123456.78}); // The price is $123,456.78
 ```
 As mentioned, the locale data is in [ICU Message format](http://userguide.icu-project.org/formatparse/messages).
@@ -178,14 +178,14 @@ if `type` is `number` and `format` is omitted, the result is formatted number wi
 
 ### Display Dates
 Locale data:
-```
+```json
 {
   "SALE_START": "Sale begins {start, date}",
   "SALE_END": "Sale ends {end, date, long}"
 }
 ```
 JS code:
-```
+```js
 intl.get('SALE_START', {start:new Date()}); // Sale begins 4/19/2017
 intl.get('SALE_END', {end:new Date()}); // Sale ends April 19, 2017
 ```
@@ -197,13 +197,13 @@ If `type` is `date`, `format` has the following values:
 
 ### Display Times
 Locale data:
-```
+```json
 {
   "COUPON": "Coupon expires at {expires, time, medium}"
 }
 ```
 JS code:
-```
+```js
 intl.get('COUPON', {expires:new Date()}); // Coupon expires at 6:45:44 PM
 ```
 if `type` is `time`, `format` has the following values:
@@ -216,7 +216,7 @@ if `type` is `time`, `format` has the following values:
 
 ## APIs
 
-```
+```js
   /**
    * Initialize properties and load CLDR locale data according to currentLocale
    * @param {Object} options
@@ -254,7 +254,7 @@ if `type` is `time`, `format` has the following values:
 
 
 ## Running Examples Locally
-```
+```sh
 git clone git@github.com:alibaba/react-intl-universal.git
 cd react-intl-universal/examples
 npm install
@@ -264,7 +264,7 @@ npm start
 ## Browser Compatibility
 
 Before using [react-intl-universal](https://www.npmjs.com/package/react-intl-universal), you need to include scripts below to support IE.
-```
+```html
 <!--[if lt IE 9]>
 <script src="//f.alicdn.com/es5-shim/4.5.7/es5-shim.min.js"></script>
 <![endif]-->

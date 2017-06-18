@@ -15,7 +15,7 @@
 - Message format is strictly implemented by [ICU standards](http://userguide.icu-project.org/formatparse/messages).
 
 ## Live Demo
-[React Intl Universal Demo](http://g.alicdn.com/alishu/common/0.0.87/intl-example/index.html)
+[React Intl Universal Demo](https://g.alicdn.com/alishu/common/0.0.95/intl-example/index.html)
 
 ## Why Another Internationalization Solution for React?
 In case of internationalizing React apps, [react-intl](https://github.com/yahoo/react-intl) is one of most popular package in industry.  [react-intl](https://github.com/yahoo/react-intl) decorate your React.Component with wrapped component which is injected internationalized message dynamically so that the locale data is able to be loaded dynamically without reloading page. The following is the example code using  [react-intl](https://github.com/yahoo/react-intl).

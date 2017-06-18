@@ -1,8 +1,6 @@
 # react-intl-universal
 
-[![npm](https://img.shields.io/npm/dt/react-intl-universal.svg)](https://www.npmjs.com/package/react-intl-universal)
-[![npm](https://img.shields.io/npm/v/react-intl-universal.svg)](https://www.npmjs.com/package/react-intl-universal)
-[![npm](https://img.shields.io/npm/l/react-intl-universal.svg)](https://github.com/alibaba/react-intl-universal/blob/master/LICENSE.md)
+[![npm](https://img.shields.io/npm/dt/react-intl-universal.svg)](https://www.npmjs.com/package/react-intl-universal) [![npm](https://img.shields.io/npm/v/react-intl-universal.svg)](https://www.npmjs.com/package/react-intl-universal) [![npm](https://img.shields.io/npm/l/react-intl-universal.svg)](https://github.com/alibaba/react-intl-universal/blob/master/LICENSE.md)
 
 ## Features
 - Can be used not only in React.Component but also in Vanilla JS.
@@ -20,9 +18,23 @@
 [React Intl Universal Demo](http://g.alicdn.com/alishu/common/0.0.87/intl-example/index.html)
 
 ## Why Another Internationalization Solution for React?
-In case of internationalizing React apps, [react-intl](https://github.com/yahoo/react-intl) is one of most popular package in industry.  [react-intl](https://github.com/yahoo/react-intl) decorate your React.Component with wrapped component which is injected internationalized message dynamically so that the locale data is able to be loaded dynamically without reloading page. However, this approach introduces two major issues.
+In case of internationalizing React apps, [react-intl](https://github.com/yahoo/react-intl) is one of most popular package in industry.  [react-intl](https://github.com/yahoo/react-intl) decorate your React.Component with wrapped component which is injected internationalized message dynamically so that the locale data is able to be loaded dynamically without reloading page. The following is the example code using  [react-intl](https://github.com/yahoo/react-intl).
 
-Firstly,  Internationalizing can only be applied in view layer such as React.Component. For Vanilla JS file, there's no way to internationalize it. For example, the following snippet is general form validator used by many React.Component in our apps. We definitely will not have such code separated in different React.Component in order to internationalize the warning message. Sadly, [react-intl](https://github.com/yahoo/react-intl) can't be used in Vanilla JS.
+```js
+import { injectIntl } from 'react-intl';
+class MyComponent extends Component {
+  render() {
+    const intl = this.props;
+    const title = intl.formatMessage({ id: 'title' });
+    return (<div>{title}</div>);
+  }
+};
+export default injectIntl(MyComponent);
+```
+
+However, this approach introduces two major issues.
+
+Firstly,  Internationalizing can be applied only in view layer such as React.Component. For Vanilla JS file, there's no way to internationalize it. For example, the following snippet is general form validator used by many React.Component in our apps. We definitely will not have such code separated in different React.Component in order to internationalize the warning message. Sadly, [react-intl](https://github.com/yahoo/react-intl) can't be used in Vanilla JS.
 
 ```js
 export default const rules = {
@@ -45,7 +57,7 @@ class App {
   }
 }
 ```
-Instead, use you need to use the method ```getWrappedInstance()``` to get that as below.
+Instead, use you need to use the method ```getWrappedInstance()``` to get that.
 ```js
 class MyComponent {...}
 export default injectIntl(MyComponent, {withRef: true});
@@ -61,7 +73,7 @@ class App {
 ```
 Furthermore, your React.Component's properties is not inherited in subclass since component is injected by [react-intl](https://github.com/yahoo/react-intl). 
 
-That's the reason why we create [react-intl-universal](https://www.npmjs.com/package/react-intl-universal).
+Due to the problem above, we create [react-intl-universal](https://www.npmjs.com/package/react-intl-universal) to internationalize React app using simple but powerful API.
 
 ## Get Started
 
@@ -70,7 +82,7 @@ That's the reason why we create [react-intl-universal](https://www.npmjs.com/pac
 npm install react-intl-universal --save
 ```
 
-### Basic Example
+### Initialize
 In the following example, we initialize `intl` with app locale data (`locales`) and determine which locale is used dynamically (`currentLocale`). Then use `intl.get(...)` to get the internationalized message. That's all. Pretty simple!
 
 Note that you are not necessary to load all locale data, just load the current locale data on demand. Please refer the [example](https://github.com/alibaba/react-intl-universal/blob/master/examples/src/App.js#L72-L88) for more detail.
@@ -98,7 +110,7 @@ class App extends Component {
       currentLocale: 'en-US', // TODO: determine locale here
       locales,
     })
-    .then(()=>{
+    .then(() => {
       // After loading CLDR locale data, start to render
 	  this.setState({initDone: true});
     });
@@ -116,7 +128,41 @@ class App extends Component {
 }
 ```
 
+
+### HTML Message
+As shown in above example, the `get` method returns string message. For HTML message, use `getHTML` instead. For example,
+
+Locale data:
+```json
+{ "TIP": "This is <span style='color:red'>HTML</span>" }
+```
+JS code:
+```js
+intl.getHTML('TIP'); // {React.Element}
+```
+
+### Default Message
+When the specific key does't exist in current locale, you may want to make it return a default message. Use `defaultMessage` method after `get` method. For example,
+
+JS code:
+```js
+intl.get('not-exist-key').defaultMessage('default message') // "default message"
+```
+
+Or using `d` for short:
+```js
+intl.get('not-exist-key').d('default message') // "default message"
+```
+
+And `getHTML` also support default message.
+```js
+intl.getHTML('not-exist-key').d(<div>hello</div>) // React.Element with "<div>hello</div>"
+```
+
+
 ### Message With Variables
+If the message contains variables,  the `{variable_name}` is substituted directly into the string. In the example below, there are two variables `{name}` and `{where}`,  the second argument representing the variables in `get` method are substituted into the string.
+
 Locale data:
 ```json
 { "HELLO": "Hello, {name}. Welcome to {where}!" }
@@ -125,25 +171,7 @@ JS code:
 ```js
 intl.get('HELLO', {name:'Tony', where:'Alibaba'}) // "Hello, Tony. Welcome to Alibaba!"
 ```
-The second argument represents for variables. It will replace variables in the locale data with the value of second argument.
 
-### Default Message
-JS code:
-```js
-intl.get('not-exist-key').defaultMessage('default message') // "default message"
-```
-If the key does't exist in current locale, it will return a default message if you append a `defaultMessage` method after `get` method.
-
-
-### HTML Message
-Locale data:
-```json
-{ "TIP": "This is <span style='color:red'>HTML</span>" }
-```
-JS code:
-```js
-intl.getHTML('TIP'); // {React element}
-```
 
 ### Plural Form and Number Thousands Separators
 
@@ -218,7 +246,7 @@ if `type` is `time`, `format` has the following values:
 ### Helper
 [react-intl-universal](https://www.npmjs.com/package/react-intl-universal) provides a utility helping developer determine the user's current locale. As the running examples, when user select a new locale, it redirect user new location like `http://localhost:3000?lang=en-US`. Then, we can use `intl.determineLocale` to get the locale from URL. It can also support determine user's locale via cookie and browser default language. Refer to the APIs section for more detail.
 
-## APIs
+## APIs Definition
 
 ```js
   /**
@@ -257,14 +285,59 @@ if `type` is `time`, `format` has the following values:
 ```
 
 
-## Running Examples Locally
-```sh
-git clone git@github.com:alibaba/react-intl-universal.git
-cd react-intl-universal/examples
-npm install
-npm start
+## Compatibility with react-intl
+As mentioned in the issue [Mirror react-intl API](https://github.com/alibaba/react-intl-universal/issues/2),  to make people switch their existing React projects from [react-intl](https://github.com/yahoo/react-intl) to [react-intl-universal](https://www.npmjs.com/package/react-intl-universal). We provide two compatible APIs as following.
+
+```js
+  /**
+   * As same as get(...) API
+   * @param {Object} options 
+   * @param {string} options.id 
+   * @param {string} options.defaultMessage
+   * @param {Object} variables Variables in message
+   * @returns {string} message
+  */
+  formatMessage(options, variables)
+```
+```js
+  /**
+   * As same as getHTML(...) API
+   * @param {Object} options 
+   * @param {string} options.id 
+   * @param {React.Element} options.defaultMessage
+   * @param {Object} variables Variables in message
+   * @returns {React.Element} message
+  */
+  formatHTMLMessage(options, variables)
 ```
 
+For example, the `formatMessage` API
+
+```js
+const name = 'Tony';
+intl.formatMessage({ id:'hello', defaultMessage: `Hello, ${name}`}, {name});
+```
+ 
+ is equivalent to `get` API
+ 
+```js
+const name = 'Tony';
+intl.get('hello', {name}).d(`Hello, ${name}`);
+```
+
+And the `formatHTMLMessage` API
+```js
+const name = 'Tony';
+intl.formatHTMLMessage({ id:'hello', defaultMessage: <div>Hello</div>}, {name});
+```
+ 
+ is equivalent to `getHTML` API
+ 
+```js
+const name = 'Tony';
+intl.getHTML('hello', {name}).d(<div>Hello</div>);
+```
+ 
 ## Browser Compatibility
 
 Before using [react-intl-universal](https://www.npmjs.com/package/react-intl-universal), you need to include scripts below to support IE.
@@ -277,16 +350,27 @@ Before using [react-intl-universal](https://www.npmjs.com/package/react-intl-uni
 <![endif]-->
 ```
 
+
+
+## Running Examples Locally
+```sh
+git clone git@github.com:alibaba/react-intl-universal.git
+cd react-intl-universal/examples
+npm install
+npm start
+```
+
 ## Ask Question
 [![Join the chat at https://gitter.im/react-intl-universal/Lobby](https://badges.gitter.im/alibaba/react-intl-universal.svg)](https://gitter.im/react-intl-universal/Lobby)
 
 ## Code Test Coverage Summary
 ```
-Statements   : 84.75% ( 50/59 )
-Branches     : 81.58% ( 31/38 )
-Functions    : 90.91% ( 10/11 )
-Lines        : 84.75% ( 50/59 )
+Statements   : 85.71% ( 60/70 )
+Branches     : 82.93% ( 34/41 )
+Functions    : 92.86% ( 13/14 )
+Lines        : 85.51% ( 59/69 )
 ```
+
 
 ## License
 This software is free to use under the BSD license.

@@ -6,9 +6,9 @@ class Plural extends Component {
     return (
       <div>
         <div className="title">Plural Examples:</div>
-        <div>{intl.get('PHOTO', {num: 0})}</div>
-        <div>{intl.get('PHOTO', {num: 1})}</div>
-        <div>{intl.get('PHOTO', {num: 1000000})}</div>
+        <div>{intl.get('PHOTO', {num: '0'})}</div>
+        <div>{intl.get('PHOTO', {num: '1'})}</div>
+        <div>{intl.get('PHOTO', {num: '1000000'})}</div>
       </div>
     )
   }

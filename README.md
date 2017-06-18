@@ -1,8 +1,6 @@
 # react-intl-universal
 
-[![npm](https://img.shields.io/npm/dt/react-intl-universal.svg)](https://www.npmjs.com/package/react-intl-universal)
-[![npm](https://img.shields.io/npm/v/react-intl-universal.svg)](https://www.npmjs.com/package/react-intl-universal)
-[![npm](https://img.shields.io/npm/l/react-intl-universal.svg)](https://github.com/alibaba/react-intl-universal/blob/master/LICENSE.md)
+[![npm](https://img.shields.io/npm/dt/react-intl-universal.svg)](https://www.npmjs.com/package/react-intl-universal) [![npm](https://img.shields.io/npm/v/react-intl-universal.svg)](https://www.npmjs.com/package/react-intl-universal) [![npm](https://img.shields.io/npm/l/react-intl-universal.svg)](https://github.com/alibaba/react-intl-universal/blob/master/LICENSE.md)
 
 ## Features
 - Can be used not only in React.Component but also in Vanilla JS.
@@ -20,9 +18,23 @@
 [React Intl Universal Demo](http://g.alicdn.com/alishu/common/0.0.87/intl-example/index.html)
 
 ## Why Another Internationalization Solution for React?
-In case of internationalizing React apps, [react-intl](https://github.com/yahoo/react-intl) is one of most popular package in industry.  [react-intl](https://github.com/yahoo/react-intl) decorate your React.Component with wrapped component which is injected internationalized message dynamically so that the locale data is able to be loaded dynamically without reloading page. However, this approach introduces two major issues.
+In case of internationalizing React apps, [react-intl](https://github.com/yahoo/react-intl) is one of most popular package in industry.  [react-intl](https://github.com/yahoo/react-intl) decorate your React.Component with wrapped component which is injected internationalized message dynamically so that the locale data is able to be loaded dynamically without reloading page. The following is the example code using  [react-intl](https://github.com/yahoo/react-intl).
 
-Firstly,  Internationalizing can only be applied in view layer such as React.Component. For Vanilla JS file, there's no way to internationalize it. For example, the following snippet is general form validator used by many React.Component in our apps. We definitely will not have such code separated in different React.Component in order to internationalize the warning message. Sadly, [react-intl](https://github.com/yahoo/react-intl) can't be used in Vanilla JS.
+```js
+import { injectIntl } from 'react-intl';
+class MyComponent extends Component {
+  render() {
+    const intl = this.props;
+    const title = intl.formatMessage({ id: 'title' });
+    return (<div>{title}</div>);
+  }
+};
+export default injectIntl(MyComponent);
+```
+
+However, this approach introduces two major issues.
+
+Firstly,  Internationalizing can be applied only in view layer such as React.Component. For Vanilla JS file, there's no way to internationalize it. For example, the following snippet is general form validator used by many React.Component in our apps. We definitely will not have such code separated in different React.Component in order to internationalize the warning message. Sadly, [react-intl](https://github.com/yahoo/react-intl) can't be used in Vanilla JS.
 
 ```js
 export default const rules = {
@@ -45,7 +57,7 @@ class App {
   }
 }
 ```
-Instead, use you need to use the method ```getWrappedInstance()``` to get that as below.
+Instead, use you need to use the method ```getWrappedInstance()``` to get that.
 ```js
 class MyComponent {...}
 export default injectIntl(MyComponent, {withRef: true});
@@ -61,7 +73,7 @@ class App {
 ```
 Furthermore, your React.Component's properties is not inherited in subclass since component is injected by [react-intl](https://github.com/yahoo/react-intl). 
 
-That's the reason why we create [react-intl-universal](https://www.npmjs.com/package/react-intl-universal).
+Due to the problem above, we create [react-intl-universal](https://www.npmjs.com/package/react-intl-universal) to internationalize React app using simple but powerful API.
 
 ## Get Started
 
@@ -134,6 +146,10 @@ intl.get('not-exist-key').defaultMessage('default message') // "default message"
 ```
 If the key does't exist in current locale, it will return a default message if you append a `defaultMessage` method after `get` method.
 
+Or using `d` for short:
+```js
+intl.get('not-exist-key').d('default message') // "default message"
+```
 
 ### HTML Message
 Locale data:
@@ -265,6 +281,45 @@ npm install
 npm start
 ```
 
+## Compatibility With react-intl
+As mentioned in the issue [Mirror react-intl API](https://github.com/alibaba/react-intl-universal/issues/2), to make people switch their existing React projects from [react-intl](https://github.com/yahoo/react-intl) to [react-intl-universal](https://www.npmjs.com/package/react-intl-universal). We provide two compatible APIs as following.
+
+```js
+  /**
+   * As same as get(...) API
+   * @param {Object} options 
+   * @param {string} options.id 
+   * @param {string} options.defaultMessage
+   * @param {Object} variables Variables in message
+   * @returns {string} message
+  */
+  formatMessage(options, variables)
+```
+```js
+  /**
+   * As same as getHTML(...) API
+   * @param {Object} options 
+   * @param {string} options.id 
+   * @param {Object} variables Variables in message
+   * @returns {React.Element} message
+  */
+  formatHTMLMessage(options, variables)
+```
+
+For example, the following code
+
+```js
+intl.formatMessage({ id:'hello', defaultMessage: `Hello, {name}`}, {name: 'Tony'});
+```
+ 
+ is equivalent to 
+ 
+```js
+intl.get('hello', {name: 'Tony'}).d(`Hello, {name}`);
+```
+
+Both of them, returns `"Hello, Tony"`.
+ 
 ## Browser Compatibility
 
 Before using [react-intl-universal](https://www.npmjs.com/package/react-intl-universal), you need to include scripts below to support IE.
@@ -287,6 +342,7 @@ Branches     : 81.58% ( 31/38 )
 Functions    : 90.91% ( 10/11 )
 Lines        : 84.75% ( 50/59 )
 ```
+
 
 ## License
 This software is free to use under the BSD license.

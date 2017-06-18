@@ -21,7 +21,7 @@ test("Message with variables", () => {
   expect(intl.get("HELLO", { name: "Tony" })).toBe("Hello, Tony");
 });
 
-test("react-intl mirror API formatMessage", () => {
+test("react-intl mirror API formatMessage:variables", () => {
   intl.init({ locales, currentLocale: "en-US" });
   const name = "Tony";
   expect(
@@ -30,16 +30,16 @@ test("react-intl mirror API formatMessage", () => {
       { name }
     )
   ).toBe(intl.get("HELLO", { name }));
-
-  expect(
-    intl.formatMessage(
-      { id: "not-exist-key", defaultMessage: `Hello, {name}` },
-      { name }
-    )
-  ).toBe(intl.get("not-exist-key", { name }).d(`Hello, {name}`));
 });
 
-test("react-intl mirror API formatHTMLMessage", () => {
+test("react-intl mirror API formatMessage:defaultMessage", () => {
+  intl.init({ locales, currentLocale: "en-US" });
+  expect(intl.formatMessage({ id: "not-exist-key" })).toBe(
+    intl.get("not-exist-key")
+  );
+});
+
+test("react-intl mirror API formatHTMLMessage:variable", () => {
   intl.init({ locales, currentLocale: "en-US" });
   let reactEl = intl.formatHTMLMessage(
     { id: "TIP_VAR", defaultMessage: React.createElement("div") },
@@ -47,10 +47,21 @@ test("react-intl mirror API formatHTMLMessage", () => {
       message: "your message"
     }
   );
-  console.log("reactEl", reactEl);
   expect(reactEl.props.dangerouslySetInnerHTML.__html).toBe(
     "This is<span>your message</span>"
   );
+});
+
+test("react-intl mirror API formatHTMLMessage:defaultMessage", () => {
+  intl.init({ locales, currentLocale: "en-US" });
+  let reactEl = intl.formatHTMLMessage({
+    id: "not-exist-key",
+    defaultMessage: React.createElement("div", {className: 'test'})
+  });
+
+  expect(reactEl.type).toBe('div');
+  expect(reactEl.props.className).toBe('test');
+
 });
 
 test("HTML Message without variables", () => {

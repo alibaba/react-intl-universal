@@ -22,9 +22,6 @@ String.prototype.defaultMessage = String.prototype.d = function(msg) {
   return this || msg || "";
 };
 
-console.log("React.DOMElement.prototype", ReactDOM);
-// React.DOMElement.prototype.defaultMessage
-
 class ReactIntlUniversal {
   constructor() {
     this.options = {
@@ -90,13 +87,42 @@ class ReactIntlUniversal {
   getHTML(key, variables) {
     let msg = this.get(key, variables);
     if (msg) {
-      return React.createElement("span", {
+      const el = React.createElement("span", {
         dangerouslySetInnerHTML: {
           __html: msg
         }
       });
+      // when key exists, it should still return element if there's defaultMessage() after getHTML()
+      const defaultMessage = () => el;
+      return Object.assign({ defaultMessage: defaultMessage, d: defaultMessage }, el);
     }
     return "";
+  }
+
+  /**
+   * As same as get(...) API
+   * @param {Object} options 
+   * @param {string} options.id 
+   * @param {string} options.defaultMessage
+   * @param {Object} variables Variables in message
+   * @returns {string} message
+  */
+  formatMessage(messageDescriptor, variables) {
+    const { id, defaultMessage } = messageDescriptor;
+    return this.get(id, variables).defaultMessage(defaultMessage);
+  }
+
+  /**
+   * As same as getHTML(...) API
+   * @param {Object} options 
+   * @param {string} options.id 
+   * @param {React.Element} options.defaultMessage
+   * @param {Object} variables Variables in message
+   * @returns {React.Element} message
+  */
+  formatHTMLMessage(messageDescriptor, variables) {
+    const { id, defaultMessage } = messageDescriptor;
+    return this.getHTML(id, variables).defaultMessage(defaultMessage);
   }
 
   /**
@@ -172,16 +198,6 @@ class ReactIntlUniversal {
     return navigator.language || navigator.userLanguage;
   }
 
-  formatMessage(messageDescriptor, variables) {
-    const { id, defaultMessage } = messageDescriptor;
-    return this.get(id, variables) || defaultMessage;
-  }
-
-  formatHTMLMessage(messageDescriptor, variables) {
-    const { id, defaultMessage } = messageDescriptor;
-    // return this.getHTML(id, variables) || defaultMessage;
-    return this.getHTML(id, variables).defaultMessage(defaultMessage);
-  }
 }
 
 module.exports = new ReactIntlUniversal();

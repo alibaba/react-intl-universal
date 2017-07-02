@@ -7,7 +7,7 @@
   "SALE_END": "販売終了日{end, date, long}",
   "COUPON": "クーポンは{expires,time,medium}に失効します",
   "SALE_PRICE": "価格は{price, number, CNY}です",
-  "PHOTO": "{num, plural, =0 {あなたは0} other {#}}枚の写真があります",
+  "PHOTO": "{photoNum, plural, =0 {あなたは0} other {#}}枚の写真があります",
   "MESSAGE_NOT_IN_COMPONENT": "ReactIntlUniversalはReact.Componentにないメッセージを国際化することができます"
 }
 

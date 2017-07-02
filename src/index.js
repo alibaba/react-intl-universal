@@ -55,8 +55,8 @@ class ReactIntlUniversal {
     if (variables) {
       variables = Object.assign({}, variables);
       // HTML message with variables. Escape it to avoid XSS attack.
-      for (key in variables) {
-        let value = variables[key];
+      for (let i in variables) {
+        let value = variables[i];
         if (
           typeof value === "string" &&
           value.indexOf("<") >= 0 &&
@@ -64,7 +64,7 @@ class ReactIntlUniversal {
         ) {
           value = escapeHtml(value);
         }
-        variables[key] = value;
+        variables[i] = value;
       }
     }
 
@@ -73,7 +73,7 @@ class ReactIntlUniversal {
       msg = msg.format(variables);
       return msg;
     } catch (err) {
-      console.error(`format message failure for key='${key}'`, err);
+      console.warn(`react-intl-universal format message failed for key='${key}'`, err);
       return "";
     }
   }

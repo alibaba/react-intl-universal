@@ -7,6 +7,6 @@
   "SALE_END": "Sale ends {end, date, long}",
   "COUPON": "Coupon expires at {expires, time, medium}",
   "SALE_PRICE": "The price is {price, number, USD}",
-  "PHOTO": "You have {num, plural, =0 {no photos.} =1 {one photo.} other {# photos.}}",
+  "PHOTO": "You have {photoNum, plural, =0 {no photos.} =1 {one photo.} other {# photos.}}",
   "MESSAGE_NOT_IN_COMPONENT": "ReactIntlUniversal is able to internationalize message not in React.Component"
 }

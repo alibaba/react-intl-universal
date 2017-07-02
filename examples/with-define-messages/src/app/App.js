@@ -32,11 +32,11 @@ export class Greeting extends React.Component {
         return <div style={{paddingTop: '40px'}}>
             <label htmlFor="nickname">{intl.formatMessage({...messages.label})}</label>
             <input id="nickname" value={this.state.name} onChange={this.onChage}/>
-            {this.state.name ? <span style={{paddingLeft: '15px'}}>
+            {this.state.name ? <div style={{paddingLeft: '15px'}}>
                 {intl.formatMessage({...messages.greeting}, {
                     name: this.state.name
                 })}
-            </span> : null}
+            </div> : null}
         </div>
     }
 

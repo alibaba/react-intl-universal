@@ -6,8 +6,8 @@ export default defineMessages({
         defaultMessage: "Hello!!",
     },
     label: {
-        id: 'exampel.app.input.label',
-        defaultMessage: 'Enter your name! (or nickname >) )',
+        id: 'example.app.input.label',
+        defaultMessage: 'Enter your name! (or nickname :) )',
     },
     greeting: {
         id: 'example.app.greeting',

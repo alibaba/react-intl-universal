@@ -1,5 +1,5 @@
 {
-  "exampel.app.input.label": "Введите ваше имя",
   "example.app.greeting": "{name}, удачного тебе дня!",
-  "example.app.hello": "Привет!!"
+  "example.app.hello": "Привет!!",
+  "example.app.input.label": "Введите ваше имя"
 }

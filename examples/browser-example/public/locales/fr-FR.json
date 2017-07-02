@@ -8,5 +8,5 @@
   "COUPON": "Coupon expire à {expires, time, medium}",
   "SALE_PRICE": "Le prix est {price, number, USD}",
   "PHOTO": "Vous avez {photoNum, plural, =0 {de photographie.} =1 {une photographie.} other {# photographies.}}",
-  "MESSAGE_NOT_IN_COMPONENT": "ReactIntlUniversal est en mesure d'internationaliser un message non React.Component"
+  "MESSAGE_NOT_IN_COMPONENT": "react-intl-universal est en mesure d'internationaliser un message non React.Component"
 }

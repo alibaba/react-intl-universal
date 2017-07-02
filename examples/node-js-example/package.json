@@ -1,0 +1,12 @@
+{
+  "name": "node-js",
+  "version": "1.0.0",
+  "description": "react-intl-universal examples",
+  "private": true,
+  "author": "chiawei.tcw@alibaba-inc.com",
+  "main": "index.js",
+  "license": "BSD-2-Clause",
+  "dependencies": {
+    "react-intl-universal": "*"
+  }
+}

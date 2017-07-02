@@ -13,9 +13,22 @@ const SYS_LOCALE_DATA_URL =
   "https://g.alicdn.com/alishu/common/0.0.86/locale-data";
 
 let isPolyfill = false;
-if (typeof window.Intl === "undefined") {
-  window.Intl = IntlPolyfill;
-  isPolyfill = true;
+
+// For node.js
+if (typeof window === "undefined") {
+  /**
+   * Although Intl is implemented in Node.js > 0.12, 
+   * displaing currency, date is inconsistent in some language.
+   * So we just IntlPolyfill.
+   */
+  global.Intl = IntlPolyfill;
+} 
+// For browser
+else {  
+  if (typeof window.Intl === "undefined") {
+    window.Intl = IntlPolyfill;
+    isPolyfill = true;
+  }
 }
 
 String.prototype.defaultMessage = String.prototype.d = function(msg) {
@@ -73,7 +86,10 @@ class ReactIntlUniversal {
       msg = msg.format(variables);
       return msg;
     } catch (err) {
-      console.warn(`react-intl-universal format message failed for key='${key}'`, err);
+      console.warn(
+        `react-intl-universal format message failed for key='${key}'`,
+        err
+      );
       return "";
     }
   }
@@ -94,7 +110,10 @@ class ReactIntlUniversal {
       });
       // when key exists, it should still return element if there's defaultMessage() after getHTML()
       const defaultMessage = () => el;
-      return Object.assign({ defaultMessage: defaultMessage, d: defaultMessage }, el);
+      return Object.assign(
+        { defaultMessage: defaultMessage, d: defaultMessage },
+        el
+      );
     }
     return "";
   }
@@ -162,6 +181,7 @@ class ReactIntlUniversal {
     return new Promise((resolve, reject) => {
       if (isPolyfill) {
         const lang = this.options.currentLocale.split("-")[0];
+        // FIXME nodejs
         load(`${SYS_LOCALE_DATA_URL}/${lang}.js`, (err, script) => {
           if (err) {
             reject(err);
@@ -197,7 +217,6 @@ class ReactIntlUniversal {
   getLocaleFromBrowser() {
     return navigator.language || navigator.userLanguage;
   }
-
 }
 
 module.exports = new ReactIntlUniversal();

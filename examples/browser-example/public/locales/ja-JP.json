@@ -8,6 +8,6 @@
   "COUPON": "クーポンは{expires,time,medium}に失効します",
   "SALE_PRICE": "価格は{price, number, CNY}です",
   "PHOTO": "{photoNum, plural, =0 {あなたは0} other {#}}枚の写真があります",
-  "MESSAGE_NOT_IN_COMPONENT": "ReactIntlUniversalはReact.Componentにないメッセージを国際化することができます"
+  "MESSAGE_NOT_IN_COMPONENT": "react-intl-universalはReact.Componentにないメッセージを国際化することができます"
 }
 

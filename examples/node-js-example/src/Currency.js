@@ -1,8 +1,16 @@
-// const intl = require("react-intl-universal");
-const intl = require("../../../lib");
+import React, {Component} from 'react'
+import intl from 'react-intl-universal';
 
-module.exports = () => {
-  console.log('\x1b[33m%s\x1b[0m', '--- Currency Example ---');
-  // FIXME CN¥，应该是¥
-  console.log("intl.get('SALE_PRICE', {price: 123456.78}) === ", intl.get('SALE_PRICE', {price: 123456.78}));
-};
+class Currency extends Component {
+  render() {
+    let price = 123456.78;
+    return (
+      <div>
+        <div className="title">Currency Example:</div>
+        <div>{intl.get('SALE_PRICE', {price})}</div>
+      </div>
+    )
+  }
+}
+
+export default Currency;

@@ -1,10 +1,17 @@
-// const intl = require("react-intl-universal");
-const intl = require("../../../lib");
+import React, {Component} from 'react'
+import intl from 'react-intl-universal';
 
-module.exports = () => {
-  console.log('\x1b[33m%s\x1b[0m', '--- Plural Examples ---');
-  console.log('intl.get("PHOTO", { photoNum: 0 }) === ', intl.get("PHOTO", { photoNum: 0 }));
-  console.log('intl.get("PHOTO", { photoNum: 1 }) === ', intl.get("PHOTO", { photoNum: 1 }));
-  console.log('intl.get("PHOTO", { photoNum: 1000000 }) === ', intl.get("PHOTO", { photoNum: 1000000 }));
-};
-  
+class Plural extends Component {
+  render() {
+    return (
+      <div>
+        <div className="title">Plural Examples:</div>
+        <div>{intl.get("PHOTO", { photoNum: 0 })}</div>
+        <div>{intl.get("PHOTO", { photoNum: 1 })}</div>
+        <div>{intl.get("PHOTO", { photoNum: 1000000 })}</div>
+      </div>
+    );
+  }
+}
+
+export default Plural;

@@ -1,0 +1,13 @@
+{
+  "SIMPLE": "単文",
+  "HELLO": "もしもし {name}, {where}へようこそ！",
+  "TIP": "これは<span style='color:red'>HTML</span>です",
+  "TIP_VAR": "これは<span style='color:red'>{message}</span>です",
+  "SALE_START": "販売開始{start, date}",
+  "SALE_END": "販売終了日{end, date, long}",
+  "COUPON": "クーポンは{expires,time,medium}に失効します",
+  "SALE_PRICE": "価格は{price, number, CNY}です",
+  "PHOTO": "{photoNum, plural, =0 {あなたは0} other {#}}枚の写真があります",
+  "MESSAGE_NOT_IN_COMPONENT": "react-intl-universalはReact.Componentにないメッセージを国際化することができます"
+}
+

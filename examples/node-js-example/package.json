@@ -1,12 +1,19 @@
 {
-  "name": "node-js",
+  "name": "react-intl-universal-example",
   "version": "1.0.0",
-  "description": "react-intl-universal examples",
   "private": true,
   "author": "chiawei.tcw@alibaba-inc.com",
-  "main": "index.js",
-  "license": "BSD-2-Clause",
+  "license": "BSD-3-Clause",
+  "devDependencies": {
+    "react-scripts": "^0.9.0"
+  },
   "dependencies": {
-    "react-intl-universal": "*"
+    "react-intl-universal": "*",
+    "react": "^15.5.4",
+    "react-dom": "^15.5.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build"
   }
 }

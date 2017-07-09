@@ -13,25 +13,18 @@ const SYS_LOCALE_DATA_URL =
   "https://g.alicdn.com/alishu/common/0.0.86/locale-data";
 
 let isPolyfill = false;
+const isBrowser = typeof window !== "undefined";
 
-// For node.js
-if (typeof window === "undefined") {
-  /**
-   * Although Intl is implemented in Node.js > 0.12, 
-   * displaing currency, date is inconsistent in some language.
-   * So we just IntlPolyfill.
-   */
-  global.Intl = IntlPolyfill;
-} 
-// For browser
-else {  
+if (isBrowser) {
   if (typeof window.Intl === "undefined") {
     window.Intl = IntlPolyfill;
     isPolyfill = true;
   }
+} else {
+  global.Intl = IntlPolyfill;
 }
 
-String.prototype.defaultMessage = String.prototype.d = function(msg) {
+String.prototype.defaultMessage = String.prototype.d = function (msg) {
   return this || msg || "";
 };
 
@@ -179,17 +172,21 @@ class ReactIntlUniversal {
     );
 
     return new Promise((resolve, reject) => {
-      if (isPolyfill) {
-        const lang = this.options.currentLocale.split("-")[0];
-        // FIXME nodejs
-        load(`${SYS_LOCALE_DATA_URL}/${lang}.js`, (err, script) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve();
-          }
-        });
+      const lang = this.options.currentLocale.split("-")[0];
+      if (isBrowser) {
+        if (isPolyfill) {          
+          load(`${SYS_LOCALE_DATA_URL}/${lang}.js`, (err, script) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve();
+            }
+          });
+        } else {
+          resolve();
+        }
       } else {
+        require(`intl/locale-data/jsonp/${lang}.js`);
         resolve();
       }
     });

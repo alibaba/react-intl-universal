@@ -1,8 +1,16 @@
-// const intl = require("react-intl-universal");
-const intl = require("../../../lib");
+import React, { Component } from 'react'
+import intl from 'react-intl-universal';
 
-module.exports = () => {
-  console.log('\x1b[33m%s\x1b[0m', '--- Basic Examples ---');
-  console.log('intl.get("SIMPLE") === ', intl.get("SIMPLE"));
-  console.log('intl.get("HELLO", { name: "Tony", where: "Alibaba" }) === ', intl.get("HELLO", { name: "Tony", where: "Alibaba" }));
-};
+class BasicComponent extends Component {
+  render () {
+    return (
+      <div>
+        <div className="title">Basic Examples:</div>
+        <div>{intl.get('SIMPLE')}</div>
+        <div>{intl.get('HELLO', {name:'Tony', where:'Alibaba'})}</div>
+      </div>
+    )
+  }
+}
+
+export default BasicComponent;

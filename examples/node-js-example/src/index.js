@@ -14,10 +14,9 @@ const basicExample = require("./Basic");
 const pluralExample = require("./Plural");
 const currencyExample = require("./Currency");
 const dateExample = require("./Date");
+const htmlExample = require("./Html");
 // TODO html
-// import HtmlExample =require("./Html");
 
-// TODO for each locales
 intl
   .init({
     currentLocale,
@@ -28,4 +27,5 @@ intl
     pluralExample();
     currencyExample();
     dateExample();
+    htmlExample();
   });

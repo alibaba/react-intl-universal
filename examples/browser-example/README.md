@@ -1,5 +1,5 @@
 # Examples
-This example shows the examples using react-intl-universal.
+This example shows the examples using react-intl-universal in browser.
 
 ## Running
 ```

@@ -1,17 +1,9 @@
-import React, {Component} from 'react'
-import intl from 'react-intl-universal';
+// const intl = require("react-intl-universal");
+const intl = require("../../../lib");
 
-class Html extends Component {
-  render() {
-    return (
-      <div>
-        <div className="title">Html Examples:</div>
-        <div>{intl.getHTML('TIP')}</div>
-        <div>{intl.getHTML('TIP_VAR', {message: 'HTML with variables'})}</div>
-        <div>{intl.getHTML('TIP_VAR', {message: '<script>alert("ReactIntlUniversal prevents from xss attack")</script>'})}</div>
-      </div>
-    )
-  }
+module.exports = () => {
+  console.log('\x1b[33m%s\x1b[0m', '--- HTML Examples ---');
+  console.log("intl.getHTML('TIP') === ", intl.getHTML('TIP').props.dangerouslySetInnerHTML.__html);
+  console.log("intl.getHTML('TIP_VAR', { message: 'HTML with variables' }) === ", intl.getHTML('TIP_VAR', { message: 'HTML with variables' }).props.dangerouslySetInnerHTML.__html);
+  console.log(`intl.getHTML('TIP_VAR', { message: '<script>alert＼"ReactIntlUniversal prevents from xss attack")</script>' }) === `, intl.getHTML('TIP_VAR', { message: '<script>alert("ReactIntlUniversal prevents from xss attack")</script>' }).props.dangerouslySetInnerHTML.__html);
 }
-
-export default Html;

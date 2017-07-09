@@ -13,12 +13,18 @@ const SYS_LOCALE_DATA_URL =
   "https://g.alicdn.com/alishu/common/0.0.86/locale-data";
 
 let isPolyfill = false;
-if (typeof window.Intl === "undefined") {
-  window.Intl = IntlPolyfill;
-  isPolyfill = true;
+const isBrowser = typeof window !== "undefined";
+
+if (isBrowser) {
+  if (typeof window.Intl === "undefined") {
+    window.Intl = IntlPolyfill;
+    isPolyfill = true;
+  }
+} else {
+  global.Intl = IntlPolyfill;
 }
 
-String.prototype.defaultMessage = String.prototype.d = function(msg) {
+String.prototype.defaultMessage = String.prototype.d = function (msg) {
   return this || msg || "";
 };
 
@@ -55,8 +61,8 @@ class ReactIntlUniversal {
     if (variables) {
       variables = Object.assign({}, variables);
       // HTML message with variables. Escape it to avoid XSS attack.
-      for (key in variables) {
-        let value = variables[key];
+      for (let i in variables) {
+        let value = variables[i];
         if (
           typeof value === "string" &&
           value.indexOf("<") >= 0 &&
@@ -64,7 +70,7 @@ class ReactIntlUniversal {
         ) {
           value = escapeHtml(value);
         }
-        variables[key] = value;
+        variables[i] = value;
       }
     }
 
@@ -73,7 +79,10 @@ class ReactIntlUniversal {
       msg = msg.format(variables);
       return msg;
     } catch (err) {
-      console.error(`format message failure for key='${key}'`, err);
+      console.warn(
+        `react-intl-universal format message failed for key='${key}'`,
+        err
+      );
       return "";
     }
   }
@@ -94,7 +103,10 @@ class ReactIntlUniversal {
       });
       // when key exists, it should still return element if there's defaultMessage() after getHTML()
       const defaultMessage = () => el;
-      return Object.assign({ defaultMessage: defaultMessage, d: defaultMessage }, el);
+      return Object.assign(
+        { defaultMessage: defaultMessage, d: defaultMessage },
+        el
+      );
     }
     return "";
   }
@@ -160,16 +172,21 @@ class ReactIntlUniversal {
     );
 
     return new Promise((resolve, reject) => {
-      if (isPolyfill) {
-        const lang = this.options.currentLocale.split("-")[0];
-        load(`${SYS_LOCALE_DATA_URL}/${lang}.js`, (err, script) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve();
-          }
-        });
+      const lang = this.options.currentLocale.split("-")[0];
+      if (isBrowser) {
+        if (isPolyfill) {          
+          load(`${SYS_LOCALE_DATA_URL}/${lang}.js`, (err, script) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve();
+            }
+          });
+        } else {
+          resolve();
+        }
       } else {
+        require(`intl/locale-data/jsonp/${lang}.js`);
         resolve();
       }
     });
@@ -197,7 +214,6 @@ class ReactIntlUniversal {
   getLocaleFromBrowser() {
     return navigator.language || navigator.userLanguage;
   }
-
 }
 
 module.exports = new ReactIntlUniversal();

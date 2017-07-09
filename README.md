@@ -1,4 +1,5 @@
 # react-intl-universal
+[react-intl-universal](https://github.com/alibaba/react-intl-universal) is a React internationalization package developed by [Alibaba Group](http://www.alibabagroup.com).
 
 [![npm](https://img.shields.io/npm/dt/react-intl-universal.svg)](https://www.npmjs.com/package/react-intl-universal) [![npm](https://img.shields.io/npm/v/react-intl-universal.svg)](https://www.npmjs.com/package/react-intl-universal) [![npm](https://img.shields.io/npm/l/react-intl-universal.svg)](https://github.com/alibaba/react-intl-universal/blob/master/LICENSE.md)
 
@@ -85,7 +86,7 @@ npm install react-intl-universal --save
 ### Initialize
 In the following example, we initialize `intl` with app locale data (`locales`) and determine which locale is used dynamically (`currentLocale`). Then use `intl.get(...)` to get the internationalized message. That's all. Pretty simple!
 
-Note that you are not necessary to load all locale data, just load the current locale data on demand. Please refer the [example](https://github.com/alibaba/react-intl-universal/blob/master/examples/src/App.js#L72-L88) for more detail.
+Note that you are not necessary to load all locale data, just load the current locale data on demand. Please refer the [example](https://github.com/alibaba/react-intl-universal/blob/master/examples/browser-example/src/App.js#L72-L88) for more detail.
 
 ```js
 import intl from 'react-intl-universal';
@@ -106,6 +107,7 @@ class App extends Component {
 
   loadLocales() {
     // init method will load CLDR locale data according to currentLocale
+    // react-intl-universal is singleton, so you should init it only once in your app
     intl.init({
       currentLocale: 'en-US', // TODO: determine locale here
       locales,
@@ -355,7 +357,18 @@ Before using [react-intl-universal](https://www.npmjs.com/package/react-intl-uni
 ## Running Examples Locally
 ```sh
 git clone git@github.com:alibaba/react-intl-universal.git
-cd react-intl-universal/examples
+```
+
+For browser rendering,
+```sh
+cd react-intl-universal/examples/browser-example
+npm install
+npm start
+```
+
+For server-side rendering,
+```sh
+cd react-intl-universal/examples/node-js-example
 npm install
 npm start
 ```

@@ -35,7 +35,7 @@ class App extends Component {
 
   constructor(props) {
     super(props);
-    const currentLocale = SUPPOER_LOCALES[0].value;
+    const currentLocale = SUPPOER_LOCALES[0].value; // Determine user's locale here
     intl.init({
       currentLocale,
       locales: {

@@ -8,7 +8,7 @@
     "react-scripts": "^0.9.0"
   },
   "dependencies": {
-    "react-intl-universal": "*",
+    "react-intl-universal": "^1.2.0",
     "react": "^15.5.4",
     "react-dom": "^15.5.4"
   },

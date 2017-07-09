@@ -357,7 +357,18 @@ Before using [react-intl-universal](https://www.npmjs.com/package/react-intl-uni
 ## Running Examples Locally
 ```sh
 git clone git@github.com:alibaba/react-intl-universal.git
-cd react-intl-universal/examples
+```
+
+For browser rendering,
+```sh
+cd react-intl-universal/examples/browser-example
+npm install
+npm start
+```
+
+For server-side rendering,
+```sh
+cd react-intl-universal/examples/node-js-example
 npm install
 npm start
 ```

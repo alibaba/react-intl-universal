@@ -8,7 +8,7 @@
     "react-scripts": "0.8.4"
   },
   "dependencies": {
-    "react-intl-universal": "*",
+    "react-intl-universal": "^1.2.0",
     "axios": "^0.16.1",
     "lodash": "^4.17.4",
     "react": "^15.5.4",

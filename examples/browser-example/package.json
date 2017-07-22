@@ -5,7 +5,7 @@
   "author": "chiawei.tcw@alibaba-inc.com",
   "license": "BSD-3-Clause",
   "devDependencies": {
-    "react-scripts": "0.8.4"
+    "react-scripts": "^1.0.10"
   },
   "dependencies": {
     "react-intl-universal": "^1.2.0",

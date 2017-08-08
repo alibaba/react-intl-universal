@@ -113,8 +113,8 @@ class ReactIntlUniversal {
 
   /**
    * As same as get(...) API
-   * @param {Object} options 
-   * @param {string} options.id 
+   * @param {Object} options
+   * @param {string} options.id
    * @param {string} options.defaultMessage
    * @param {Object} variables Variables in message
    * @returns {string} message
@@ -126,8 +126,8 @@ class ReactIntlUniversal {
 
   /**
    * As same as getHTML(...) API
-   * @param {Object} options 
-   * @param {string} options.id 
+   * @param {Object} options
+   * @param {string} options.id
    * @param {React.Element} options.defaultMessage
    * @param {Object} variables Variables in message
    * @returns {React.Element} message
@@ -147,6 +147,7 @@ class ReactIntlUniversal {
   determineLocale(options = {}) {
     return (
       this.getLocaleFromURL(options) ||
+      this.getLocaleFromLocalStorage(options) ||
       this.getLocaleFromCookie(options) ||
       this.getLocaleFromBrowser()
     );
@@ -174,7 +175,7 @@ class ReactIntlUniversal {
     return new Promise((resolve, reject) => {
       const lang = this.options.currentLocale.split("-")[0];
       if (isBrowser) {
-        if (isPolyfill) {          
+        if (isPolyfill) {
           load(`${SYS_LOCALE_DATA_URL}/${lang}.js`, (err, script) => {
             if (err) {
               reject(err);
@@ -213,6 +214,14 @@ class ReactIntlUniversal {
 
   getLocaleFromBrowser() {
     return navigator.language || navigator.userLanguage;
+  }
+
+  getLocaleFromLocalStorage(options) {
+    const {localStorageKey} = options;
+    if (!window.localStorage) {
+      return null;
+    }
+    return localStorage.getItem(localStorageKey);
   }
 }
 

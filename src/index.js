@@ -1,4 +1,4 @@
-import IntlPolyfill from "intl";
+import IntlPolyfill from "intl/lib/core";
 import React from "react";
 import IntlMessageFormat from "intl-messageformat";
 import escapeHtml from "escape-html";
@@ -8,6 +8,8 @@ import load from "load-script";
 import invariant from "invariant";
 import "console-polyfill";
 import * as constants from "./constants";
+
+console.log('IntlPolyfill', IntlPolyfill);
 
 const SYS_LOCALE_DATA_URL =
   "https://g.alicdn.com/alishu/common/0.0.86/locale-data";

@@ -342,8 +342,8 @@ intl.getHTML('hello', {name}).d(<div>Hello</div>);
  
 ## Browser Compatibility
 
-Before using [react-intl-universal](https://www.npmjs.com/package/react-intl-universal), you need to include scripts below to support older browser.
-```html
+Before using [react-intl-universal](https://www.npmjs.com/package/react-intl-universal), you need to include scripts below in HTML to support older browser.
+```
 <!--[if lt IE 9]>
 <script src="//f.alicdn.com/es5-shim/4.5.7/es5-shim.min.js"></script>
 <![endif]-->

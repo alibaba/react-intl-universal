@@ -1,5 +1,5 @@
 {
-  "name": "react-intl-universal-example",
+  "name": "react-intl-universal-browser-example",
   "version": "1.0.0",
   "private": true,
   "author": "chiawei.tcw@alibaba-inc.com",
@@ -8,7 +8,7 @@
     "react-scripts": "0.8.4"
   },
   "dependencies": {
-    "react-intl-universal": "^1.2.0",
+    "react-intl-universal": "^1.3.4",
     "axios": "^0.16.1",
     "lodash": "^4.17.4",
     "react": "^15.5.4",

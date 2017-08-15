@@ -1,4 +1,4 @@
-import IntlPolyfill from "intl/lib/core";
+import IntlPolyfill from "intl";
 import React from "react";
 import IntlMessageFormat from "intl-messageformat";
 import escapeHtml from "escape-html";
@@ -186,7 +186,17 @@ class ReactIntlUniversal {
           resolve();
         }
       } else {
-        require(`intl/locale-data/jsonp/${lang}.js`);
+        // require(`intl/locale-data/jsonp/${lang}.js`);
+        // TODO rquired on demand
+        require(`intl/locale-data/jsonp/en.js`);
+        require(`intl/locale-data/jsonp/zh.js`);
+        require(`intl/locale-data/jsonp/fr.js`);
+        require(`intl/locale-data/jsonp/ja.js`);
+        require(`intl/locale-data/jsonp/de.js`);
+        require(`intl/locale-data/jsonp/es.js`);
+        require(`intl/locale-data/jsonp/ko.js`);
+        require(`intl/locale-data/jsonp/pt.js`);
+        require(`intl/locale-data/jsonp/it.js`);
         resolve();
       }
     });

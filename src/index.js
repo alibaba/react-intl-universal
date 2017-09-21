@@ -51,7 +51,7 @@ class ReactIntlUniversal {
     if (!locales || !locales[currentLocale]) {
       return "";
     }
-    let msg = locales[currentLocale][key];
+    let msg = this.getDescendantProp(locales[currentLocale], key);
     if (msg == null) {
       console.warn(
         `react-intl-universal key "${key}" not defined in ${currentLocale}`
@@ -219,6 +219,14 @@ class ReactIntlUniversal {
         return params && params[urlLocaleKey];
       }
     }
+  }
+
+  getDescendantProp(locale, key) {
+    const msg = key.split('.').reduce(function(a, b) {
+      return a[b];
+    }, locale);
+
+    return msg;
   }
 
   getLocaleFromBrowser() {

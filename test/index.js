@@ -24,7 +24,7 @@ test("Message with variables", () => {
 test("Set specific locale with nested notation", () => {
   intl.init({ locales, currentLocale: "en-US" });
   expect(intl.get("NESTED.HELLO")).toBe("Hello World");
-  expect(intl.get("NESTED.HELLO_TONY", { name: "Meta" })).toBe("Hello, Meta");
+  expect(intl.get("NESTED.HELLO_NAME", { name: "Meta" })).toBe("Hello, Meta");
 });
 
 test("react-intl mirror API formatMessage:variables", () => {

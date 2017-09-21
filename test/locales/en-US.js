@@ -10,6 +10,6 @@ module.exports = ({
   "PHOTO": "You have {num, plural, =0 {no photos.} =1 {one photo.} other {# photos.}}",
   "NESTED": {
     "HELLO": "Hello World",
-    "HELLO_TONY": "Hello, {name}"
+    "HELLO_NAME": "Hello, {name}"
   }
 });

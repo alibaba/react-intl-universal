@@ -21,6 +21,12 @@ test("Message with variables", () => {
   expect(intl.get("HELLO", { name: "Tony" })).toBe("Hello, Tony");
 });
 
+test("Set specific locale with nested notation", () => {
+  intl.init({ locales, currentLocale: "en-US" });
+  expect(intl.get("NESTED.HELLO")).toBe("Hello World");
+  expect(intl.get("NESTED.HELLO_NAME", { name: "World" })).toBe("Hello, World");
+});
+
 test("react-intl mirror API formatMessage:variables", () => {
   intl.init({ locales, currentLocale: "en-US" });
   const name = "Tony";
@@ -194,6 +200,11 @@ test("Default message", () => {
   expect(intl.get("not-exist-key").d("this is default msg")).toBe(
     "this is default msg"
   );
+});
+
+test("Default message with nested key", () => {
+  intl.init({ locales, currentLocale: "en-US" });
+  expect(intl.get("NOT_EXIST_KEY.HELLO").defaultMessage("Hello World")).toBe("Hello World");
 });
 
 test("Default message", () => {

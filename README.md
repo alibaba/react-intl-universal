@@ -14,6 +14,7 @@
 - Support for 150+ languages.
 - Runs in the browser and Node.js.
 - Message format is strictly implemented by [ICU standards](http://userguide.icu-project.org/formatparse/messages).
+- Locale data in [nested JSON format](https://github.com/alibaba/react-intl-universal/releases/tag/1.4.3) are supported.
 
 ## Live Demo
 [React Intl Universal Demo](https://g.alicdn.com/alishu/common/0.0.95/intl-example/index.html)
@@ -351,8 +352,6 @@ Before using [react-intl-universal](https://www.npmjs.com/package/react-intl-uni
 if(typeof Promise!=="function"){document.write('<script src="//f.alicdn.com/es6-shim/0.35.1/??es6-shim.min.js,es6-sham.min.js"><\/script>')}
 </script>
 ```
-
-
 
 ## Running Examples Locally
 ```sh

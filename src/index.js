@@ -222,6 +222,11 @@ class ReactIntlUniversal {
   }
 
   getDescendantProp(locale, key) {
+
+    if(locale[key]) {
+      return locale[key];
+    }
+
     const msg = key.split(".").reduce(function(a, b) {
       return (a != undefined) ? a[b] : a ;
     }, locale);

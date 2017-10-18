@@ -246,3 +246,8 @@ test("Determine Locale", () => {
   document.cookie = cookie.serialize("lang", "zh-CN");
   expect(intl.determineLocale({ cookieLocaleKey: "lang" })).toBe("zh-CN");
 });
+
+test("GET dot key variables", () => {
+  intl.init({ locales, currentLocale: "en-US" });
+  expect(intl.get("DOT.HELLO")).toBe("Hello World");
+});

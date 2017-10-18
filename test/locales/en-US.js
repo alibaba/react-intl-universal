@@ -11,5 +11,6 @@ module.exports = ({
   "NESTED": {
     "HELLO": "Hello World",
     "HELLO_NAME": "Hello, {name}"
-  }
+  },
+  "DOT.HELLO": "Hello World",
 });

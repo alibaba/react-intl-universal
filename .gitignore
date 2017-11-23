@@ -3,4 +3,5 @@ lib/
 coverage/
 node_modules/
 tool/
+.idea
 npm-debug.log

@@ -202,6 +202,13 @@ class ReactIntlUniversal {
     });
   }
 
+  /**
+   * Get the inital options 
+   */
+  getInitOptions() {
+    return this.options;
+  }
+
   getLocaleFromCookie(options) {
     const { cookieLocaleKey } = options;
     if (cookieLocaleKey) {
@@ -223,7 +230,7 @@ class ReactIntlUniversal {
 
   getDescendantProp(locale, key) {
 
-    if(locale[key]) {
+    if (locale[key]) {
       return locale[key];
     }
 

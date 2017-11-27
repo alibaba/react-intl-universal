@@ -285,6 +285,12 @@ if `type` is `time`, `format` has the following values:
    * @returns {string} determined locale such as 'en-US'
    */
   determineLocale(options)
+
+  /**
+   * Get the inital options 
+   * @returns {Object} options includes currentLocale and locales
+   */
+  getInitOptions()
 ```
 
 

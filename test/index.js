@@ -247,7 +247,14 @@ test("Determine Locale", () => {
   expect(intl.determineLocale({ cookieLocaleKey: "lang" })).toBe("zh-CN");
 });
 
-test("GET dot key variables", () => {
+test("Get dot key variables", () => {
   intl.init({ locales, currentLocale: "en-US" });
   expect(intl.get("DOT.HELLO")).toBe("Hello World");
 });
+
+test("Get init options", () => {
+  intl.init({ locales, currentLocale: "en-US" });
+  const { currentLocale } = intl.getInitOptions();
+  expect(currentLocale).toBe("en-US");
+});
+

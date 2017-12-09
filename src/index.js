@@ -1,13 +1,27 @@
-import IntlPolyfill from "intl";
-import React from "react";
+// import IntlPolyfill from "intl";
+// import React from "react";
 import IntlMessageFormat from "intl-messageformat";
 import escapeHtml from "escape-html";
 import cookie from "cookie";
 import queryParser from "querystring";
 import load from "load-script";
-import invariant from "invariant";
-import "console-polyfill";
-import * as constants from "./constants";
+// import invariant from "invariant";
+// import "console-polyfill";
+// import * as constants from "./constants";
+
+
+const currency = ["AFN","EUR","ALL","DZD","USD","AOA","XCD","ARS","AMD","AWG","AUD","AZN","BSD","BHD","BDT","BBD","BYN","BZD","XOF","BMD","INR","BTN","BOB","BOV","BAM","BWP","NOK","BRL","BND","BGN","BIF","CVE","KHR","XAF","CAD","KYD","CLP","CLF","CNY","COP","COU","KMF","CDF","NZD","CRC","HRK","CUP","CUC","ANG","CZK","DKK","DJF","DOP","EGP","SVC","ERN","ETB","FKP","FJD","XPF","GMD","GEL","GHS","GIP","GTQ","GBP","GNF","GYD","HTG","HNL","HKD","HUF","ISK","IDR","XDR","IRR","IQD","ILS","JMD","JPY","JOD","KZT","KES","KPW","KRW","KWD","KGS","LAK","LBP","LSL","ZAR","LRD","LYD","CHF","MOP","MKD","MGA","MWK","MYR","MVR","MRO","MUR","XUA","MXN","MXV","MDL","MNT","MAD","MZN","MMK","NAD","NPR","NIO","NGN","OMR","PKR","PAB","PGK","PYG","PEN","PHP","PLN","QAR","RON","RUB","RWF","SHP","WST","STD","SAR","RSD","SCR","SLL","SGD","XSU","SBD","SOS","SSP","LKR","SDG","SRD","SZL","SEK","CHE","CHW","SYP","TWD","TJS","TZS","THB","TOP","TTD","TND","TRY","TMT","UGX","UAH","AED","USN","UYU","UYI","UZS","VUV","VEF","VND","YER","ZMW","ZWL","XBA","XBB","XBC","XBD","XTS","XXX","XAU","XPD","XPT","XAG"];
+const numberFormat = {};
+for (var i = 0; i < currency.length; i++) {
+  numberFormat[currency[i]] = {
+    style: 'currency',
+    currency: currency[i]
+  };
+}
+const defaultFormats = {
+  number: numberFormat
+}
+
 
 const SYS_LOCALE_DATA_URL =
   "https://g.alicdn.com/alishu/common/0.0.86/locale-data";
@@ -15,14 +29,14 @@ const SYS_LOCALE_DATA_URL =
 let isPolyfill = false;
 const isBrowser = typeof window !== "undefined";
 
-if (isBrowser) {
-  if (typeof window.Intl === "undefined") {
-    window.Intl = IntlPolyfill;
-    isPolyfill = true;
-  }
-} else {
-  global.Intl = IntlPolyfill;
-}
+// if (isBrowser) {
+//   if (typeof window.Intl === "undefined") {
+//     window.Intl = IntlPolyfill;
+//     isPolyfill = true;
+//   }
+// } else {
+//   global.Intl = IntlPolyfill;
+// }
 
 String.prototype.defaultMessage = String.prototype.d = function (msg) {
   return this || msg || "";
@@ -45,7 +59,7 @@ class ReactIntlUniversal {
    * @returns {string} message
    */
   get(key, variables) {
-    invariant(key, "key is required");
+    // invariant(key, "key is required");
     const { locales, currentLocale, formats } = this.options;
 
     if (!locales || !locales[currentLocale]) {
@@ -54,7 +68,7 @@ class ReactIntlUniversal {
     let msg = this.getDescendantProp(locales[currentLocale], key);
     if (msg == null) {
       console.warn(
-        `react-intl-universal key "${key}" not defined in ${currentLocale}`
+        `intl-universal key "${key}" not defined in ${currentLocale}`
       );
       return "";
     }
@@ -80,7 +94,7 @@ class ReactIntlUniversal {
       return msg;
     } catch (err) {
       console.warn(
-        `react-intl-universal format message failed for key='${key}'`,
+        `intl-universal format message failed for key='${key}'`,
         err
       );
       return "";
@@ -93,23 +107,23 @@ class ReactIntlUniversal {
    * @param {Object} variables Variables in message
    * @returns {React.Element} message
   */
-  getHTML(key, variables) {
-    let msg = this.get(key, variables);
-    if (msg) {
-      const el = React.createElement("span", {
-        dangerouslySetInnerHTML: {
-          __html: msg
-        }
-      });
-      // when key exists, it should still return element if there's defaultMessage() after getHTML()
-      const defaultMessage = () => el;
-      return Object.assign(
-        { defaultMessage: defaultMessage, d: defaultMessage },
-        el
-      );
-    }
-    return "";
-  }
+  // getHTML(key, variables) {
+  //   let msg = this.get(key, variables);
+  //   if (msg) {
+  //     const el = React.createElement("span", {
+  //       dangerouslySetInnerHTML: {
+  //         __html: msg
+  //       }
+  //     });
+  //     // when key exists, it should still return element if there's defaultMessage() after getHTML()
+  //     const defaultMessage = () => el;
+  //     return Object.assign(
+  //       { defaultMessage: defaultMessage, d: defaultMessage },
+  //       el
+  //     );
+  //   }
+  //   return "";
+  // }
 
   /**
    * As same as get(...) API
@@ -124,18 +138,18 @@ class ReactIntlUniversal {
     return this.get(id, variables).defaultMessage(defaultMessage);
   }
 
-  /**
-   * As same as getHTML(...) API
-   * @param {Object} options 
-   * @param {string} options.id 
-   * @param {React.Element} options.defaultMessage
-   * @param {Object} variables Variables in message
-   * @returns {React.Element} message
-  */
-  formatHTMLMessage(messageDescriptor, variables) {
-    const { id, defaultMessage } = messageDescriptor;
-    return this.getHTML(id, variables).defaultMessage(defaultMessage);
-  }
+  // /**
+  //  * As same as getHTML(...) API
+  //  * @param {Object} options 
+  //  * @param {string} options.id 
+  //  * @param {React.Element} options.defaultMessage
+  //  * @param {Object} variables Variables in message
+  //  * @returns {React.Element} message
+  // */
+  // formatHTMLMessage(messageDescriptor, variables) {
+  //   const { id, defaultMessage } = messageDescriptor;
+  //   return this.getHTML(id, variables).defaultMessage(defaultMessage);
+  // }
 
   /**
    * Helper: determine user's locale via URL, cookie, and browser's language.
@@ -160,15 +174,15 @@ class ReactIntlUniversal {
    * @returns {Promise}
    */
   init(options = {}) {
-    invariant(options.currentLocale, "options.currentLocale is required");
-    invariant(options.locales, "options.locales is required");
+    // invariant(options.currentLocale, "options.currentLocale is required");
+    // invariant(options.locales, "options.locales is required");
 
     Object.assign(this.options, options);
 
     this.options.formats = Object.assign(
       {},
       this.options.formats,
-      constants.defaultFormats
+      defaultFormats
     );
 
     return new Promise((resolve, reject) => {
@@ -234,4 +248,6 @@ class ReactIntlUniversal {
   }
 }
 
-module.exports = new ReactIntlUniversal();
+window.IntlUniversal = ReactIntlUniversal;
+
+// module.exports = new ReactIntlUniversal();

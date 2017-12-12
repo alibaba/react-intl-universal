@@ -246,6 +246,21 @@ if `type` is `time`, `format` has the following values:
 - `medium` shows times with hours, minutes, and seconds
 - `long` shows times with hours, minutes, seconds, and timezone
 
+### Common Locale Data
+For browser rendering, the common locale data such as date, currency, and number format are automatically loaded from CDN on demand.
+
+For server-side rendering, they should be added in your application as shown in the [example](https://github.com/alibaba/react-intl-universal/blob/master/examples/node-js-example/src/App.js#L11-L16).
+
+```
+// For Node.js
+import IntlPolyfill from "intl";
+global.Intl = IntlPolyfill;
+require('intl/locale-data/jsonp/en.js');
+require('intl/locale-data/jsonp/zh.js');
+require('intl/locale-data/jsonp/fr.js');
+require('intl/locale-data/jsonp/ja.js');
+```
+
 ### Helper
 [react-intl-universal](https://www.npmjs.com/package/react-intl-universal) provides a utility helping developer determine the user's current locale. As the running examples, when user select a new locale, it redirect user new location like `http://localhost:3000?lang=en-US`. Then, we can use `intl.determineLocale` to get the locale from URL. It can also support determine user's locale via cookie and browser default language. Refer to the APIs section for more detail.
 
@@ -380,15 +395,6 @@ npm start
 
 ## Ask Question
 [![Join the chat at https://gitter.im/react-intl-universal/Lobby](https://badges.gitter.im/alibaba/react-intl-universal.svg)](https://gitter.im/react-intl-universal/Lobby)
-
-## Code Test Coverage Summary
-```
-Statements   : 85.71% ( 60/70 )
-Branches     : 82.93% ( 34/41 )
-Functions    : 92.86% ( 13/14 )
-Lines        : 85.51% ( 59/69 )
-```
-
 
 ## License
 This software is free to use under the BSD license.

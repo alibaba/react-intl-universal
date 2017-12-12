@@ -9,20 +9,20 @@ import invariant from "invariant";
 import "console-polyfill";
 import * as constants from "./constants";
 
-const SYS_LOCALE_DATA_URL =
-  "https://g.alicdn.com/alishu/common/0.0.86/locale-data";
+const COMMON_LOCALE_DATA_URLS = {
+  en: "https://g.alicdn.com/react-intl-universal/locale-data/1.0.0/en.js",
+  zh: "https://g.alicdn.com/react-intl-universal/locale-data/1.0.0/zh.js",
+  fr: "https://g.alicdn.com/react-intl-universal/locale-data/1.0.0/fr.js",
+  ja: "https://g.alicdn.com/react-intl-universal/locale-data/1.0.0/ja.js",
+  de: "https://g.alicdn.com/react-intl-universal/locale-data/1.0.0/de.js",
+  es: "https://g.alicdn.com/react-intl-universal/locale-data/1.0.0/es.js",
+  ko: "https://g.alicdn.com/react-intl-universal/locale-data/1.0.0/ko.js",
+  pt: "https://g.alicdn.com/react-intl-universal/locale-data/1.0.0/pt.js",
+  it: "https://g.alicdn.com/react-intl-universal/locale-data/1.0.0/it.js",
+};
 
-let isPolyfill = false;
+
 const isBrowser = typeof window !== "undefined";
-
-if (isBrowser) {
-  if (typeof window.Intl === "undefined") {
-    window.Intl = IntlPolyfill;
-    isPolyfill = true;
-  }
-} else {
-  global.Intl = IntlPolyfill;
-}
 
 String.prototype.defaultMessage = String.prototype.d = function (msg) {
   return this || msg || "";
@@ -172,10 +172,12 @@ class ReactIntlUniversal {
     );
 
     return new Promise((resolve, reject) => {
-      const lang = this.options.currentLocale.split("-")[0];
+
+      const lang = this.options.currentLocale.split('-')[0].split('_')[0];
+      const langUrl = COMMON_LOCALE_DATA_URLS[lang];
       if (isBrowser) {
-        if (isPolyfill) {          
-          load(`${SYS_LOCALE_DATA_URL}/${lang}.js`, (err, script) => {
+        if (langUrl) {
+          load(langUrl, (err, script) => {
             if (err) {
               reject(err);
             } else {
@@ -183,20 +185,11 @@ class ReactIntlUniversal {
             }
           });
         } else {
+          console.warn('lang is not supported', lang);
           resolve();
         }
       } else {
-        // require(`intl/locale-data/jsonp/${lang}.js`);
-        // TODO rquired on demand
-        require(`intl/locale-data/jsonp/en.js`);
-        require(`intl/locale-data/jsonp/zh.js`);
-        require(`intl/locale-data/jsonp/fr.js`);
-        require(`intl/locale-data/jsonp/ja.js`);
-        require(`intl/locale-data/jsonp/de.js`);
-        require(`intl/locale-data/jsonp/es.js`);
-        require(`intl/locale-data/jsonp/ko.js`);
-        require(`intl/locale-data/jsonp/pt.js`);
-        require(`intl/locale-data/jsonp/it.js`);
+        // For Node.js, common locales are added in the application
         resolve();
       }
     });
@@ -234,8 +227,8 @@ class ReactIntlUniversal {
       return locale[key];
     }
 
-    const msg = key.split(".").reduce(function(a, b) {
-      return (a != undefined) ? a[b] : a ;
+    const msg = key.split(".").reduce(function (a, b) {
+      return (a != undefined) ? a[b] : a;
     }, locale);
 
     return msg;

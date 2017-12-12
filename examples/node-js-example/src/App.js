@@ -6,6 +6,14 @@ import HtmlComponent from "./Html";
 import DateComponent from "./Date";
 import CurrencyComponent from "./Currency";
 import MessageNotInComponent from "./MessageNotInComponent";
+import IntlPolyfill from "intl";
+
+// For Node.js, common locales should be added in the application
+global.Intl = IntlPolyfill;
+require('intl/locale-data/jsonp/en.js');
+require('intl/locale-data/jsonp/zh.js');
+require('intl/locale-data/jsonp/fr.js');
+require('intl/locale-data/jsonp/ja.js');
 
 const SUPPOER_LOCALES = [
   {

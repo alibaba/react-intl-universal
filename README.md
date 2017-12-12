@@ -251,7 +251,7 @@ For browser rendering, the common locale data such as date, currency, and number
 
 For server-side rendering, they should be added in your application as shown in the [example](https://github.com/alibaba/react-intl-universal/blob/master/examples/node-js-example/src/App.js#L11-L16).
 
-```
+```js
 // For Node.js
 import IntlPolyfill from "intl";
 global.Intl = IntlPolyfill;

@@ -84,3 +84,7 @@ declare module "react-intl-universal" {
         defaultMessage?: string,
     }
 }
+
+declare interface String {
+    defaultMessage(msg: string): string;
+}

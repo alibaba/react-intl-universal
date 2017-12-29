@@ -58,6 +58,7 @@ declare module "react-intl-universal" {
      */
     export function getHTML(key: string, value: any): string;
 
+    export function getDescendantProp(locale: { [key: string]: any }, key: string);
     export function getInitOptions(): ReactIntlUniversalOptions;
     export function getLocaleFromBrowser(): string;
     export function getLocaleFromCookie(options: ReactIntlUniversalOptions): void;
@@ -86,5 +87,6 @@ declare module "react-intl-universal" {
 }
 
 declare interface String {
-    defaultMessage(msg: string): string;
+    defaultMessage(msg: string | JSX.Element): string;
+    d(msg: string | JSX.Element): string;
 }

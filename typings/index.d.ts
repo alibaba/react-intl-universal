@@ -58,25 +58,25 @@ declare module "react-intl-universal" {
      */
     export function getHTML(key: string, value: any): string;
 
-    export function getDescendantProp(locale: { [key: string]: any }, key: string);
+    /**
+     * Get the inital options 
+     * @returns {Object} options includes currentLocale and locales
+     */
     export function getInitOptions(): ReactIntlUniversalOptions;
-    export function getLocaleFromBrowser(): string;
-    export function getLocaleFromCookie(options: ReactIntlUniversalOptions): void;
-    export function getLocaleFromURL(options: ReactIntlUniversalOptions): void;
 
     /**
      * Initialize properties and load CLDR locale data according to currentLocale
      * @param {Object} options
      * @param {string} options.currentLocale Current locale such as 'en-US'
-     * @param {string} options.locales App locale data like {"en-US":{"key1":"value1"},"zh-CN":{"key1":"值1"}}
+     * @param {Object} options.locales App locale data like {"en-US":{"key1":"value1"},"zh-CN":{"key1":"值1"}}
      * @returns {Promise}
      */
     export function init(options: ReactIntlUniversalOptions): Promise<void>;
 
     export interface ReactIntlUniversalOptions {
-        cookieLocaleKey?: string;
         currentLocale?: string;
-        locales: { [key: string]: any };
+        locales?: { [key: string]: any };
+        cookieLocaleKey?: string;
         urlLocaleKey?: string;
     }
 

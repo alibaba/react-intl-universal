@@ -78,6 +78,7 @@ declare module "react-intl-universal" {
         locales?: { [key: string]: any };
         cookieLocaleKey?: string;
         urlLocaleKey?: string;
+        enableWarning?: boolean;
     }
 
     export interface ReactIntlUniversalMessageDescriptor {

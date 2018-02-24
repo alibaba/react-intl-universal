@@ -115,7 +115,7 @@ test("HTML Message with XSS attack", () => {
 });
 
 test("Message with Date", () => {
-  let start = new Date("Fri Apr 07 2017 17:08:33 GMT+0800 (CST)");
+  let start = new Date("Fri Apr 07 2017 17:08:33");
   intl.init({ locales, currentLocale: "en-US" });
   expect(
     intl.get("SALE_START", {
@@ -130,7 +130,7 @@ test("Message with Date", () => {
 });
 
 test("Message with Time", () => {
-  let expires = new Date("Fri Apr 07 2017 17:08:33 GMT+0800 (CST)");
+  let expires = new Date("Fri Apr 07 2017 17:08:33");
   intl.init({ locales, currentLocale: "en-US" });
   expect(
     intl.get("COUPON", {
@@ -190,6 +190,16 @@ test("Message with plural", () => {
 test("Without default message, just return empty string", () => {
   intl.init({ locales, currentLocale: "en-US" });
   expect(intl.get("not-exist-key")).toBe("");
+});
+
+test("Should call handler when message is not defined", () => {
+  const notDefinedHandler = jest.fn();
+  intl.init({ 
+    locales, currentLocale: "en-US",
+    notDefinedHandler
+  });
+  intl.get("not-exist-key");
+  expect(notDefinedHandler).lastCalledWith('react-intl-universal key \"not-exist-key\" not defined in en-US');
 });
 
 test("Default message", () => {

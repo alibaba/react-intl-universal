@@ -1,12 +1,12 @@
 {
   "SIMPLE": "phrase simple",
   "HELLO": "Bonjour, {name}. Bienvenue chez {where}!",
-  "TIP": "Ceci est <span style='color:red'>HTML</span>",
-  "TIP_VAR": "Ceci est <span style='color:red'>{message}</span>",
-  "SALE_START": "Vente commence {start, date}",
-  "SALE_END": "se termine la vente {end, date, long}",
-  "COUPON": "Coupon expire à {expires, time, medium}",
-  "SALE_PRICE": "Le prix est {price, number, USD}",
+  "TIP": "Ceci est du <span style='color:red'>HTML</span>",
+  "TIP_VAR": "Ceci est un <span style='color:red'>{message}</span>",
+  "SALE_START": "Vente commence le {start, date}",
+  "SALE_END": "La vente se termine le {end, date, long}",
+  "COUPON": "Le coupon expire à {expires, time, medium}",
+  "SALE_PRICE": "Le prix est de {price, number, USD}",
   "PHOTO": "Vous avez {photoNum, plural, =0 {de photographie.} =1 {une photographie.} other {# photographies.}}",
   "MESSAGE_NOT_IN_COMPONENT": "react-intl-universal est en mesure d'internationaliser un message non React.Component"
 }

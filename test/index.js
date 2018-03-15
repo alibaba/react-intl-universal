@@ -3,6 +3,7 @@ import cookie from "cookie";
 import intl from "../src/index";
 import zhCN from "./locales/zh-CN";
 import enUS from "./locales/en-US";
+import enUSMore from "./locales/en-US-more";
 
 const locales = {
   "en-US": enUS,
@@ -256,5 +257,14 @@ test("Get init options", () => {
   intl.init({ locales, currentLocale: "en-US" });
   const { currentLocale } = intl.getInitOptions();
   expect(currentLocale).toBe("en-US");
+});
+
+test("load mutiple locale data", () => {
+  intl.init({ locales, currentLocale: "en-US" });
+  const localesMore = {
+    "en-US": enUSMore,
+  };
+  intl.load(localesMore); // promise?
+  expect(intl.get("MORE")).toBe("More data");
 });
 

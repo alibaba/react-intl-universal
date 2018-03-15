@@ -202,6 +202,13 @@ class ReactIntlUniversal {
     return this.options;
   }
 
+  /**
+   * Load more locales after init
+   */
+  load(locales) {
+    Object.assign(this.options.locales, locales);
+  }
+
   getLocaleFromCookie(options) {
     const { cookieLocaleKey } = options;
     if (cookieLocaleKey) {

@@ -73,7 +73,7 @@ class App {
   }
 }
 ```
-Furthermore, your React.Component's properties is not inherited in subclass since component is injected by [react-intl](https://github.com/yahoo/react-intl). 
+Furthermore, your React.Component's properties are not inherited in subclass since component is injected by [react-intl](https://github.com/yahoo/react-intl). 
 
 Due to the problem above, we create [react-intl-universal](https://www.npmjs.com/package/react-intl-universal) to internationalize React app using simple but powerful API.
 
@@ -157,14 +157,14 @@ Or using `d` for short:
 intl.get('not-exist-key').d('default message') // "default message"
 ```
 
-And `getHTML` also support default message.
+And `getHTML` also supports default message.
 ```js
 intl.getHTML('not-exist-key').d(<div>hello</div>) // React.Element with "<div>hello</div>"
 ```
 
 
 ### Message With Variables
-If the message contains variables,  the `{variable_name}` is substituted directly into the string. In the example below, there are two variables `{name}` and `{where}`,  the second argument representing the variables in `get` method are substituted into the string.
+If the message contains variables the `{variable_name}` is substituted directly into the string. In the example below, there are two variables `{name}` and `{where}`,  the second argument representing the variables in `get` method are substituted into the string.
 
 Locale data:
 ```json

@@ -281,7 +281,7 @@ require('intl/locale-data/jsonp/ja.js');
    * Load more locales after init
    * @param {Object} locales App locale data 
    */
-  export function load(locales): void;
+  load(locales)
 
 
   /**

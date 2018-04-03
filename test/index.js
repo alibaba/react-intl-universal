@@ -264,7 +264,7 @@ test("load mutiple locale data", () => {
   const localesMore = {
     "en-US": enUSMore,
   };
-  intl.load(localesMore); // promise?
+  intl.load(localesMore); 
   expect(intl.get("MORE")).toBe("More data");
 });
 

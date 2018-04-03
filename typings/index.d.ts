@@ -77,7 +77,7 @@ declare module "react-intl-universal" {
      * Load more locales after init
      * @param {Object} locales App locale data 
      */
-    export function init(locales: { [key: string]: any }): void;
+    export function load(locales: { [key: string]: any }): void;
 
     export interface ReactIntlUniversalOptions {
         currentLocale?: string;

@@ -259,12 +259,12 @@ test("Get init options", () => {
   expect(currentLocale).toBe("en-US");
 });
 
-test("load mutiple locale data", () => {
+test("load mutiple locale data without overriding existing one", () => {
   intl.init({ locales, currentLocale: "en-US" });
   const localesMore = {
     "en-US": enUSMore,
   };
   intl.load(localesMore); 
+  expect(intl.get("SIMPLE")).toBe("Simple");
   expect(intl.get("MORE")).toBe("More data");
 });
-

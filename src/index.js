@@ -8,6 +8,7 @@ import load from "load-script";
 import invariant from "invariant";
 import "console-polyfill";
 import * as constants from "./constants";
+import merge from "lodash.merge";
 
 const COMMON_LOCALE_DATA_URLS = {
   en: "https://g.alicdn.com/react-intl-universal/locale-data/1.0.0/en.js",
@@ -207,7 +208,7 @@ class ReactIntlUniversal {
    * Load more locales after init
    */
   load(locales) {
-    Object.assign(this.options.locales, locales);
+    merge(this.options.locales, locales);
   }
 
   getLocaleFromCookie(options) {

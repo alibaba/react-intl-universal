@@ -34,6 +34,7 @@
     "intl-messageformat": "^2.2.0",
     "invariant": "^2.2.2",
     "load-script": "^1.0.0",
+    "lodash.merge": "^4.6.1",
     "object-keys": "^1.0.11",
     "querystring": "^0.2.0",
     "react": "^15.4.2"

@@ -407,5 +407,5 @@ npm start
 ## License
 This software is free to use under the BSD license.
 
-## Work at Alibaba　加入我们
+## Work at Alibaba 加入我们
 [Join us as a frontend engineer in Alibaba group!](https://github.com/alibaba/react-intl-universal/issues/41)

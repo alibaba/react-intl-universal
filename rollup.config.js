@@ -27,7 +27,8 @@ export default {
         'cookie',
         'querystring',
         'react',
-        'console-polyfill'
+        'console-polyfill',
+        'lodash.merge'
     ],
     plugins : [babel({exclude: 'node_modules/**', presets: ['es2015-rollup']})]
 };

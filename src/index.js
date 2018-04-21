@@ -9,6 +9,7 @@ import invariant from "invariant";
 import "console-polyfill";
 import * as constants from "./constants";
 import merge from "lodash.merge";
+import isElectron from 'is-electron';
 
 const COMMON_LOCALE_DATA_URLS = {
   en: "https://g.alicdn.com/react-intl-universal/locale-data/1.0.0/en.js",
@@ -24,7 +25,7 @@ const COMMON_LOCALE_DATA_URLS = {
 };
 
 
-const isBrowser = typeof window !== "undefined";
+const isBrowser = !isElectron() && typeof window !== "undefined";
 
 String.prototype.defaultMessage = String.prototype.d = function (msg) {
   return this || msg || "";

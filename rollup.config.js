@@ -28,7 +28,8 @@ export default {
         'querystring',
         'react',
         'console-polyfill',
-        'lodash.merge'
+        'lodash.merge',
+        'is-electron'
     ],
     plugins : [babel({exclude: 'node_modules/**', presets: ['es2015-rollup']})]
 };

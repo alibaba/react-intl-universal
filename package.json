@@ -1,6 +1,6 @@
 {
   "name": "react-intl-universal",
-  "version": "1.9.3",
+  "version": "1.10.1",
   "description": "Internationalize React apps. Not only for React.Component but also for Vanilla JS.",
   "keywords": [
     "intl",
@@ -33,6 +33,7 @@
     "intl": "^1.2.5",
     "intl-messageformat": "^2.2.0",
     "invariant": "^2.2.2",
+    "is-electron": "^2.1.0",
     "load-script": "^1.0.0",
     "lodash.merge": "^4.6.1",
     "object-keys": "^1.0.11",

@@ -272,6 +272,7 @@ require('intl/locale-data/jsonp/ja.js');
    * @param {Object} options
    * @param {string} options.currentLocale Current locale such as 'en-US'
    * @param {string} options.locales App locale data like {"en-US":{"key1":"value1"},"zh-CN":{"key1":"值1"}}
+   * @param {Object} options.warningHandler Ability to accumulate missing messages using third party services like Sentry
    * @returns {Promise}
    */
   init(options)

@@ -38,7 +38,7 @@ class ReactIntlUniversal {
       urlLocaleKey: null, // URL's query Key to determine locale. Example: if URL=http://localhost?lang=en-US, then set it 'lang'
       cookieLocaleKey: null, // Cookie's Key to determine locale. Example: if cookie=lang:en-US, then set it 'lang'
       locales: {}, // app locale data like {"en-US":{"key1":"value1"},"zh-CN":{"key1":"值1"}}
-      notDefinedHandler: console.warn // ability to accumulate missing messages using third party services like Sentry
+      warningHandler: console.warn // ability to accumulate missing messages using third party services like Sentry
     };
   }
 
@@ -57,7 +57,7 @@ class ReactIntlUniversal {
     }
     let msg = this.getDescendantProp(locales[currentLocale], key);
     if (msg == null) {
-      this.options.notDefinedHandler(
+      this.options.warningHandler(
         `react-intl-universal key "${key}" not defined in ${currentLocale}`
       );
       return "";
@@ -83,7 +83,7 @@ class ReactIntlUniversal {
       msg = msg.format(variables);
       return msg;
     } catch (err) {
-      this.options.notDefinedHandler(
+      this.options.warningHandler(
         `react-intl-universal format message failed for key='${key}'`,
         err
       );
@@ -189,7 +189,7 @@ class ReactIntlUniversal {
             }
           });
         } else {
-          this.options.notDefinedHandler('lang is not supported', lang);
+          this.options.warningHandler(`lang "${lang}" is not supported.`);
           resolve();
         }
       } else {

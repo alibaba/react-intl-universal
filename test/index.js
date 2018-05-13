@@ -194,13 +194,13 @@ test("Without default message, just return empty string", () => {
 });
 
 test("Should call handler when message is not defined", () => {
-  const notDefinedHandler = jest.fn();
+  const warningHandler = jest.fn();
   intl.init({ 
     locales, currentLocale: "en-US",
-    notDefinedHandler
+    warningHandler
   });
   intl.get("not-exist-key");
-  expect(notDefinedHandler).lastCalledWith('react-intl-universal key \"not-exist-key\" not defined in en-US');
+  expect(warningHandler).lastCalledWith('react-intl-universal key \"not-exist-key\" not defined in en-US');
 });
 
 test("Default message", () => {

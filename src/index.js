@@ -22,6 +22,7 @@ const COMMON_LOCALE_DATA_URLS = {
   pt: "https://g.alicdn.com/react-intl-universal/locale-data/1.0.0/pt.js",
   it: "https://g.alicdn.com/react-intl-universal/locale-data/1.0.0/it.js",
   ru: "https://g.alicdn.com/react-intl-universal/locale-data/1.0.0/ru.js",
+  pl: "https://g.alicdn.com/react-intl-universal/locale-data/1.0.0/pl.js",
 };
 
 

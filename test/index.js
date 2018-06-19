@@ -115,6 +115,16 @@ test("HTML Message with XSS attack", () => {
   );
 });
 
+test("HTML Message with disable escape html", () => {
+  intl.init({ locales, currentLocale: "en-US", escapeHtml: false });
+  let reactEl = intl.getHTML("TIP_VAR", {
+    message: "<sctipt>alert(1)</script>"
+  });
+  expect(reactEl.props.dangerouslySetInnerHTML.__html).toBe(
+    "This is<span><sctipt>alert(1)</script></span>"
+  );
+});
+
 test("Message with Date", () => {
   let start = new Date("Fri Apr 07 2017 17:08:33");
   intl.init({ locales, currentLocale: "en-US" });

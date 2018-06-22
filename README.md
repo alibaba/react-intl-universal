@@ -206,7 +206,7 @@ As mentioned, the locale data is in [ICU Message format](http://userguide.icu-pr
 The syntax is {name, type, format}. Here is description:
 
 - name is the variable name in the message. In this case, it's `price`.
-- type is the type of value such as `number`, `data`, and `time`.
+- type is the type of value such as `number`, `date`, and `time`.
 - format is optional, and is additional information for the displaying format of the value. In this case, it's `USD`.
 
 if `type` is `number` and `format` is omitted, the result is formatted number with [thousands separators](https://docs.oracle.com/cd/E19455-01/806-0169/overview-9/index.html). If `format` is one of [currency code](https://www.currency-iso.org/en/home/tables/table-a1.html), it will show in corresponding currency format.

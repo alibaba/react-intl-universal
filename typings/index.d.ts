@@ -70,6 +70,7 @@ declare module "react-intl-universal" {
      * @param {string} options.currentLocale Current locale such as 'en-US'
      * @param {Object} options.locales App locale data like {"en-US":{"key1":"value1"},"zh-CN":{"key1":"值1"}}
      * @param {Object} options.warningHandler Ability to accumulate missing messages using third party services like Sentry
+     * @param {boolean} options.escapeHtml Ability to disable escape html in variable mode
      * @returns {Promise}
      */
     export function init(options: ReactIntlUniversalOptions): Promise<void>;
@@ -86,6 +87,7 @@ declare module "react-intl-universal" {
         cookieLocaleKey?: string;
         urlLocaleKey?: string;
         warningHandler?: (message?: any, error?: any) => void;
+        escapeHtml?: boolean;
     }
     
     export interface ReactIntlUniversalMessageDescriptor {

@@ -42,7 +42,8 @@ class ReactIntlUniversal {
       urlLocaleKey: null, // URL's query Key to determine locale. Example: if URL=http://localhost?lang=en-US, then set it 'lang'
       cookieLocaleKey: null, // Cookie's Key to determine locale. Example: if cookie=lang:en-US, then set it 'lang'
       locales: {}, // app locale data like {"en-US":{"key1":"value1"},"zh-CN":{"key1":"值1"}}
-      warningHandler: console.warn // ability to accumulate missing messages using third party services like Sentry
+      warningHandler: console.warn, // ability to accumulate missing messages using third party services like Sentry
+      commonLocaleDataUrls: COMMON_LOCALE_DATA_URLS, 
     };
   }
 
@@ -182,7 +183,7 @@ class ReactIntlUniversal {
     return new Promise((resolve, reject) => {
 
       const lang = this.options.currentLocale.split('-')[0].split('_')[0];
-      const langUrl = COMMON_LOCALE_DATA_URLS[lang];
+      const langUrl = this.options.commonLocaleDataUrls[lang];
       if (isBrowser) {
         if (langUrl) {
           load(langUrl, (err, script) => {

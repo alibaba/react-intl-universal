@@ -73,7 +73,7 @@ class ReactIntlUniversal {
       for (let i in variables) {
         let value = variables[i];
         if (
-          typeof value === "string" &&
+          (typeof value === "string" || value instanceof String) &&
           value.indexOf("<") >= 0 &&
           value.indexOf(">") >= 0
         ) {

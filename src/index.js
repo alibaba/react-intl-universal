@@ -15,6 +15,7 @@ const COMMON_LOCALE_DATA_URLS = {
   en: "https://g.alicdn.com/react-intl-universal/locale-data/1.0.0/en.js",
   zh: "https://g.alicdn.com/react-intl-universal/locale-data/1.0.0/zh.js",
   fr: "https://g.alicdn.com/react-intl-universal/locale-data/1.0.0/fr.js",
+  fa: "https://g.alicdn.com/react-intl-universal/locale-data/1.0.0/fa.js",
   ja: "https://g.alicdn.com/react-intl-universal/locale-data/1.0.0/ja.js",
   de: "https://g.alicdn.com/react-intl-universal/locale-data/1.0.0/de.js",
   es: "https://g.alicdn.com/react-intl-universal/locale-data/1.0.0/es.js",

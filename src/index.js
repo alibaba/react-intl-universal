@@ -30,7 +30,9 @@ const COMMON_LOCALE_DATA_URLS = {
 };
 
 
-const isBrowser = !isElectron() && typeof window !== "undefined";
+const isBrowser = !isElectron() &&  !!(typeof window !== 'undefined' &&
+window.document &&
+window.document.createElement);
 
 String.prototype.defaultMessage = String.prototype.d = function (msg) {
   return this || msg || "";
@@ -44,7 +46,7 @@ class ReactIntlUniversal {
       cookieLocaleKey: null, // Cookie's Key to determine locale. Example: if cookie=lang:en-US, then set it 'lang'
       locales: {}, // app locale data like {"en-US":{"key1":"value1"},"zh-CN":{"key1":"值1"}}
       warningHandler: console.warn, // ability to accumulate missing messages using third party services like Sentry
-      commonLocaleDataUrls: COMMON_LOCALE_DATA_URLS, 
+      commonLocaleDataUrls: COMMON_LOCALE_DATA_URLS,
     };
   }
 
@@ -123,8 +125,8 @@ class ReactIntlUniversal {
 
   /**
    * As same as get(...) API
-   * @param {Object} options 
-   * @param {string} options.id 
+   * @param {Object} options
+   * @param {string} options.id
    * @param {string} options.defaultMessage
    * @param {Object} variables Variables in message
    * @returns {string} message
@@ -136,8 +138,8 @@ class ReactIntlUniversal {
 
   /**
    * As same as getHTML(...) API
-   * @param {Object} options 
-   * @param {string} options.id 
+   * @param {Object} options
+   * @param {string} options.id
    * @param {React.Element} options.defaultMessage
    * @param {Object} variables Variables in message
    * @returns {React.Element} message
@@ -206,7 +208,7 @@ class ReactIntlUniversal {
   }
 
   /**
-   * Get the inital options 
+   * Get the inital options
    */
   getInitOptions() {
     return this.options;

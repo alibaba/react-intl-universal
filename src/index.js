@@ -61,6 +61,9 @@ class ReactIntlUniversal {
     const { locales, currentLocale, formats } = this.options;
 
     if (!locales || !locales[currentLocale]) {
+      this.options.warningHandler(
+        `react-intl-universal locales data "${currentLocale}" not exists.`
+      );
       return "";
     }
     let msg = this.getDescendantProp(locales[currentLocale], key);
@@ -87,15 +90,14 @@ class ReactIntlUniversal {
     }
 
     try {
-      msg = new IntlMessageFormat(msg, currentLocale, formats); // TODO memorize
-      msg = msg.format(variables);
-      return msg;
+      const msgFormatter = new IntlMessageFormat(msg, currentLocale, formats); 
+      return msgFormatter.format(variables);
     } catch (err) {
       this.options.warningHandler(
-        `react-intl-universal format message failed for key='${key}'`,
-        err
+        `react-intl-universal format message failed for key='${key}'.`,
+        err.message
       );
-      return "";
+      return msg;
     }
   }
 

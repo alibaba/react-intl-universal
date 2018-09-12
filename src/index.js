@@ -199,7 +199,7 @@ class ReactIntlUniversal {
             }
           });
         } else {
-          this.options.warningHandler(`lang "${lang}" is not supported.`);
+          this.options.warningHandler(`Language "${lang}" is not supported. Check https://github.com/alibaba/react-intl-universal/releases/tag/1.12.0`);
           resolve();
         }
       } else {

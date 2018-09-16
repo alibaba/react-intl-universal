@@ -1,0 +1,17 @@
+{
+  "name": "react-intl-universal-typescript-example",
+  "version": "1.0.0",
+  "private": true,
+  "author": "chiawei.tcw@alibaba-inc.com",
+  "license": "BSD-3-Clause",
+  "devDependencies": {
+    "react-scripts": "^0.9.0"
+  },
+  "dependencies": {
+    "react-intl-universal": "*",
+    "typescript": "^3.0.3"
+  },
+  "scripts": {
+    "tsc": "tsc"
+  }
+}

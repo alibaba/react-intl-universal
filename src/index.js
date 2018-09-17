@@ -182,17 +182,10 @@ class ReactIntlUniversal {
     return new Promise((resolve, reject) => {
 
       const lang = this.options.currentLocale.split('-')[0].split('_')[0];
-      const langUrl = COMMON_LOCALE_DATA_URLS[lang];
       if (isBrowser) {
-        if (langUrl) {
-          load(langUrl, (err, script) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve();
-            }
-          });
-        } else {
+        try {
+          require(`./locale-data/${lang}.js`);
+        } catch(e) {
           this.options.warningHandler(`lang "${lang}" is not supported.`);
           resolve();
         }

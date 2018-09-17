@@ -1,6 +1,6 @@
 {
   "name": "react-intl-universal",
-  "version": "1.11.6",
+  "version": "1.13.1",
   "description": "Internationalize React apps. Not only for React.Component but also for Vanilla JS.",
   "keywords": [
     "intl",
@@ -37,8 +37,10 @@
     "load-script": "^1.0.0",
     "lodash.merge": "^4.6.1",
     "object-keys": "^1.0.11",
-    "querystring": "^0.2.0",
-    "react": "^15.4.2"
+    "querystring": "^0.2.0"
+  },
+  "peerDependencies": {
+    "react": "^0.14.9 || ^15.0.0 || ^16.0.0"
   },
   "devDependencies": {
     "babel-cli": "^6.2.0",
@@ -52,7 +54,8 @@
     "rimraf": "^2.4.2",
     "rollup": "^0.41.4",
     "rollup-plugin-babel": "^2.3.9",
-    "rollup-plugin-commonjs": "^7.0.0"
+    "rollup-plugin-commonjs": "^7.0.0",
+    "react": "^15.4.2"
   },
   "babel": {
     "presets": [

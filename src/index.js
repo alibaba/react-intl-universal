@@ -15,6 +15,7 @@ const COMMON_LOCALE_DATA_URLS = {
   en: "https://g.alicdn.com/react-intl-universal/locale-data/1.0.0/en.js",
   zh: "https://g.alicdn.com/react-intl-universal/locale-data/1.0.0/zh.js",
   fr: "https://g.alicdn.com/react-intl-universal/locale-data/1.0.0/fr.js",
+  fa: "https://g.alicdn.com/react-intl-universal/locale-data/1.0.0/fa.js",
   ja: "https://g.alicdn.com/react-intl-universal/locale-data/1.0.0/ja.js",
   de: "https://g.alicdn.com/react-intl-universal/locale-data/1.0.0/de.js",
   es: "https://g.alicdn.com/react-intl-universal/locale-data/1.0.0/es.js",
@@ -29,7 +30,9 @@ const COMMON_LOCALE_DATA_URLS = {
 };
 
 
-const isBrowser = !isElectron() && typeof window !== "undefined";
+const isBrowser = !isElectron() &&  !!(typeof window !== 'undefined' &&
+window.document &&
+window.document.createElement);
 
 String.prototype.defaultMessage = String.prototype.d = function (msg) {
   return this || msg || "";
@@ -42,7 +45,8 @@ class ReactIntlUniversal {
       urlLocaleKey: null, // URL's query Key to determine locale. Example: if URL=http://localhost?lang=en-US, then set it 'lang'
       cookieLocaleKey: null, // Cookie's Key to determine locale. Example: if cookie=lang:en-US, then set it 'lang'
       locales: {}, // app locale data like {"en-US":{"key1":"value1"},"zh-CN":{"key1":"值1"}}
-      warningHandler: console.warn // ability to accumulate missing messages using third party services like Sentry
+      warningHandler: console.warn, // ability to accumulate missing messages using third party services like Sentry
+      commonLocaleDataUrls: COMMON_LOCALE_DATA_URLS,
     };
   }
 
@@ -57,6 +61,9 @@ class ReactIntlUniversal {
     const { locales, currentLocale, formats } = this.options;
 
     if (!locales || !locales[currentLocale]) {
+      this.options.warningHandler(
+        `react-intl-universal locales data "${currentLocale}" not exists.`
+      );
       return "";
     }
     let msg = this.getDescendantProp(locales[currentLocale], key);
@@ -83,15 +90,14 @@ class ReactIntlUniversal {
     }
 
     try {
-      msg = new IntlMessageFormat(msg, currentLocale, formats); // TODO memorize
-      msg = msg.format(variables);
-      return msg;
+      const msgFormatter = new IntlMessageFormat(msg, currentLocale, formats); 
+      return msgFormatter.format(variables);
     } catch (err) {
       this.options.warningHandler(
-        `react-intl-universal format message failed for key='${key}'`,
-        err
+        `react-intl-universal format message failed for key='${key}'.`,
+        err.message
       );
-      return "";
+      return msg;
     }
   }
 
@@ -121,8 +127,8 @@ class ReactIntlUniversal {
 
   /**
    * As same as get(...) API
-   * @param {Object} options 
-   * @param {string} options.id 
+   * @param {Object} options
+   * @param {string} options.id
    * @param {string} options.defaultMessage
    * @param {Object} variables Variables in message
    * @returns {string} message
@@ -134,8 +140,8 @@ class ReactIntlUniversal {
 
   /**
    * As same as getHTML(...) API
-   * @param {Object} options 
-   * @param {string} options.id 
+   * @param {Object} options
+   * @param {string} options.id
    * @param {React.Element} options.defaultMessage
    * @param {Object} variables Variables in message
    * @returns {React.Element} message
@@ -186,8 +192,8 @@ class ReactIntlUniversal {
         try {
           require(`./locale-data/${lang}.js`);
         } catch(e) {
-          this.options.warningHandler(`lang "${lang}" is not supported.`);
-          resolve();
+          this.options.warningHandler(`Language "${lang}" is not supported. Check https://github.com/alibaba/react-intl-universal/releases/tag/1.12.0`);
+          reject(e);
         }
       } else {
         // For Node.js, common locales are added in the application
@@ -197,7 +203,7 @@ class ReactIntlUniversal {
   }
 
   /**
-   * Get the inital options 
+   * Get the inital options
    */
   getInitOptions() {
     return this.options;

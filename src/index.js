@@ -188,19 +188,12 @@ class ReactIntlUniversal {
     return new Promise((resolve, reject) => {
 
       const lang = this.options.currentLocale.split('-')[0].split('_')[0];
-      const langUrl = this.options.commonLocaleDataUrls[lang];
       if (isBrowser) {
-        if (langUrl) {
-          load(langUrl, (err, script) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve();
-            }
-          });
-        } else {
+        try {
+          require(`./locale-data/${lang}.js`);
+        } catch(e) {
           this.options.warningHandler(`Language "${lang}" is not supported. Check https://github.com/alibaba/react-intl-universal/releases/tag/1.12.0`);
-          resolve();
+          reject(e);
         }
       } else {
         // For Node.js, common locales are added in the application

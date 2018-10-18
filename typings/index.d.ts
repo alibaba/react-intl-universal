@@ -1,5 +1,3 @@
-import { ReactIntlUniversalCallOptions } from "react-intl-universal";
-
 declare module "react-intl-universal" {
     /**
      * Helper: determine user's locale via URL, cookie, and browser's language.

@@ -56,6 +56,7 @@ class ReactIntlUniversal {
    * @param {string} key The string representing key in locale data file
    * @param {Object} variables Variables in message
    * @param {Object} options User defined options for the call
+   * @param {boolean} options.escapeHtml Escapes HTML in variables when true
    * @returns {string} message
    */
   get(key, variables, options) {
@@ -113,6 +114,7 @@ class ReactIntlUniversal {
    * @param {string} key The string representing key in locale data file
    * @param {Object} variables Variables in message
    * @param {Object} options User defined options for the call
+   * @param {boolean} options.escapeHtml Escapes HTML in variables when true
    * @returns {React.Element} message
   */
   getHTML(key, variables, options) {
@@ -135,15 +137,17 @@ class ReactIntlUniversal {
 
   /**
    * As same as get(...) API
-   * @param {Object} options
-   * @param {string} options.id
-   * @param {string} options.defaultMessage
+   * @param {Object} messageDescriptor
+   * @param {string} messageDescriptor.id
+   * @param {string} messageDescriptor.defaultMessage
    * @param {Object} variables Variables in message
+   * @param {Object} options User defined options for the call
+   * @param {boolean} options.escapeHtml Escapes HTML in variables when true
    * @returns {string} message
   */
-  formatMessage(messageDescriptor, variables) {
+  formatMessage(messageDescriptor, variables, options) {
     const { id, defaultMessage } = messageDescriptor;
-    return this.get(id, variables).defaultMessage(defaultMessage);
+    return this.get(id, variables, options).defaultMessage(defaultMessage);
   }
 
   /**
@@ -154,9 +158,9 @@ class ReactIntlUniversal {
    * @param {Object} variables Variables in message
    * @returns {React.Element} message
   */
-  formatHTMLMessage(messageDescriptor, variables) {
+  formatHTMLMessage(messageDescriptor, variables, options) {
     const { id, defaultMessage } = messageDescriptor;
-    return this.getHTML(id, variables).defaultMessage(defaultMessage);
+    return this.getHTML(id, variables, options).defaultMessage(defaultMessage);
   }
 
   /**

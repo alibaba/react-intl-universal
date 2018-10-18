@@ -1,3 +1,5 @@
+import { ReactIntlUniversalCallOptions } from "react-intl-universal";
+
 declare module "react-intl-universal" {
     /**
      * Helper: determine user's locale via URL, cookie, and browser's language.
@@ -11,40 +13,32 @@ declare module "react-intl-universal" {
     /**
      * Provide React-Intl compatibility, same as getHTML(...) API.
      */
-    export function formatHTMLMessage(messageDescriptor: ReactIntlUniversalMessageDescriptor): string;
-
-    /**
-     * Provide React-Intl compatibility, same as getHTML(...) API.
-     */
-    export function formatHTMLMessage(messageDescriptor: ReactIntlUniversalMessageDescriptor, variables: any): string;
+    export function formatHTMLMessage(messageDescriptor: ReactIntlUniversalMessageDescriptor, variables?: any, options?: ReactIntlUniversalCallOptions): string;
 
     /**
      * Provide React-Intl compatibility, same as get(...) API.
      */
-    export function formatMessage(messageDescriptor: ReactIntlUniversalMessageDescriptor): string;
-
-    /**
-     * Provide React-Intl compatibility, same as get(...) API.
-     */
-    export function formatMessage(messageDescriptor: ReactIntlUniversalMessageDescriptor, variables: any): string;
+    export function formatMessage(messageDescriptor: ReactIntlUniversalMessageDescriptor, variables?: any, options?: ReactIntlUniversalCallOptions): string;
 
     /**
      * Get the formatted message by key
      * @param {string} key The string representing key in locale data file
      * @param {Object} variables Variables in message
      * @param {Object} options User defined options for the call
+     * @param {boolean} options.escapeHtml Escapes HTML in variables when true
      * @returns {string} message
      */
-    export function get(key: string, variables?: any, options?: {escapeHtml: boolean}): string;
+    export function get(key: string, variables?: any, options?: ReactIntlUniversalCallOptions): string;
 
     /**
      * Get the formatted html message by key.
      * @param {string} key The string representing key in locale data file
      * @param {Object} variables Variables in message
      * @param {Object} options User defined options for the call
+     * @param {boolean} options.escapeHtml Escapes HTML in variables when true
      * @returns {React.Element} message
      */
-    export function getHTML(key: string, variables?: any, options?: {escapeHtml: boolean}): string;
+    export function getHTML(key: string, variables?: any, options?: ReactIntlUniversalCallOptions): string;
 
     /**
      * Get the inital options 
@@ -75,6 +69,10 @@ declare module "react-intl-universal" {
         cookieLocaleKey?: string;
         urlLocaleKey?: string;
         warningHandler?: (message?: any, error?: any) => void;
+        escapeHtml?: boolean;
+    }
+
+    export interface ReactIntlUniversalCallOptions {
         escapeHtml?: boolean;
     }
     

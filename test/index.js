@@ -121,6 +121,64 @@ test("HTML Message with XSS attack", () => {
   );
 });
 
+test("HTML Message that disables and reenables HTML variable escaping", async () => {
+  await intl.init({locales, currentLocale: "en-US"});
+
+  // should escape by default
+  const element1 = intl.getHTML("TIP_VAR", {
+    message: "<script>alert(1)</script>"
+  });
+  expect(element1.props.dangerouslySetInnerHTML.__html).toBe(
+    "This is<span>&lt;script&gt;alert(1)&lt;/script&gt;</span>"
+  );
+
+  // Should not escape
+  const element2 = intl.getHTML("TIP_VAR", {
+    message: "<script>alert(1)</script>"
+  }, {
+    escapeHtml: false
+  });
+  expect(element2.props.dangerouslySetInnerHTML.__html).toBe(
+    "This is<span><script>alert(1)</script></span>"
+  );
+
+  // should escape
+  const element3 = intl.getHTML("TIP_VAR", {
+    message: "<script>alert(1)</script>"
+  }, {
+    escapeHtml: true
+  });
+  expect(element3.props.dangerouslySetInnerHTML.__html).toBe(
+    "This is<span>&lt;script&gt;alert(1)&lt;/script&gt;</span>"
+  );
+});
+
+test("Message that disables and reenables HTML variable escaping", async () => {
+  await intl.init({ locales, currentLocale: "en-US" });
+  // should escape by default
+  const element1 = intl.get("HELLO", {
+    name: "<b>Some Test Name</b>"
+  });
+  expect(element1).toBe("Hello, &lt;b&gt;Some Test Name&lt;/b&gt;");
+
+  // Should not escape
+  const element2 = intl.get("HELLO", {
+    name: "<b>Some Test Name</b>"
+  }, {
+    escapeHtml: false
+  });
+  expect(element2).toBe("Hello, <b>Some Test Name</b>");
+
+  // should escape
+  const element3 = intl.get("HELLO", {
+    name: "<b>Some Test Name</b>"
+  }, {
+    escapeHtml: true
+  });
+  expect(element3).toBe("Hello, &lt;b&gt;Some Test Name&lt;/b&gt;");
+
+});
+
 test("HTML Message with disable escape html", () => {
   intl.init({ locales, currentLocale: "en-US", escapeHtml: false });
   let reactEl = intl.getHTML("TIP_VAR", {
@@ -129,40 +187,6 @@ test("HTML Message with disable escape html", () => {
   expect(reactEl.props.dangerouslySetInnerHTML.__html).toBe(
     "This is<span><script>alert(1)</script></span>"
   );
-});
-
-test("HTML Message with disable escape html on call", () => {
-  intl.init({ locales, currentLocale: "en-US" })
-    .then(() => {
-
-      // should escape by default
-      const element1 = intl.getHTML("TIP_VAR", {
-        message: "<script>alert(1)</script>"
-      });
-      expect(element1.props.dangerouslySetInnerHTML.__html).toBe(
-        "This is<span>&lt;script&gt;alert(1)&lt;/script&gt;</span>"
-      );
-
-      // Should not escape
-      const element2 = intl.getHTML("TIP_VAR", {
-        message: "<script>alert(1)</script>"
-      }, {
-        escapeHtml: false
-      });
-      expect(element2.props.dangerouslySetInnerHTML.__html).toBe(
-        "This is<span><script>alert(1)</script></span>"
-      );
-
-      // should escape
-      const element3 = intl.getHTML("TIP_VAR", {
-        message: "<script>alert(1)</script>"
-      }, {
-        escapeHtml: true
-      });
-      expect(element3.props.dangerouslySetInnerHTML.__html).toBe(
-        "This is<span>&lt;script&gt;alert(1)&lt;/script&gt;</span>"
-      );
-    });
 });
 
 test("Message with Date", () => {

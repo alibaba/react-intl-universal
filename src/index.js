@@ -63,7 +63,8 @@ class ReactIntlUniversal {
     invariant(key, "key is required");
     const { locales, currentLocale, formats } = this.options;
     // if there are no options, set one up and use init's default.
-    if (!options) {
+    if ( options == null ||
+      (options && (options.escapeHtml == null))) {
       options = {escapeHtml: this.options.escapeHtml}
     }
 

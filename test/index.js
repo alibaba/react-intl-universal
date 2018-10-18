@@ -114,20 +114,20 @@ test("HTML Message with variables", () => {
 test("HTML Message with XSS attack", () => {
   intl.init({ locales, currentLocale: "en-US" });
   let reactEl = intl.getHTML("TIP_VAR", {
-    message: "<sctipt>alert(1)</script>"
+    message: "<script>alert(1)</script>"
   });
   expect(reactEl.props.dangerouslySetInnerHTML.__html).toBe(
-    "This is<span>&lt;sctipt&gt;alert(1)&lt;/script&gt;</span>"
+    "This is<span>&lt;script&gt;alert(1)&lt;/script&gt;</span>"
   );
 });
 
 test("HTML Message with disable escape html", () => {
   intl.init({ locales, currentLocale: "en-US", escapeHtml: false });
   let reactEl = intl.getHTML("TIP_VAR", {
-    message: "<sctipt>alert(1)</script>"
+    message: "<script>alert(1)</script>"
   });
   expect(reactEl.props.dangerouslySetInnerHTML.__html).toBe(
-    "This is<span><sctipt>alert(1)</script></span>"
+    "This is<span><script>alert(1)</script></span>"
   );
 });
 

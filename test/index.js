@@ -121,6 +121,50 @@ test("HTML Message with XSS attack", () => {
   );
 });
 
+test("HTML Message with disable escape html", () => {
+  intl.init({ locales, currentLocale: "en-US", escapeHtml: false });
+  let reactEl = intl.getHTML("TIP_VAR", {
+    message: "<sctipt>alert(1)</script>"
+  });
+  expect(reactEl.props.dangerouslySetInnerHTML.__html).toBe(
+    "This is<span><sctipt>alert(1)</script></span>"
+  );
+});
+
+test("HTML Message with disable escape html on call", () => {
+  intl.init({ locales, currentLocale: "en-US" })
+    .then(() => {
+
+      // should escape by default
+      const element1 = intl.getHTML("TIP_VAR", {
+        message: "<script>alert(1)</script>"
+      });
+      expect(element1.props.dangerouslySetInnerHTML.__html).toBe(
+        "This is<span>&lt;script&gt;alert(1)&lt;/script&gt;</span>"
+      );
+
+      // Should not escape
+      const element2 = intl.getHTML("TIP_VAR", {
+        message: "<script>alert(1)</script>"
+      }, {
+        escapeHtml: false
+      });
+      expect(element2.props.dangerouslySetInnerHTML.__html).toBe(
+        "This is<span><script>alert(1)</script></span>"
+      );
+
+      // should escape
+      const element3 = intl.getHTML("TIP_VAR", {
+        message: "<script>alert(1)</script>"
+      }, {
+        escapeHtml: true
+      });
+      expect(element3.props.dangerouslySetInnerHTML.__html).toBe(
+        "This is<span>&lt;script&gt;alert(1)&lt;/script&gt;</span>"
+      );
+    });
+});
+
 test("Message with Date", () => {
   let start = new Date("Fri Apr 07 2017 17:08:33");
   intl.init({ locales, currentLocale: "en-US" });
@@ -284,3 +328,4 @@ test("load mutiple locale data without overriding existing one", () => {
   expect(intl.get("SIMPLE")).toBe("Simple");
   expect(intl.get("MORE")).toBe("More data");
 });
+

@@ -9,6 +9,7 @@ class Html extends Component {
         <div>{intl.getHTML('TIP')}</div>
         <div>{intl.getHTML('TIP_VAR', {message: 'HTML with variables'})}</div>
         <div>{intl.getHTML('TIP_VAR', {message: '<script>alert("ReactIntlUniversal prevents from xss attack")</script>'})}</div>
+        <div>{intl.getHTML('TIP_VAR', {message: '<b>Escaped HTML string</b>'}, {escapeHtml: false})}</div>
       </div>
     )
   }

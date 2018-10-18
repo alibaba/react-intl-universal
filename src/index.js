@@ -46,6 +46,7 @@ class ReactIntlUniversal {
       cookieLocaleKey: null, // Cookie's Key to determine locale. Example: if cookie=lang:en-US, then set it 'lang'
       locales: {}, // app locale data like {"en-US":{"key1":"value1"},"zh-CN":{"key1":"值1"}}
       warningHandler: console.warn, // ability to accumulate missing messages using third party services like Sentry
+      escapeHtml: true,
       commonLocaleDataUrls: COMMON_LOCALE_DATA_URLS,
     };
   }
@@ -54,11 +55,16 @@ class ReactIntlUniversal {
    * Get the formatted message by key
    * @param {string} key The string representing key in locale data file
    * @param {Object} variables Variables in message
+   * @param {Object} options User defined options for the call
    * @returns {string} message
    */
-  get(key, variables) {
+  get(key, variables, options) {
     invariant(key, "key is required");
     const { locales, currentLocale, formats } = this.options;
+    // if there are no options, set one up and use init's default.
+    if (!options) {
+      options = {escapeHtml: this.options.escapeHtml}
+    }
 
     if (!locales || !locales[currentLocale]) {
       this.options.warningHandler(
@@ -66,6 +72,7 @@ class ReactIntlUniversal {
       );
       return "";
     }
+
     let msg = this.getDescendantProp(locales[currentLocale], key);
     if (msg == null) {
       this.options.warningHandler(
@@ -79,13 +86,13 @@ class ReactIntlUniversal {
       for (let i in variables) {
         let value = variables[i];
         if (
+          options.escapeHtml === true &&
           (typeof value === "string" || value instanceof String) &&
           value.indexOf("<") >= 0 &&
           value.indexOf(">") >= 0
         ) {
-          value = escapeHtml(value);
+          variables[i] = escapeHtml(value);
         }
-        variables[i] = value;
       }
     }
 
@@ -105,10 +112,11 @@ class ReactIntlUniversal {
    * Get the formatted html message by key.
    * @param {string} key The string representing key in locale data file
    * @param {Object} variables Variables in message
+   * @param {Object} options User defined options for the call
    * @returns {React.Element} message
   */
-  getHTML(key, variables) {
-    let msg = this.get(key, variables);
+  getHTML(key, variables, options) {
+    let msg = this.get(key, variables, options);
     if (msg) {
       const el = React.createElement("span", {
         dangerouslySetInnerHTML: {

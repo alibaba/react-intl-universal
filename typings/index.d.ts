@@ -31,32 +31,20 @@ declare module "react-intl-universal" {
     /**
      * Get the formatted message by key
      * @param {string} key The string representing key in locale data file
-     * @returns {string} message
-     */
-    export function get(key: string): string;
-
-    /**
-     * Get the formatted message by key
-     * @param {string} key The string representing key in locale data file
      * @param {Object} variables Variables in message
+     * @param {Object} options User defined options for the call
      * @returns {string} message
      */
-    export function get(key: string, value: any): string;
-
-    /**
-     * Get the formatted html message by key.
-     * @param {string} key The string representing key in locale data file
-     * @returns {React.Element} message
-     */
-    export function getHTML(key: string): string;
+    export function get(key: string, variables?: any, options?: {escapeHtml: boolean}): string;
 
     /**
      * Get the formatted html message by key.
      * @param {string} key The string representing key in locale data file
      * @param {Object} variables Variables in message
+     * @param {Object} options User defined options for the call
      * @returns {React.Element} message
      */
-    export function getHTML(key: string, value: any): string;
+    export function getHTML(key: string, variables?: any, options?: {escapeHtml: boolean}): string;
 
     /**
      * Get the inital options 
@@ -87,6 +75,7 @@ declare module "react-intl-universal" {
         cookieLocaleKey?: string;
         urlLocaleKey?: string;
         warningHandler?: (message?: any, error?: any) => void;
+        escapeHtml?: boolean;
     }
     
     export interface ReactIntlUniversalMessageDescriptor {

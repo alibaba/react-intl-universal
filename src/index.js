@@ -47,6 +47,7 @@ class ReactIntlUniversal {
       locales: {}, // app locale data like {"en-US":{"key1":"value1"},"zh-CN":{"key1":"值1"}}
       warningHandler: console.warn, // ability to accumulate missing messages using third party services like Sentry
       commonLocaleDataUrls: COMMON_LOCALE_DATA_URLS,
+      fallbackLocale: '', // Locale to use if a key is not found in the current locale
     };
   }
 
@@ -68,10 +69,20 @@ class ReactIntlUniversal {
     }
     let msg = this.getDescendantProp(locales[currentLocale], key);
     if (msg == null) {
-      this.options.warningHandler(
-        `react-intl-universal key "${key}" not defined in ${currentLocale}`
-      );
-      return "";
+      if (this.options.fallbackLocale) {
+        msg = this.getDescendantProp(locales[this.options.fallbackLocale], key);
+        if (msg === null) {
+          this.options.warningHandler(
+            `react-intl-universal key "${key}" not defined in ${currentLocale} or the fallback locale, ${this.options.fallbackLocale}`
+          );
+          return "";
+        }
+      } else {
+        this.options.warningHandler(
+          `react-intl-universal key "${key}" not defined in ${currentLocale}`
+        );
+        return "";
+      }
     }
     if (variables) {
       variables = Object.assign({}, variables);

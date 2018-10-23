@@ -15,4 +15,5 @@ module.exports = ({
   "DOT.HELLO": "Hello World",
   "BRACE1": "The format is {var}",
   "BRACE2": "The format is ${var}",
+  "ONLY_IN_ENGLISH": "ONLY_IN_ENGLISH"
 });

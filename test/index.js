@@ -284,3 +284,8 @@ test("load mutiple locale data without overriding existing one", () => {
   expect(intl.get("SIMPLE")).toBe("Simple");
   expect(intl.get("MORE")).toBe("More data");
 });
+
+test("Uses fallback locale if key not found", () => {
+  intl.init({ locales, currentLocale: "zh-CN", fallbackLocale: "en-US" });
+  expect(intl.get("ONLY_IN_ENGLISH")).toBe("ONLY_IN_ENGLISH");
+});

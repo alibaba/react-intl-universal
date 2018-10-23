@@ -22,6 +22,12 @@ test("Message with variables", () => {
   expect(intl.get("HELLO", { name: "Tony" })).toBe("Hello, Tony");
 });
 
+test("Message with brace", () => {
+  intl.init({ locales, currentLocale: "en-US" });
+  expect(intl.get("BRACE1")).toBe("The format is {var}");
+  expect(intl.get("BRACE2")).toBe("The format is ${var}");
+});
+
 test("Set specific locale with nested notation", () => {
   intl.init({ locales, currentLocale: "en-US" });
   expect(intl.get("NESTED.HELLO")).toBe("Hello World");

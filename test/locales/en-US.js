@@ -13,4 +13,6 @@ module.exports = ({
     "HELLO_NAME": "Hello, {name}"
   },
   "DOT.HELLO": "Hello World",
+  "BRACE1": "The format is {var}",
+  "BRACE2": "The format is ${var}",
 });

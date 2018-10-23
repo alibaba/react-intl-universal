@@ -1,3 +1,6 @@
+## Work at Alibaba 加入我们
+[Join us as a frontend engineer in Alibaba group!](https://github.com/alibaba/react-intl-universal/issues/41)
+
 # react-intl-universal
 [react-intl-universal](https://github.com/alibaba/react-intl-universal) is a React internationalization package developed by [Alibaba Group](http://www.alibabagroup.com).
 
@@ -271,8 +274,9 @@ require('intl/locale-data/jsonp/ja.js');
    * Initialize properties and load CLDR locale data according to currentLocale
    * @param {Object} options
    * @param {string} options.currentLocale Current locale such as 'en-US'
-   * @param {string} options.locales App locale data like {"en-US":{"key1":"value1"},"zh-CN":{"key1":"值1"}}
-   * @param {Object} options.warningHandler Ability to accumulate missing messages using third party services like Sentry. See https://github.com/alibaba/react-intl-universal/releases/tag/1.11.1
+   * @param {Object} options.locales App locale data like {"en-US":{"key1":"value1"},"zh-CN":{"key1":"值1"}}
+   * @param {Object} options.commonLocaleDataUrls Custom common locale urls. See https://github.com/alibaba/react-intl-universal/releases/tag/1.12.0
+   * @param {Object} options.warningHandler Ability to accumulate missing messages using third party services. See https://github.com/alibaba/react-intl-universal/releases/tag/1.11.1
    * @returns {Promise}
    */
   init(options)
@@ -407,6 +411,3 @@ npm start
 
 ## License
 This software is free to use under the BSD license.
-
-## Work at Alibaba 加入我们
-[Join us as a frontend engineer in Alibaba group!](https://github.com/alibaba/react-intl-universal/issues/41)

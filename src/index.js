@@ -46,6 +46,7 @@ class ReactIntlUniversal {
       cookieLocaleKey: null, // Cookie's Key to determine locale. Example: if cookie=lang:en-US, then set it 'lang'
       locales: {}, // app locale data like {"en-US":{"key1":"value1"},"zh-CN":{"key1":"值1"}}
       warningHandler: console.warn, // ability to accumulate missing messages using third party services like Sentry
+      escapeHtml: true, // disable escape html in variable mode
       commonLocaleDataUrls: COMMON_LOCALE_DATA_URLS,
     };
   }
@@ -79,6 +80,7 @@ class ReactIntlUniversal {
       for (let i in variables) {
         let value = variables[i];
         if (
+          this.options.escapeHtml === true &&
           (typeof value === "string" || value instanceof String) &&
           value.indexOf("<") >= 0 &&
           value.indexOf(">") >= 0

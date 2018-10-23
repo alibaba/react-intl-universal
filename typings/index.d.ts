@@ -70,6 +70,7 @@ declare module "react-intl-universal" {
      * @param {string} options.currentLocale Current locale such as 'en-US'
      * @param {Object} options.locales App locale data like {"en-US":{"key1":"value1"},"zh-CN":{"key1":"值1"}}
      * @param {Object} options.warningHandler Ability to accumulate missing messages using third party services like Sentry
+     * @param {string} options.fallbackLocale One locale from options.locales to use if a key is not found in the current locale
      * @returns {Promise}
      */
     export function init(options: ReactIntlUniversalOptions): Promise<void>;

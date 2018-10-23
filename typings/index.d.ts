@@ -1,5 +1,11 @@
 declare module "react-intl-universal" {
     /**
+     * Intl translation type definition
+     * @example { 'sign': string, 'logout': string }
+     */
+    export interface Message {}
+    type Key = keyof Message;
+    /**
      * Helper: determine user's locale via URL, cookie, and browser's language.
      * You may not this API, if you have other rules to determine user's locale.
      * @param {string} options.urlLocaleKey URL's query Key to determine locale. Example: if URL=http://localhost?lang=en-US, then set it 'lang'
@@ -33,7 +39,7 @@ declare module "react-intl-universal" {
      * @param {string} key The string representing key in locale data file
      * @returns {string} message
      */
-    export function get(key: string): string;
+    export function get(key: Key): string;
 
     /**
      * Get the formatted message by key
@@ -48,7 +54,7 @@ declare module "react-intl-universal" {
      * @param {string} key The string representing key in locale data file
      * @returns {React.Element} message
      */
-    export function getHTML(key: string): string;
+    export function getHTML(key: Key): string;
 
     /**
      * Get the formatted html message by key.
@@ -56,10 +62,10 @@ declare module "react-intl-universal" {
      * @param {Object} variables Variables in message
      * @returns {React.Element} message
      */
-    export function getHTML(key: string, value: any): string;
+    export function getHTML(key: Key, value: any): string;
 
     /**
-     * Get the inital options 
+     * Get the inital options
      * @returns {Object} options includes currentLocale and locales
      */
     export function getInitOptions(): ReactIntlUniversalOptions;
@@ -76,7 +82,7 @@ declare module "react-intl-universal" {
 
     /**
      * Load more locales after init
-     * @param {Object} locales App locale data 
+     * @param {Object} locales App locale data
      */
     export function load(locales: { [key: string]: any }): void;
 
@@ -88,7 +94,7 @@ declare module "react-intl-universal" {
         urlLocaleKey?: string;
         warningHandler?: (message?: any, error?: any) => void;
     }
-    
+
     export interface ReactIntlUniversalMessageDescriptor {
         id: string,
         defaultMessage?: string,

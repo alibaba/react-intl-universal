@@ -273,6 +273,7 @@ require('intl/locale-data/jsonp/ja.js');
   /**
    * Initialize properties and load CLDR locale data according to currentLocale
    * @param {Object} options
+   * @param {string} options.escapeHtml To escape html. Default as ture.
    * @param {string} options.currentLocale Current locale such as 'en-US'
    * @param {Object} options.locales App locale data like {"en-US":{"key1":"value1"},"zh-CN":{"key1":"值1"}}
    * @param {Object} options.commonLocaleDataUrls Custom common locale urls. See https://github.com/alibaba/react-intl-universal/releases/tag/1.12.0

@@ -69,7 +69,7 @@ test("react-intl mirror API formatHTMLMessage:defaultMessage", () => {
   intl.init({ locales, currentLocale: "en-US" });
   let reactEl = intl.formatHTMLMessage({
     id: "not-exist-key",
-    defaultMessage: React.createElement("div", {className: 'test'})
+    defaultMessage: React.createElement("div", { className: 'test' })
   });
 
   expect(reactEl.type).toBe('div');
@@ -211,7 +211,7 @@ test("Without default message, just return empty string", () => {
 
 test("Should call handler when message is not defined", () => {
   const warningHandler = jest.fn();
-  intl.init({ 
+  intl.init({
     locales, currentLocale: "en-US",
     warningHandler
   });
@@ -290,7 +290,18 @@ test("load mutiple locale data without overriding existing one", () => {
   const localesMore = {
     "en-US": enUSMore,
   };
-  intl.load(localesMore); 
+  intl.load(localesMore);
   expect(intl.get("SIMPLE")).toBe("Simple");
   expect(intl.get("MORE")).toBe("More data");
 });
+
+test("Uses fallback locale if key not found in currentLocale", () => {
+  intl.init({ locales, currentLocale: "zh-CN", fallbackLocale: "en-US" });
+  expect(intl.get("ONLY_IN_ENGLISH")).toBe("ONLY_IN_ENGLISH");
+});
+
+test("Uses default message if key not found in fallbackLocale", () => {
+  intl.init({ locales, currentLocale: "zh-CN", fallbackLocale: "en-US" });
+  expect(intl.get("not-exist-key").defaultMessage("this is default msg")).toBe("this is default msg");
+});
+

@@ -48,7 +48,7 @@ class ReactIntlUniversal {
       warningHandler: console.warn, // ability to accumulate missing messages using third party services like Sentry
       escapeHtml: true, // disable escape html in variable mode
       commonLocaleDataUrls: COMMON_LOCALE_DATA_URLS,
-      fallbackLocale: '', // Locale to use if a key is not found in the current locale
+      fallbackLocale: null, // Locale to use if a key is not found in the current locale
     };
   }
 
@@ -72,7 +72,7 @@ class ReactIntlUniversal {
     if (msg == null) {
       if (this.options.fallbackLocale) {
         msg = this.getDescendantProp(locales[this.options.fallbackLocale], key);
-        if (msg === null) {
+        if (msg == null) {
           this.options.warningHandler(
             `react-intl-universal key "${key}" not defined in ${currentLocale} or the fallback locale, ${this.options.fallbackLocale}`
           );

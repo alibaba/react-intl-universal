@@ -278,6 +278,7 @@ require('intl/locale-data/jsonp/ja.js');
    * @param {Object} options.locales App locale data like {"en-US":{"key1":"value1"},"zh-CN":{"key1":"值1"}}
    * @param {Object} options.commonLocaleDataUrls Custom common locale urls. See https://github.com/alibaba/react-intl-universal/releases/tag/1.12.0
    * @param {Object} options.warningHandler Ability to accumulate missing messages using third party services. See https://github.com/alibaba/react-intl-universal/releases/tag/1.11.1
+   * @param {string} options.fallbackLocale One locale from options.locales to use if a key is not found in the current locale
    * @returns {Promise}
    */
   init(options)

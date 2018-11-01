@@ -37,7 +37,7 @@ String.prototype.defaultMessage = String.prototype.d = function (msg) {
   return this || msg || "";
 };
 
-Array.prototype.d = String.prototype.defaultMessage = String.prototype.d;
+Array.prototype.d = Array.prototype.defaultMessage = String.prototype.defaultMessage;
 
 class ReactIntlUniversal {
   constructor() {

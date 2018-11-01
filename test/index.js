@@ -47,13 +47,13 @@ test("react-intl mirror API formatMessage:variables", () => {
 
 test("react-intl mirror API formatMessage:variables with React Elements", () => {
   intl.init({ locales, currentLocale: "en-US" });
-  const name = React.createElement('b',null, "Tony");
-  expect(
-    intl.formatMessage(
-      { id: "HELLO", defaultMessage: `Hello, {name}` },
-      { name }
-    )
-  ).toBe(intl.get("HELLO", { name }));
+  const name = React.createElement('b', null, "Tony");
+  const answer = intl.formatMessage(
+    { id: "HELLO", defaultMessage: `Hello, {name}` },
+    { name }
+  );
+  expect(answer[0]).toBe("Hello, ");
+  expect(answer[1].props.children).toBe('Tony');
 });
 
 test("react-intl mirror API formatMessage:defaultMessage", () => {

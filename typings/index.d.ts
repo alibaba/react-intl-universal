@@ -11,22 +11,22 @@ declare module "react-intl-universal" {
     /**
      * Provide React-Intl compatibility, same as getHTML(...) API.
      */
-    export function formatHTMLMessage(messageDescriptor: ReactIntlUniversalMessageDescriptor): string;
+    export function formatHTMLMessage(messageDescriptor: ReactIntlUniversalMessageDescriptor): string | [string | JSX.Element];
 
     /**
      * Provide React-Intl compatibility, same as getHTML(...) API.
      */
-    export function formatHTMLMessage(messageDescriptor: ReactIntlUniversalMessageDescriptor, variables: any): string;
+    export function formatHTMLMessage(messageDescriptor: ReactIntlUniversalMessageDescriptor, variables: any): string | [string | JSX.Element];
 
     /**
      * Provide React-Intl compatibility, same as get(...) API.
      */
-    export function formatMessage(messageDescriptor: ReactIntlUniversalMessageDescriptor): string;
+    export function formatMessage(messageDescriptor: ReactIntlUniversalMessageDescriptor): string | [string | JSX.Element];
 
     /**
      * Provide React-Intl compatibility, same as get(...) API.
      */
-    export function formatMessage(messageDescriptor: ReactIntlUniversalMessageDescriptor, variables: any): string;
+    export function formatMessage(messageDescriptor: ReactIntlUniversalMessageDescriptor, variables: any): string | [string | JSX.Element];
 
     /**
      * Get the formatted message by key
@@ -41,7 +41,7 @@ declare module "react-intl-universal" {
      * @param {Object} variables Variables in message
      * @returns {string} message
      */
-    export function get(key: string, value: any): string;
+    export function get(key: string, value: any): string | [string | JSX.Element];
 
     /**
      * Get the formatted html message by key.
@@ -99,6 +99,11 @@ declare module "react-intl-universal" {
 }
 
 declare interface String {
-    defaultMessage(msg: string | JSX.Element): string;
-    d(msg: string | JSX.Element): string;
+  defaultMessage(msg: string | JSX.Element): string;
+  d(msg: string | JSX.Element): string;
+}
+
+declare interface Array {
+  defaultMessage(msg: string | JSX.Element): string;
+  d(msg: string | JSX.Element): string;
 }

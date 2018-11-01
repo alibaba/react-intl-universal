@@ -45,6 +45,17 @@ test("react-intl mirror API formatMessage:variables", () => {
   ).toBe(intl.get("HELLO", { name }));
 });
 
+test("react-intl mirror API formatMessage:variables with React Elements", () => {
+  intl.init({ locales, currentLocale: "en-US" });
+  const name = React.createElement('b',null, "Tony");
+  expect(
+    intl.formatMessage(
+      { id: "HELLO", defaultMessage: `Hello, {name}` },
+      { name }
+    )
+  ).toBe(intl.get("HELLO", { name }));
+});
+
 test("react-intl mirror API formatMessage:defaultMessage", () => {
   intl.init({ locales, currentLocale: "en-US" });
   expect(intl.formatMessage({ id: "not-exist-key" })).toBe(
@@ -305,3 +316,10 @@ test("Uses default message if key not found in fallbackLocale", () => {
   expect(intl.get("not-exist-key").defaultMessage("this is default msg")).toBe("this is default msg");
 });
 
+test("get with React Element as variable", () => {
+  intl.init({ locales, currentLocale: "en-US" });
+  const name = React.createElement('b', null, "Tony");
+  const answer = intl.get("HELLO",{ name });
+  expect(answer[0]).toBe("Hello, ");
+  expect(answer[1].props.children).toBe('Tony');
+});

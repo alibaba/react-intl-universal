@@ -179,7 +179,6 @@ JS code:
 intl.get('HELLO', {name:'Tony', where:'Alibaba'}) // "Hello, Tony. Welcome to Alibaba!"
 ```
 
-
 ### React Element in Message
 When you want to add rich text as a variable to a message, use the following method:
 
@@ -192,8 +191,6 @@ JS Code:
 ```js
 intl.get('hello', { name: <b>Tony</b> }); // ["Hello ", React.createElement('b', null, Tony)]
 ```
-
-You can embed a React Element as a variable as part of a message. React will know what to do with this, since this version returns an Array with strings and React Element objects, preserving the node structure.
 
 ### Plural Form and Number Thousands Separators
 

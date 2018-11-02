@@ -12,6 +12,7 @@
 - Display numbers, currency, dates and times for different locales.
 - Pluralize labels in strings.
 - Support variables in message.
+- Support React Elements as variables in message.
 - Support HTML in message.
 - Automatically load [Common Locale Data Repository (CLDR)](http://cldr.unicode.org/) locale data on demand. It's used for displaying numbers, currency, dates and times accordingly.
 - Support for 150+ languages.
@@ -134,10 +135,10 @@ class App extends Component {
 }
 ```
 
-
 ### HTML Message
-As shown in above example, the `get` method returns string message. For HTML message, use `getHTML` instead. For example,
-
+The `get` method returns string message. For HTML message, use `getHTML` instead.
+ Avoid using this in favor of React Element embedding, if at all possible. For example,
+ 
 Locale data:
 ```json
 { "TIP": "This is <span style='color:red'>HTML</span>" }
@@ -178,6 +179,21 @@ JS code:
 intl.get('HELLO', {name:'Tony', where:'Alibaba'}) // "Hello, Tony. Welcome to Alibaba!"
 ```
 
+
+### React Element in Message
+When you want to add rich text as a variable to a message, use the following method:
+
+Locale data:
+```json
+{ "hello": "Hello, {name}" }
+``` 
+
+JS Code:
+```js
+intl.get('hello', { name: <b>Tony</b> }); // ["Hello ", React.createElement('b', null, Tony)]
+```
+
+You can embed a React Element as a variable as part of a message. React will know what to do with this, since this version returns an Array with strings and React Element objects, preserving the node structure.
 
 ### Plural Form and Number Thousands Separators
 

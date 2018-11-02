@@ -323,3 +323,13 @@ test("get with React Element as variable", () => {
   expect(answer[0]).toBe("Hello, ");
   expect(answer[1].props.children).toBe('Tony');
 });
+
+test("get with React element and normal variable", () => {
+  intl.init({ locales, currentLocale: "en-US" });
+  const name = React.createElement('b', null, "Tony");
+  const year = new Date().getFullYear();
+  const answer = intl.get("HELLO_ADV",{ name, year });
+  expect(answer[0]).toBe("Hello, ");
+  expect(answer[1].props.children).toBe('Tony');
+  expect(answer[2]).toBe(`. The year is ${year}.`);
+});

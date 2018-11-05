@@ -25,7 +25,7 @@
     "prepublish": "npm run clean && npm run build"
   },
   "author": "chiawei.tcw@alibaba-inc.com",
-  "license": "BSD",
+  "license": "BSD-3-Clause",
   "dependencies": {
     "console-polyfill": "^0.3.0",
     "cookie": "^0.3.1",

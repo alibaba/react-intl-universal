@@ -1,6 +1,7 @@
 module.exports = ({
   "SIMPLE": "Simple",
   "HELLO": "Hello, {name}",
+  "HELLO_ADV": "Hello, {name}. The year is {year}.",
   "TIP": "This is <span>HTML</span>",
   "TIP_VAR": "This is<span>{message}</span>",
   "SALE_START": "Sale begins {start, date}",

@@ -85,6 +85,7 @@ declare module "react-intl-universal" {
     export interface ReactIntlUniversalOptions {
         currentLocale?: string;
         locales?: { [key: string]: any };
+        fallbackLocale?: string;
         commonLocaleDataUrls?: { [key: string]: string };
         cookieLocaleKey?: string;
         urlLocaleKey?: string;

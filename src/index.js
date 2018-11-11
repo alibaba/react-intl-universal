@@ -29,7 +29,6 @@ const COMMON_LOCALE_DATA_URLS = {
   tr: "https://g.alicdn.com/react-intl-universal/locale-data/1.0.0/tr.js",
 };
 
-
 const isBrowser = !isElectron() &&  !!(typeof window !== 'undefined' &&
 window.document &&
 window.document.createElement);
@@ -37,6 +36,8 @@ window.document.createElement);
 String.prototype.defaultMessage = String.prototype.d = function (msg) {
   return this || msg || "";
 };
+
+Array.prototype.d = Array.prototype.defaultMessage = String.prototype.defaultMessage;
 
 class ReactIntlUniversal {
   constructor() {
@@ -56,7 +57,7 @@ class ReactIntlUniversal {
    * Get the formatted message by key
    * @param {string} key The string representing key in locale data file
    * @param {Object} variables Variables in message
-   * @returns {string} message
+   * @returns {(string | T)[]} message
    */
   get(key, variables) {
     invariant(key, "key is required");
@@ -69,6 +70,7 @@ class ReactIntlUniversal {
       return "";
     }
     let msg = this.getDescendantProp(locales[currentLocale], key);
+
     if (msg == null) {
       if (this.options.fallbackLocale) {
         msg = this.getDescendantProp(locales[this.options.fallbackLocale], key);
@@ -85,8 +87,33 @@ class ReactIntlUniversal {
         return "";
       }
     }
+
+    let tokenDelimiter;
+    let tokenizedValues;
+    let elements;
+
     if (variables) {
       variables = Object.assign({}, variables);
+      const uid = Math.floor(Math.random() * 0x10000000000).toString(16);
+      tokenDelimiter = `@__${uid}__@`;
+      tokenizedValues = {};
+      elements = {};
+
+      const generateToken = (() => {
+        let counter = 0;
+        return () => `ELEMENT-${uid}-${(counter += 1)}`;
+      })();
+
+      Object.keys(variables).forEach(name => {
+        const value = variables[name];
+        if (React.isValidElement(value)) {
+          const token = generateToken();
+          tokenizedValues[name] = tokenDelimiter + token + tokenDelimiter;
+          elements[token] = value;
+        } else {
+          tokenizedValues[name] = value;
+        }
+      });
       // HTML message with variables. Escape it to avoid XSS attack.
       for (let i in variables) {
         let value = variables[i];
@@ -101,10 +128,17 @@ class ReactIntlUniversal {
         variables[i] = value;
       }
     }
-
+    let hasElements = elements && Object.keys(elements).length > 0;
     try {
       const msgFormatter = new IntlMessageFormat(msg, currentLocale, formats); 
-      return msgFormatter.format(variables);
+      const finalMessage = msgFormatter.format(tokenizedValues || variables);
+      if (hasElements) {
+        return finalMessage
+          .split(tokenDelimiter)
+          .filter(part => !!part)
+          .map(part => elements[part] || part);
+      }
+      return finalMessage;
     } catch (err) {
       this.options.warningHandler(
         `react-intl-universal format message failed for key='${key}'.`,

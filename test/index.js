@@ -4,10 +4,12 @@ import intl from "../src/index";
 import zhCN from "./locales/zh-CN";
 import enUS from "./locales/en-US";
 import enUSMore from "./locales/en-US-more";
+import zhTW from "./locales/zh-TW";
 
 const locales = {
   "en-US": enUS,
-  "zh-CN": zhCN
+  "zh-CN": zhCN,
+  "zh-TW": zhTW
 };
 
 test("Set specific locale", () => {
@@ -305,3 +307,8 @@ test("Uses default message if key not found in fallbackLocale", () => {
   expect(intl.get("not-exist-key").defaultMessage("this is default msg")).toBe("this is default msg");
 });
 
+test("Test for enhanced fallback mechnanism", () => {
+  intl.init({ locales, currentLocale: "zh-TW", fallbackLocale: "zh-CN; en-US" });
+  expect(intl.get("NOT_IN_zh-TW")).toBe("NOT_IN_zh-TW");
+  expect(intl.get("ONLY_IN_ENGLISH")).toBe("ONLY_IN_ENGLISH");
+})

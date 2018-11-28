@@ -6,6 +6,7 @@ import HtmlComponent from "./Html";
 import DateComponent from "./Date";
 import CurrencyComponent from "./Currency";
 import MessageNotInComponent from "./MessageNotInComponent";
+import FallbackComponent from "./Fallback";
 import IntlPolyfill from "intl";
 
 // For Node.js, common locales should be added in the application
@@ -61,6 +62,7 @@ class App extends Component {
         <DateComponent />
         <CurrencyComponent />
         <MessageNotInComponent />
+        <FallbackComponent />
       </div>
     );
   }

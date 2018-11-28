@@ -2,12 +2,12 @@ import intl from "react-intl-universal"
 import _ from "lodash";
 import http from "axios";
 import React, { Component } from "react";
-// import PluralComponent from "./Plural";
-// import BasicComponent from "./Basic";
-// import HtmlComponent from "./Html";
-// import DateComponent from "./Date";
-// import CurrencyComponent from "./Currency";
-// import MessageNotInComponent from "./MessageNotInComponent";
+import PluralComponent from "./Plural";
+import BasicComponent from "./Basic";
+import HtmlComponent from "./Html";
+import DateComponent from "./Date";
+import CurrencyComponent from "./Currency";
+import MessageNotInComponent from "./MessageNotInComponent";
 import FallbackComponent from "./Fallback";
 import "./app.css";
 
@@ -51,12 +51,12 @@ class App extends Component {
       this.state.initDone &&
       <div>
         {this.renderLocaleSelector()}
-        {/* <BasicComponent />
+        <BasicComponent />
         <PluralComponent />
         <HtmlComponent />
         <DateComponent />
         <CurrencyComponent />
-        <MessageNotInComponent /> */}
+        <MessageNotInComponent />
         <FallbackComponent />
       </div>
     );

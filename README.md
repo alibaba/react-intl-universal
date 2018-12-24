@@ -151,19 +151,19 @@ intl.getHTML('TIP'); // {React.Element}
 When the specific key does't exist in current locale, you may want to make it return a default message. Use `defaultMessage` method after `get` method. For example,
 
 JS code:
-```js
+```jsx
 const name = 'Tony';
 intl.get('hello', { name }).defaultMessage(`Hello, ${name}`); // "Hello, tony"
 ```
 
 Or using `d` for short:
-```js
+```jsx
 const name = 'Tony';
 intl.get('hello', { name }).d(`Hello, ${name}`); // "Hello, tony"
 ```
 
 And `getHTML` also supports default message.
-```js
+```jsx
 const name = 'Tony';
 intl.getHTML('not-exist-key').d(<div>hello, {name}</div>) // React.Element with "<div>Hello, Tony</div>"
 ```

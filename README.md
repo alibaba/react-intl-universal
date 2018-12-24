@@ -155,9 +155,9 @@ Locale data:
 ```
 JS code:
 ```js
-intl.get('PHOTO', {num:0}); // "You have no photos."
-intl.get('PHOTO', {num:1}); // "You have one photo."
-intl.get('PHOTO', {num:1000000}); // "You have 1,000,000 photos."
+intl.get('PHOTO', { num: 0 }); // "You have no photos."
+intl.get('PHOTO', { num: 1 }); // "You have one photo."
+intl.get('PHOTO', { num: 1000000 }); // "You have 1,000,000 photos."
 ```
 Plural label supports standard [ICU Message syntax](http://userguide.icu-project.org/formatparse/messages).
 
@@ -170,7 +170,7 @@ Locale data:
 ```
 JS code:
 ```js
-intl.get('SALE_PRICE', {price:123456.78}); // The price is $123,456.78
+intl.get('SALE_PRICE', { price: 123456.78 }); // The price is $123,456.78
 ```
 As mentioned, the locale data is in [ICU Message format](http://userguide.icu-project.org/formatparse/messages).
 

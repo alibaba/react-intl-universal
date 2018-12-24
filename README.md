@@ -153,13 +153,13 @@ When the specific key does't exist in current locale, you may want to make it re
 JS code:
 ```jsx
 const name = 'Tony';
-intl.get('hello', { name }).defaultMessage(`Hello, ${name}`); // "Hello, tony"
+intl.get('hello', { name }).defaultMessage(`Hello, ${name}`); // "Hello, Tony"
 ```
 
 Or using `d` for short:
 ```jsx
 const name = 'Tony';
-intl.get('hello', { name }).d(`Hello, ${name}`); // "Hello, tony"
+intl.get('hello', { name }).d(`Hello, ${name}`); // "Hello, Tony"
 ```
 
 And `getHTML` also supports default message.

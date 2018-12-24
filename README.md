@@ -152,17 +152,18 @@ When the specific key does't exist in current locale, you may want to make it re
 
 JS code:
 ```js
-intl.get('not-exist-key').defaultMessage('default message') // "default message"
+const name = 'Tony';
+intl.get('hello', { name }).defaultMessage(`Hello, ${name}`); // "Hello, tony"
 ```
 
 Or using `d` for short:
 ```js
-intl.get('not-exist-key').d('default message') // "default message"
+intl.get('hello', { name }).d(`Hello, ${name}`); // "Hello, tony"
 ```
 
 And `getHTML` also supports default message.
 ```js
-intl.getHTML('not-exist-key').d(<div>hello</div>) // React.Element with "<div>hello</div>"
+intl.getHTML('not-exist-key').d(<div>hello</div>) // React.Element with "<div>Hello, Tony</div>"
 ```
 
 

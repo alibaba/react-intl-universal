@@ -153,19 +153,19 @@ When the specific key does't exist in current locale, you may want to make it re
 JS code:
 ```jsx
 const name = 'Tony';
-intl.get('hello', { name }).defaultMessage(`Hello, ${name}`); // "Hello, Tony"
+intl.get('HELLO', { name }).defaultMessage(`Hello, ${name}`); // "Hello, Tony"
 ```
 
 Or using `d` for short:
 ```jsx
 const name = 'Tony';
-intl.get('hello', { name }).d(`Hello, ${name}`); // "Hello, Tony"
+intl.get('HELLO', { name }).d(`Hello, ${name}`); // "Hello, Tony"
 ```
 
 And `getHTML` also supports default message.
 ```jsx
 const name = 'Tony';
-intl.getHTML('not-exist-key').d(<div>hello, {name}</div>) // React.Element with "<div>Hello, Tony</div>"
+intl.getHTML('HELLO').d(<div>hello, {name}</div>) // React.Element with "<div>Hello, Tony</div>"
 ```
 
 

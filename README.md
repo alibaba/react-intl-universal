@@ -147,8 +147,29 @@ JS code:
 intl.getHTML('TIP'); // {React.Element}
 ```
 
+
+### Message With Variables
+If the message contains variables the `{variable_name}` is substituted directly into the string. In the example below, there are two variables `{name}` and `{where}`,  the second argument representing the variables in `get` method are substituted into the string.
+
+Locale data:
+```json
+{ "HELLO": "Hello, {name}. Welcome to {where}!" }
+```
+
+JS code:
+```js
+intl.get('HELLO', {name:'Tony', where:'Alibaba'}) // "Hello, Tony. Welcome to Alibaba!"
+```
+
+
 ### Default Message
 When the specific key does't exist in current locale, you may want to make it return a default message. Use `defaultMessage` method after `get` method. For example,
+
+Locale data:
+```json
+{ "HELLO": "Hello, {name}. Welcome to {where}!" }
+```
+
 
 JS code:
 ```jsx
@@ -166,19 +187,6 @@ And `getHTML` also supports default message.
 ```jsx
 const name = 'Tony';
 intl.getHTML('HELLO').d(<div>hello, {name}</div>) // React.Element with "<div>Hello, Tony</div>"
-```
-
-
-### Message With Variables
-If the message contains variables the `{variable_name}` is substituted directly into the string. In the example below, there are two variables `{name}` and `{where}`,  the second argument representing the variables in `get` method are substituted into the string.
-
-Locale data:
-```json
-{ "HELLO": "Hello, {name}. Welcome to {where}!" }
-```
-JS code:
-```js
-intl.get('HELLO', {name:'Tony', where:'Alibaba'}) // "Hello, Tony. Welcome to Alibaba!"
 ```
 
 

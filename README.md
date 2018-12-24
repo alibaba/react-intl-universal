@@ -165,7 +165,7 @@ intl.get('hello', { name }).d(`Hello, ${name}`); // "Hello, tony"
 And `getHTML` also supports default message.
 ```js
 const name = 'Tony';
-intl.getHTML('not-exist-key').d(<div>hello {name}</div>) // React.Element with "<div>Hello, Tony</div>"
+intl.getHTML('not-exist-key').d(<div>hello, {name}</div>) // React.Element with "<div>Hello, Tony</div>"
 ```
 
 

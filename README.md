@@ -222,7 +222,7 @@ When the specific key does't exist in current locale, you may want to make it re
 
 Locale data:
 ```json
-{ "HELLO": "Hello, {name}. Welcome to {where}!" }
+{ "HELLO": "Hello, {name}" }
 ```
 
 

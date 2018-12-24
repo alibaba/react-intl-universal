@@ -134,20 +134,6 @@ class App extends Component {
 }
 ```
 
-
-### HTML Message
-As shown in above example, the `get` method returns string message. For HTML message, use `getHTML` instead. For example,
-
-Locale data:
-```json
-{ "TIP": "This is <span style='color:red'>HTML</span>" }
-```
-JS code:
-```js
-intl.getHTML('TIP'); // {React.Element}
-```
-
-
 ### Message With Variables
 If the message contains variables the `{variable_name}` is substituted directly into the string. In the example below, there are two variables `{name}` and `{where}`,  the second argument representing the variables in `get` method are substituted into the string.
 
@@ -158,37 +144,8 @@ Locale data:
 
 JS code:
 ```js
-intl.get('HELLO', {name:'Tony', where:'Alibaba'}) // "Hello, Tony. Welcome to Alibaba!"
+intl.get('HELLO', { name: 'Tony', where: 'Alibaba' }) // "Hello, Tony. Welcome to Alibaba!"
 ```
-
-
-### Default Message
-When the specific key does't exist in current locale, you may want to make it return a default message. Use `defaultMessage` method after `get` method. For example,
-
-Locale data:
-```json
-{ "HELLO": "Hello, {name}. Welcome to {where}!" }
-```
-
-
-JS code:
-```jsx
-const name = 'Tony';
-intl.get('HELLO', { name }).defaultMessage(`Hello, ${name}`); // "Hello, Tony"
-```
-
-Or using `d` for short:
-```jsx
-const name = 'Tony';
-intl.get('HELLO', { name }).d(`Hello, ${name}`); // "Hello, Tony"
-```
-
-And `getHTML` also supports default message.
-```jsx
-const name = 'Tony';
-intl.getHTML('HELLO').d(<div>hello, {name}</div>) // React.Element with "<div>Hello, Tony</div>"
-```
-
 
 ### Plural Form and Number Thousands Separators
 
@@ -259,6 +216,47 @@ if `type` is `time`, `format` has the following values:
 - `short` shows times with hours and minutes
 - `medium` shows times with hours, minutes, and seconds
 - `long` shows times with hours, minutes, seconds, and timezone
+
+### Default Message
+When the specific key does't exist in current locale, you may want to make it return a default message. Use `defaultMessage` method after `get` method. For example,
+
+Locale data:
+```json
+{ "HELLO": "Hello, {name}. Welcome to {where}!" }
+```
+
+
+JS code:
+```jsx
+const name = 'Tony';
+intl.get('HELLO', { name }).defaultMessage(`Hello, ${name}`); // "Hello, Tony"
+```
+
+Or using `d` for short:
+```jsx
+const name = 'Tony';
+intl.get('HELLO', { name }).d(`Hello, ${name}`); // "Hello, Tony"
+```
+
+And `getHTML` also supports default message.
+```jsx
+const name = 'Tony';
+intl.getHTML('HELLO').d(<div>hello, {name}</div>) // React.Element with "<div>Hello, Tony</div>"
+```
+
+
+### HTML Message
+The `get` method returns string message. For HTML message, use `getHTML` instead. For example,
+
+Locale data:
+```json
+{ "TIP": "This is <span style='color:red'>HTML</span>" }
+```
+JS code:
+```js
+intl.getHTML('TIP'); // {React.Element}
+```
+
 
 ### Common Locale Data
 For browser rendering, the common locale data such as date, currency, and number format are automatically loaded from CDN on demand.

@@ -158,12 +158,14 @@ intl.get('hello', { name }).defaultMessage(`Hello, ${name}`); // "Hello, tony"
 
 Or using `d` for short:
 ```js
+const name = 'Tony';
 intl.get('hello', { name }).d(`Hello, ${name}`); // "Hello, tony"
 ```
 
 And `getHTML` also supports default message.
 ```js
-intl.getHTML('not-exist-key').d(<div>hello</div>) // React.Element with "<div>Hello, Tony</div>"
+const name = 'Tony';
+intl.getHTML('not-exist-key').d(<div>hello {name}</div>) // React.Element with "<div>Hello, Tony</div>"
 ```
 
 

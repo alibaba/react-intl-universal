@@ -71,6 +71,7 @@ declare module "react-intl-universal" {
      * @param {Object} options.locales App locale data like {"en-US":{"key1":"value1"},"zh-CN":{"key1":"值1"}}
      * @param {Object} options.warningHandler Ability to accumulate missing messages using third party services like Sentry
      * @param {string} options.fallbackLocale Fallback locale such as 'zh-CN' to use if a key is not found in the current locale
+     * @param {string[]} options.fallbackLocales Locales to use if a key is not found in the current locale, such as ['zh-CN', 'en-US'] will use the key in locale 'zh-CN' first, if the specific key not exist in 'zh-CN', will fallback to locale 'en-US
      * @param {boolean} options.escapeHtml To escape html. Default value is true.
      * @returns {Promise}
      */
@@ -86,6 +87,7 @@ declare module "react-intl-universal" {
         currentLocale?: string;
         locales?: { [key: string]: any };
         fallbackLocale?: string;
+        fallbackLocales?: string[];
         commonLocaleDataUrls?: { [key: string]: string };
         cookieLocaleKey?: string;
         urlLocaleKey?: string;

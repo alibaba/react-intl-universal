@@ -71,13 +71,12 @@ class App extends Component {
       currentLocale = "en-US";
     }
 
-    let fallbackLocale = currentLocale === 'zh-TW' ? 'zh-CN; en-US' : 'en-US';
-    
-    let fallbackLocales = fallbackLocale.split(';').map(item => item.trim());
-    let allLocales = [currentLocale, ...fallbackLocales]
+    let fallbackLocales = currentLocale === 'zh-TW' ? ['zh-CN', 'en-US'] : ['en-US'];
+   
+    let allLocales = [currentLocale, ...fallbackLocales];
 
     function getMessagesByLocale(locale) {
-      return http.get(`locales/${locale}.json`)
+      return http.get(`locales/${locale}.json`);
     }
 
     let promises = allLocales.map(item => getMessagesByLocale(item));
@@ -95,7 +94,7 @@ class App extends Component {
 
         return intl.init({
           currentLocale,
-          fallbackLocale,
+          fallbackLocales,
           locales
         })
       }))

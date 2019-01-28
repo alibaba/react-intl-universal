@@ -308,7 +308,7 @@ test("Uses default message if key not found in fallbackLocale", () => {
 });
 
 test("Test for enhanced fallback mechnanism", () => {
-  intl.init({ locales, currentLocale: "zh-TW", fallbackLocale: "zh-CN; en-US" });
+  intl.init({ locales, currentLocale: "zh-TW", fallbackLocales: ["zh-CN", "en-US"] });
   expect(intl.get("NOT_IN_zh-TW")).toBe("NOT_IN_zh-TW");
   expect(intl.get("ONLY_IN_ENGLISH")).toBe("ONLY_IN_ENGLISH");
 })

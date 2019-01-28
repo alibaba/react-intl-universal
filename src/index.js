@@ -48,7 +48,8 @@ class ReactIntlUniversal {
       warningHandler: console.warn, // ability to accumulate missing messages using third party services like Sentry
       escapeHtml: true, // disable escape html in variable mode
       commonLocaleDataUrls: COMMON_LOCALE_DATA_URLS,
-      fallbackLocale: null, // Locales to use if a key is not found in the current locale, such as 'zh-CN;en' will use the key in locale 'zh-CN', if the specific key not exist in 'zh-CN', will fallback to 'en'
+      fallbackLocale: '', // Locale to use if a key is not found in the current locale
+      fallbackLocales: [], // Locales to use if a key is not found in the current locale, such as ['zh-CN', 'en-US'] will use the key in locale 'zh-CN' first, if the specific key not exist in 'zh-CN', will fallback to locale 'en-US'
     };
   }
 
@@ -71,9 +72,8 @@ class ReactIntlUniversal {
     let msg = this.getDescendantProp(locales[currentLocale], key);
 
     if (msg == null) {
-      if (this.options.fallbackLocale) {
-        let fallbackLocales = this.options.fallbackLocale.split(';').map(locale => locale.trim());
-        for (let locale of fallbackLocales) {
+      if (Array.isArray(this.options.fallbackLocales) && this.options.fallbackLocales.length > 0) {
+        for (let locale of this.options.fallbackLocales) {
           msg = this.getDescendantProp(locales[locale], key);
           if (msg == null) {
             this.options.warningHandler(
@@ -83,8 +83,15 @@ class ReactIntlUniversal {
             break;
           }
         }
-
         if (msg == null) {
+          return "";
+        }
+      } else if (this.options.fallbackLocale) {
+        msg = this.getDescendantProp(locales[this.options.fallbackLocale], key);
+        if (msg == null) {
+          this.options.warningHandler(
+            `react-intl-universal key "${key}" not defined in ${currentLocale} or the fallback locale, ${this.options.fallbackLocale}`
+          );
           return "";
         }
       } else {

@@ -48,7 +48,7 @@ class ReactIntlUniversal {
       warningHandler: console.warn, // ability to accumulate missing messages using third party services like Sentry
       escapeHtml: true, // disable escape html in variable mode
       commonLocaleDataUrls: COMMON_LOCALE_DATA_URLS,
-      fallbackLocale: '', // Locale to use if a key is not found in the current locale
+      fallbackLocale: '', /** @deprecated Locale to use if a key is not found in the current locale */
       fallbackLocales: [], // Locales to use if a key is not found in the current locale, such as ['zh-CN', 'en-US'] will use the key in locale 'zh-CN' first, if the specific key not exist in 'zh-CN', will fallback to locale 'en-US'
     };
   }

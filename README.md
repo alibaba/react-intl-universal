@@ -1,6 +1,3 @@
-## Work at Alibaba 加入我们
-[Join us as a frontend engineer in Alibaba group!](https://github.com/alibaba/react-intl-universal/issues/41)
-
 # react-intl-universal
 [react-intl-universal](https://github.com/alibaba/react-intl-universal) is a React internationalization package developed by [Alibaba Group](http://www.alibabagroup.com).
 

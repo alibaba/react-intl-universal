@@ -17,7 +17,8 @@
 - Locale data in [nested JSON format](https://github.com/alibaba/react-intl-universal/releases/tag/1.4.3) are supported.
 
 ## Live Demo
-[React Intl Universal Demo](https://g.alicdn.com/alishu/common/0.0.95/intl-example/index.html)
+- [react-intl-universal demo](https://g.alicdn.com/alishu/common/0.0.95/intl-example/index.html)
+- [CodeSandbox](https://codesandbox.io/s/727pw9zoqx)
 
 ## Why Another Internationalization Solution for React?
 In case of internationalizing React apps, [react-intl](https://github.com/yahoo/react-intl) is one of most popular package in industry.  [react-intl](https://github.com/yahoo/react-intl) decorate your React.Component with wrapped component which is injected internationalized message dynamically so that the locale data is able to be loaded dynamically without reloading page. The following is the example code using  [react-intl](https://github.com/yahoo/react-intl).

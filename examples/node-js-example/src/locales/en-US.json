@@ -8,5 +8,6 @@
   "COUPON": "Coupon expires at {expires, time, medium}",
   "SALE_PRICE": "The price is {price, number, USD}",
   "PHOTO": "You have {photoNum, plural, =0 {no photos.} =1 {one photo.} other {# photos.}}",
-  "MESSAGE_NOT_IN_COMPONENT": "react-intl-universal is able to internationalize message not in React.Component"
+  "MESSAGE_NOT_IN_COMPONENT": "react-intl-universal is able to internationalize message not in React.Component",
+  "FALLBACK_ONLY_EXIST_IN_EN": "Fallback Test, Only exist in English."
 }

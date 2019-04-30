@@ -279,6 +279,13 @@ test("Get dot key variables", () => {
   expect(intl.get("DOT.HELLO")).toBe("Hello World");
 });
 
+test("Call warningHandler if currentLocale didn't exist in locales", () => {
+  const warningHandler = jest.fn();
+  intl.init({ warningHandler, locales, currentLocale: "fake" });
+  intl.get("DOT.HELLO");
+  expect(warningHandler).toHaveBeenCalledTimes(2);
+});
+
 test("Get init options", () => {
   intl.init({ locales, currentLocale: "en-US" });
   const { currentLocale } = intl.getInitOptions();
@@ -305,3 +312,42 @@ test("Uses default message if key not found in fallbackLocale", () => {
   expect(intl.get("not-exist-key").defaultMessage("this is default msg")).toBe("this is default msg");
 });
 
+test("Call warningHandler if the languages was not supported", () => {
+  const warningHandler = jest.fn();
+  intl.init({ locales, currentLocale: "fake", warningHandler });
+  expect(warningHandler).toHaveBeenCalledTimes(1);
+});
+
+test("Resolve language url if currentLocale was matched", async () => {
+  const result = await intl.init({ locales, currentLocale: "en" });
+  expect(result).toBe(undefined);
+});
+
+test("Reject language url if language loaded was failed", async () => {
+  let errorOccured = false;
+  try {
+    await intl.init({ locales, commonLocaleDataUrls: { pl: 'http://fakeurl/test' }, currentLocale: 'pl' });
+  } catch (e) {
+    errorOccured = true;
+  }
+  await expect(errorOccured).toBe(true);
+});
+
+test("Resolve directly if the environment is not browser", async () => {
+  const createElement = window.document.createElement;
+  Object.defineProperty(window.document, 'createElement', {
+    writable: true,
+    configurable: true,
+    value: undefined,
+  });
+  jest.resetModules();
+  const { default: ReactIntlUniversal } = await require('../src/ReactIntlUniversal');
+  const nextIntl = new ReactIntlUniversal();
+  const result = await nextIntl.init({ locales, currentLocale: "zh-CN" });
+  Object.defineProperty(window.document, 'createElement', {
+    writable: true,
+    configurable: true,
+    value: createElement,
+  });
+  expect(result).toBe(undefined);
+});

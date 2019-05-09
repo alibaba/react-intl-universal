@@ -41,7 +41,7 @@ declare module "react-intl-universal" {
      * @param {Object} variables Variables in message
      * @returns {string} message
      */
-    export function get(key: string, value: any): string;
+    export function get(key: string, variables: any): string;
 
     /**
      * Get the formatted html message by key.

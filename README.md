@@ -418,9 +418,5 @@ npm start
 ## Tools
 - [react-intl-universal-pseudo-converter](https://github.com/ceszare/react-intl-universal-pseudo-converter): A  [pseudo-localization](https://en.wikipedia.org/wiki/Pseudolocalization) tool for testing internationalization.
 
-
-## Ask Question
-[![Join the chat at https://gitter.im/react-intl-universal/Lobby](https://badges.gitter.im/alibaba/react-intl-universal.svg)](https://gitter.im/react-intl-universal/Lobby)
-
 ## License
 This software is free to use under the BSD license.

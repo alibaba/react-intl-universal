@@ -21,7 +21,6 @@ export default {
     external : [
         'invariant',
         'intl-messageformat',
-        'load-script',
         'intl',
         'escape-html',
         'cookie',
@@ -29,7 +28,6 @@ export default {
         'react',
         'console-polyfill',
         'lodash.merge',
-        'is-electron'
     ],
     plugins : [babel({exclude: 'node_modules/**', presets: ['es2015-rollup']})]
 };

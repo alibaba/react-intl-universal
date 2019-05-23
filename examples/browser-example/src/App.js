@@ -1,4 +1,4 @@
-import intl from "react-intl-universal";
+import intl from 'react-intl-universal';
 import _ from "lodash";
 import http from "axios";
 import React, { Component } from "react";
@@ -9,6 +9,11 @@ import DateComponent from "./Date";
 import CurrencyComponent from "./Currency";
 import MessageNotInComponent from "./MessageNotInComponent";
 import "./app.css";
+
+require('intl/locale-data/jsonp/en.js');
+require('intl/locale-data/jsonp/zh.js');
+require('intl/locale-data/jsonp/fr.js');
+require('intl/locale-data/jsonp/ja.js');
 
 const SUPPOER_LOCALES = [
   {

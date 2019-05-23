@@ -92,8 +92,11 @@ Note that you are not necessary to load all locale data, just load the current l
 
 ```js
 import intl from 'react-intl-universal';
+// common locale data
+require('intl/locale-data/jsonp/en.js');
+require('intl/locale-data/jsonp/zh.js');
 
-// locale data
+// app locale data
 const locales = {
   "en-US": require('./locales/en-US.js'),
   "zh-CN": require('./locales/zh-CN.js'),
@@ -283,7 +286,6 @@ require('intl/locale-data/jsonp/ja.js');
    * @param {string} options.escapeHtml To escape html. Default value is true.
    * @param {string} options.currentLocale Current locale such as 'en-US'
    * @param {Object} options.locales App locale data like {"en-US":{"key1":"value1"},"zh-CN":{"key1":"值1"}}
-   * @param {Object} options.commonLocaleDataUrls Custom common locale urls. See https://github.com/alibaba/react-intl-universal/releases/tag/1.12.0
    * @param {Object} options.warningHandler Ability to accumulate missing messages using third party services. See https://github.com/alibaba/react-intl-universal/releases/tag/1.11.1
    * @param {string} options.fallbackLocale Fallback locale such as 'zh-CN' to use if a key is not found in the current locale
    * @returns {Promise}

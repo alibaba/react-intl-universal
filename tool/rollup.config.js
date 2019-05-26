@@ -20,14 +20,6 @@ export default {
   banner: copyright,
   external: [
     'invariant',
-    'intl-messageformat',
-    'intl',
-    'escape-html',
-    'cookie',
-    'querystring',
-    'react',
-    'console-polyfill',
-    'lodash.merge',
   ],
   plugins: [babel({ exclude: 'node_modules/**', presets: ['es2015-rollup'] })]
 };

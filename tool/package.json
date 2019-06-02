@@ -2,10 +2,8 @@
   "name": "react-intl-universal-extract",
   "version": "0.0.1",
   "description": "Extract i18n message",
-  "publishConfig": {
-    "registry": "http://registry.npm.alibaba-inc.com"
-  },
   "keywords": [
+    "react-intl-universal",
     "intl",
     "i18n",
     "internationalization",

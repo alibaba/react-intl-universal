@@ -10,7 +10,6 @@
 - Pluralize labels in strings.
 - Support variables in message.
 - Support HTML in message.
-- Automatically load [Common Locale Data Repository (CLDR)](http://cldr.unicode.org/) locale data on demand. It's used for displaying numbers, currency, dates and times accordingly.
 - Support for 150+ languages.
 - Runs in the browser and Node.js.
 - Message format is strictly implemented by [ICU standards](http://userguide.icu-project.org/formatparse/messages).

@@ -3,11 +3,13 @@ import cookie from "cookie";
 import intl from "../src/index";
 import zhCN from "./locales/zh-CN";
 import enUS from "./locales/en-US";
+import ptBR from "./locales/pt-BR";
 import enUSMore from "./locales/en-US-more";
 
 const locales = {
   "en-US": enUS,
-  "zh-CN": zhCN
+  "zh-CN": zhCN,
+  "pt-BR": ptBR
 };
 
 test("Set specific locale", () => {
@@ -15,6 +17,8 @@ test("Set specific locale", () => {
   expect(intl.get("SIMPLE")).toBe("简单");
   intl.init({ locales, currentLocale: "en-US" });
   expect(intl.get("SIMPLE")).toBe("Simple");
+  intl.init({ locales, currentLocale: "pt-BR"});
+  expect(intl.get("SIMPLE")).toBe("Simples");
 });
 
 test("Message with variables", () => {
@@ -160,6 +164,12 @@ test("Message with Time", () => {
       expires: expires
     })
   ).toBe("优惠卷将在17:08:33过期");
+  intl.init({ locales, currentLocale: "pt-BR" });
+  expect(
+    intl.get("COUPON", {
+      expires: expires
+    })
+  ).toBe("O cupom expira em 17:08:33");
 });
 
 test("Message with Currency", () => {
@@ -176,6 +186,12 @@ test("Message with Currency", () => {
       price: price
     })
   ).toBe("售价CN¥ 123,456.78");
+  intl.init({ locales, currentLocale: "pt-BR"});
+  expect(
+    intl.get("SALE_PRICE", {
+      price: price
+    })
+  ).toBe("O preço é R$ 123,456.78")
 });
 
 test("Message with plural", () => {
@@ -202,6 +218,12 @@ test("Message with plural", () => {
       num: 1
     })
   ).toBe("你有1张照片");
+  intl.init({ locales, currentLocale: "pt-BR"});
+  expect(
+    intl.get("PHOTO", {
+      num: 1
+    })
+  ).toBe("Você tem uma foto");  
 });
 
 test("Without default message, just return empty string", () => {

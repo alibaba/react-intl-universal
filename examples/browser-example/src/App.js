@@ -35,6 +35,10 @@ const SUPPOER_LOCALES = [
   {
     name: "日本の",
     value: "ja-JP"
+  },
+  {
+    name: "Portuguese",
+    value: "pt-BR"
   }
 ];
 
@@ -70,6 +74,7 @@ class App extends Component {
       urlLocaleKey: "lang",
       cookieLocaleKey: "lang"
     });
+    
     if (!_.find(SUPPOER_LOCALES, { value: currentLocale })) {
       currentLocale = "en-US";
     }
@@ -90,6 +95,8 @@ class App extends Component {
         // After loading CLDR locale data, start to render
         this.setState({ initDone: true });
       });
+      console.log('teste')
+
   }
 
   renderLocaleSelector() {

@@ -4,6 +4,8 @@ import intl from "../src/index";
 import zhCN from "./locales/zh-CN";
 import enUS from "./locales/en-US";
 import enUSMore from "./locales/en-US-more";
+import LocalStorageMock from "./util/LocalStorageMock";
+global.localStorage = new LocalStorageMock;
 
 const locales = {
   "en-US": enUS,
@@ -251,6 +253,11 @@ test("Default HTML message", () => {
 test("Get locale from cookie", () => {
   document.cookie = cookie.serialize("lang", "en-US");
   expect(intl.getLocaleFromCookie({ cookieLocaleKey: "lang" })).toBe("en-US");
+});
+
+test("Get locale from localStorage", () => {
+  localStorage.setItem("lang", "en-US");
+  expect(intl.getLocaleFromLocalStorage({ localStorageLocaleKey: "lang" })).toBe("en-US");
 });
 
 test("Get locale from URL", () => {

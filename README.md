@@ -274,7 +274,7 @@ require('intl/locale-data/jsonp/ja.js');
 ```
 
 ### Helper
-[react-intl-universal](https://www.npmjs.com/package/react-intl-universal) provides a utility helping developer determine the user's current locale. As the running examples, when user select a new locale, it redirect user new location like `http://localhost:3000?lang=en-US`. Then, we can use `intl.determineLocale` to get the locale from URL. It can also support determine user's locale via cookie and browser default language. Refer to the APIs section for more detail.
+[react-intl-universal](https://www.npmjs.com/package/react-intl-universal) provides a utility helping developer determine the user's current locale. As the running examples, when user select a new locale, it redirect user new location like `http://localhost:3000?lang=en-US`. Then, we can use `intl.determineLocale` to get the locale from URL. It can also support determine user's locale via cookie, localStorage, and browser default language. Refer to the APIs section for more detail.
 
 ## APIs Definition
 
@@ -320,6 +320,7 @@ require('intl/locale-data/jsonp/ja.js');
    * You may not this API, if you have other rules to determine user's locale.
    * @param {string} options.urlLocaleKey URL's query Key to determine locale. Example: if URL=http://localhost?lang=en-US, then set it 'lang'
    * @param {string} options.cookieLocaleKey Cookie's Key to determine locale. Example: if cookie=lang:en-US, then set it 'lang'
+   * @param {string} options.localStorageLocaleKey LocalStorage's Key to determine locale such as 'lang'
    * @returns {string} determined locale such as 'en-US'
    */
   determineLocale(options)

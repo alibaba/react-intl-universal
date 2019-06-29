@@ -4,6 +4,7 @@ declare module "react-intl-universal" {
      * You may not this API, if you have other rules to determine user's locale.
      * @param {string} options.urlLocaleKey URL's query Key to determine locale. Example: if URL=http://localhost?lang=en-US, then set it 'lang'
      * @param {string} options.cookieLocaleKey Cookie's Key to determine locale. Example: if cookie=lang:en-US, then set it 'lang'
+     * @param {string} options.localStorageLocaleKey LocalStorage's Key to determine locale such as 'lang'
      * @returns {string} determined locale such as 'en-US'
      */
     export function determineLocale(options: ReactIntlUniversalOptions): string;
@@ -89,6 +90,7 @@ declare module "react-intl-universal" {
         commonLocaleDataUrls?: { [key: string]: string };
         cookieLocaleKey?: string;
         urlLocaleKey?: string;
+        localStorageLocaleKey?: string;
         warningHandler?: (message?: any, error?: any) => void;
         escapeHtml?: boolean;
     }

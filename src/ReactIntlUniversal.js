@@ -17,8 +17,6 @@ class ReactIntlUniversal {
   constructor() {
     this.options = {
       currentLocale: null, // Current locale such as 'en-US'
-      urlLocaleKey: null, // URL's query Key to determine locale. Example: if URL=http://localhost?lang=en-US, then set it 'lang'
-      cookieLocaleKey: null, // Cookie's Key to determine locale. Example: if cookie=lang:en-US, then set it 'lang'
       locales: {}, // app locale data like {"en-US":{"key1":"value1"},"zh-CN":{"key1":"值1"}}
       warningHandler: console.warn.bind(console), // ability to accumulate missing messages using third party services like Sentry
       escapeHtml: true, // disable escape html in variable mode
@@ -140,16 +138,18 @@ class ReactIntlUniversal {
   }
 
   /**
-   * Helper: determine user's locale via URL, cookie, and browser's language.
+   * Helper: determine user's locale via URL, cookie, localStorage, and browser's language.
    * You may not this API, if you have other rules to determine user's locale.
    * @param {string} options.urlLocaleKey URL's query Key to determine locale. Example: if URL=http://localhost?lang=en-US, then set it 'lang'
    * @param {string} options.cookieLocaleKey Cookie's Key to determine locale. Example: if cookie=lang:en-US, then set it 'lang'
+   * @param {string} options.localStorageLocaleKey LocalStorage's Key to determine locale such as 'lang'
    * @returns {string} determined locale such as 'en-US'
    */
   determineLocale(options = {}) {
     return (
       this.getLocaleFromURL(options) ||
       this.getLocaleFromCookie(options) ||
+      this.getLocaleFromLocalStorage(options) ||
       this.getLocaleFromBrowser()
     );
   }
@@ -199,6 +199,13 @@ class ReactIntlUniversal {
     if (cookieLocaleKey) {
       let params = cookie.parse(document.cookie);
       return params && params[cookieLocaleKey];
+    }
+  }
+
+  getLocaleFromLocalStorage(options) {
+    const { localStorageLocaleKey } = options;
+    if (localStorageLocaleKey && window.localStorage) {
+      return localStorage.getItem(localStorageLocaleKey);
     }
   }
 

@@ -1,6 +1,6 @@
 {
   "name": "react-intl-universal",
-  "version": "2.0.4",
+  "version": "2.1.0",
   "description": "Internationalize React apps. Not only for React.Component but also for Vanilla JS.",
   "keywords": [
     "intl",
@@ -65,9 +65,8 @@
     "transform": {
       ".*": "<rootDir>/node_modules/babel-jest"
     },
-    "testRegex": "/test/.*\\.js",
+    "testRegex": "/test/.*\\.test.js",
     "testPathIgnorePatterns": [
-      "/test/locales/"
     ],
     "collectCoverageFrom": [
       "src/**/*.js"

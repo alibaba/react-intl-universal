@@ -1,6 +1,6 @@
 {
   "name": "react-intl-universal",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Internationalize React apps. Not only for React.Component but also for Vanilla JS.",
   "keywords": [
     "intl",
@@ -24,7 +24,6 @@
     "preversion": "npm run clean && npm run build && npm run test",
     "prepublish": "npm run clean && npm run build"
   },
-  "author": "chiawei.tcw@alibaba-inc.com",
   "license": "BSD-3-Clause",
   "dependencies": {
     "console-polyfill": "^0.3.0",

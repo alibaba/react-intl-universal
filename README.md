@@ -3,6 +3,9 @@
 
 [![npm](https://img.shields.io/npm/dt/react-intl-universal.svg)](https://www.npmjs.com/package/react-intl-universal) [![npm](https://img.shields.io/npm/v/react-intl-universal.svg)](https://www.npmjs.com/package/react-intl-universal) [![npm](https://img.shields.io/npm/l/react-intl-universal.svg)](https://github.com/alibaba/react-intl-universal/blob/master/LICENSE.md)
 
+## Join us now! 
+Frontend engineer in Alibaba group! [[2019阿里巴巴招聘] 资深前端工程师/专家](https://github.com/alibaba/react-intl-universal/issues/41)
+
 ## Features
 - Can be used not only in React.Component but also in Vanilla JS.
 - Simple. Only three main API and one optional helper.

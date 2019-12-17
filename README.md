@@ -322,7 +322,7 @@ intl.getHTML('TIP'); // {React.Element}
 
 
 ## Compatibility with react-intl
-As mentioned in the issue [Mirror react-intl API](https://github.com/alibaba/react-intl-universal/issues/2),  to make people switch their existing React projects from [react-intl](https://github.com/yahoo/react-intl) to [react-intl-universal](https://www.npmjs.com/package/react-intl-universal). We provide two compatible APIs as following.
+As mentioned in the issue [Mirror react-intl API](https://github.com/alibaba/react-intl-universal/issues/2), to make people switch their existing React projects from [react-intl](https://github.com/yahoo/react-intl) to [react-intl-universal](https://www.npmjs.com/package/react-intl-universal). We provide two compatible APIs as following.
 
 ```js
   /**
@@ -375,7 +375,6 @@ intl.getHTML('hello', {name}).d(<div>Hello</div>);
 ```
  
 ## Browser Compatibility
-
 Before using [react-intl-universal](https://www.npmjs.com/package/react-intl-universal), you need to include scripts below in HTML to support older browser.
 ```
 <!--[if lt IE 9]>

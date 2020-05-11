@@ -33,7 +33,7 @@ const SUPPOER_LOCALES = [
     value: "fr-FR"
   },
   {
-    name: "日本の",
+    name: "日本語",
     value: "ja-JP"
   }
 ];

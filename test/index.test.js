@@ -206,6 +206,39 @@ test("Message with plural", () => {
   ).toBe("你有1张照片");
 });
 
+test("Message with skeleton", () => {
+  intl.init({ locales, currentLocale: "en-US" });
+  expect(
+    intl.get("SKELETON_VAR", {
+      value: 42.5
+    })
+  ).toBe("Increase by 42.5");
+
+  expect(
+    intl.get("SKELETON_VAR", {
+      value: 42
+    })
+  ).toBe("Increase by 42.0");
+
+  expect(
+    intl.get("SKELETON_VAR", {
+      value: 42.109
+    })
+  ).toBe("Increase by 42.11");
+
+  expect(
+    intl.get("SKELETON_SELECTORDINAL", {
+      year: 2
+    })
+  ).toBe("It's my cat's 2nd birthday!");
+
+  expect(
+    intl.get("SKELETON_SELECTORDINAL", {
+      year: 10
+    })
+  ).toBe("It's my cat's 10th birthday!");
+})
+
 test("Without default message, just return empty string", () => {
   intl.init({ locales, currentLocale: "en-US" });
   expect(intl.get("not-exist-key")).toBe("");

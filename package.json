@@ -1,6 +1,6 @@
 {
   "name": "react-intl-universal",
-  "version": "2.2.5",
+  "version": "2.3.1",
   "description": "Internationalize React apps. Not only for React.Component but also for Vanilla JS.",
   "keywords": [
     "intl",

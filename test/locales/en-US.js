@@ -15,5 +15,7 @@ module.exports = ({
   "DOT.HELLO": "Hello World",
   "BRACE1": "The format is {var}",
   "BRACE2": "The format is ${var}",
-  "ONLY_IN_ENGLISH": "ONLY_IN_ENGLISH"
+  "ONLY_IN_ENGLISH": "ONLY_IN_ENGLISH",
+  "SKELETON_VAR": "Increase by {value, number, ::.0#}",
+  "SKELETON_SELECTORDINAL": "It's my cat's {year, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} birthday!"
 });

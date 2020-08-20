@@ -161,7 +161,7 @@ test("Message with Time", () => {
     intl.get("COUPON", {
       expires: expires
     })
-  ).toBe("优惠卷将在5:08:33 PM过期");
+  ).toBe("优惠卷将在17:08:33过期");
 });
 
 test("Message with Currency", () => {

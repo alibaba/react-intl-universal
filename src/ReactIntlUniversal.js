@@ -32,6 +32,9 @@ class ReactIntlUniversal {
    * @returns {string} message
    */
   get(key, variables) {
+    if (this.options.intlGetHook) {
+      this.options.intlGetHook(key, this.options.currentLocale);
+    }
     invariant(key, "key is required");
     const { locales, currentLocale, formats } = this.options;
 
@@ -94,6 +97,9 @@ class ReactIntlUniversal {
    * @returns {React.Element} message
   */
   getHTML(key, variables) {
+    if (this.options.intlGetHook) {
+      this.options.intlGetHook(key, this.options.currentLocale);
+    }
     let msg = this.get(key, variables);
     if (msg) {
       const el = React.createElement("span", {

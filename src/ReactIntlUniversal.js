@@ -33,7 +33,11 @@ class ReactIntlUniversal {
    */
   get(key, variables) {
     if (this.options.intlGetHook) {
-      this.options.intlGetHook(key, this.options.currentLocale);
+      try {
+        this.options.intlGetHook(key, this.options.currentLocale);
+      } catch (e) {
+        console.log('intl get hook error: ', e);
+      }
     }
     invariant(key, "key is required");
     const { locales, currentLocale, formats } = this.options;
@@ -98,7 +102,11 @@ class ReactIntlUniversal {
   */
   getHTML(key, variables) {
     if (this.options.intlGetHook) {
-      this.options.intlGetHook(key, this.options.currentLocale);
+      try {
+        this.options.intlGetHook(key, this.options.currentLocale);
+      } catch (e) {
+        console.log('intl get hook error: ', e);
+      }
     }
     let msg = this.get(key, variables);
     if (msg) {

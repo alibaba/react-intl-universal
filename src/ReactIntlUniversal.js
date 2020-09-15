@@ -42,11 +42,12 @@ class ReactIntlUniversal {
     invariant(key, "key is required");
     const { locales, currentLocale, formats } = this.options;
 
+    const id = String(key);
     if (!locales || !locales[currentLocale]) {
       this.options.warningHandler(
         `react-intl-universal locales data "${currentLocale}" not exists.`
       );
-      return "";
+      return id;
     }
     let msg = this.getDescendantProp(locales[currentLocale], key);
     if (msg == null) {
@@ -56,13 +57,13 @@ class ReactIntlUniversal {
           this.options.warningHandler(
             `react-intl-universal key "${key}" not defined in ${currentLocale} or the fallback locale, ${this.options.fallbackLocale}`
           );
-          return "";
+          return id;
         }
       } else {
         this.options.warningHandler(
           `react-intl-universal key "${key}" not defined in ${currentLocale}`
         );
-        return "";
+        return id;
       }
     }
     if (variables) {

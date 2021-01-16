@@ -262,9 +262,14 @@ intl.getHTML('TIP'); // {React.Element}
 ### Helper
 [react-intl-universal](https://www.npmjs.com/package/react-intl-universal) provides a utility helping developer determine the user's `currentLocale`. As the running examples, when user select a new locale, it redirect user new location like `http://localhost:3000?lang=en-US`. Then, we can use `intl.determineLocale` to get the locale from URL. It can also support determine user's locale via cookie, localStorage, and browser default language. Refer to the APIs section for more detail.
 
+## Component Internationalization
+When internationalizing a React component, you don't need to `intl.init` again.
+You could make it as [peerDependency](https://github.com/alibaba/react-intl-universal/blob/master/examples/component-example/package.json#L34), then just [load](https://github.com/alibaba/react-intl-universal/blob/master/examples/component-example/src/index.tsx#L16) the locale data in the compoent.
+
 ## App Examples
-- [Browser rendering](https://github.com/alibaba/react-intl-universal/blob/master/examples/browser-example/src/App.js)
-- [Server-side rendering](https://github.com/alibaba/react-intl-universal/blob/master/examples/node-js-example/src/App.js)
+- [Browser Apps](https://github.com/alibaba/react-intl-universal/blob/master/examples/browser-example/src/App.js)
+- [Server-side App](https://github.com/alibaba/react-intl-universal/blob/master/examples/node-js-example/src/App.js)
+- [Component](https://github.com/alibaba/react-intl-universal/blob/master/examples/component-example)
 
 ## APIs Definition
 

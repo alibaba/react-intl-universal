@@ -1,0 +1,9 @@
+node_modules/
+.travis.yml
+*.swp
+.sass-cache/
+mods/.sass-cache/
+.DS_Store
+.idea
+coverage
+test

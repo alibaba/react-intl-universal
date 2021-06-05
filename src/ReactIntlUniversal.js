@@ -153,7 +153,7 @@ class ReactIntlUniversal {
 
   /**
    * Helper: determine user's locale via URL, cookie, localStorage, and browser's language.
-   * You may not this API, if you have other rules to determine user's locale.
+   * You may not need this API, if you have other rules to determine user's locale.
    * @param {string} options.urlLocaleKey URL's query Key to determine locale. Example: if URL=http://localhost?lang=en-US, then set it 'lang'
    * @param {string} options.cookieLocaleKey Cookie's Key to determine locale. Example: if cookie=lang:en-US, then set it 'lang'
    * @param {string} options.localStorageLocaleKey LocalStorage's Key to determine locale such as 'lang'

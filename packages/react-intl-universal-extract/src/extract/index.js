@@ -15,7 +15,6 @@ const extract = (options = {}) => {
   ignoreFiles = ignore().add(_.get(params, 'ignore', []));
   const startPath = pathTool.join(cwd, params.sourcePath);
   logger.info('Start to extract.');
-  logger.log('Paramters:', JSON.stringify(params))
   let messages = scanFiles(startPath, params, ignoreFiles);
   messages = _.sortBy(messages, 'key');
   if (verifyMessages(messages)) {

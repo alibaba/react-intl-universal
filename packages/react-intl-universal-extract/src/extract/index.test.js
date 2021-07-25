@@ -11,8 +11,9 @@ const getTransformed = (result, key) => {
 
 test("Test extract", () => {
   const result = script.extract({
-    sourcePath: './test-files', 
-    outputPath: './locales/en_US.json'
+    sourcePath: './test-files',
+    outputPath: './locales/en_US.json',
+    // verbose: true,
   });
 
   expect(getOriginal(result, 'basic1')).toBe('default message');

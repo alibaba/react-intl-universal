@@ -14,9 +14,10 @@ const runScript = (cmd, options) => {
 
 function parseCmd(argv) {
   program
-    .option('-c, --cmd [required]', '[extract]')
+    .option('--cmd [required]', '[extract]')
     .option('--source-path [optional]', 'The source code directory. Example: "./src"')
     .option('--output-path [optional]', 'The output path for extracted messages. Example: "./src/locales"')
+    .option('--verbose [optional]', 'Show detail message')
     .parse(argv);
   return program;
 }

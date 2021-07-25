@@ -14,6 +14,7 @@
   "bin": {
     "react-intl-universal-extract": "bin/index.js"
   },
+  "main": "./lib/index.js",
   "scripts": {
     "test": "jest --coverage",
     "test:watch": "jest --watch --verbose --coverage",

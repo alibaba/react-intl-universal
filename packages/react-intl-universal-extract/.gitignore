@@ -1,0 +1,8 @@
+dist/
+lib/
+coverage/
+node_modules/
+locales/
+npm-debug.log
+.vscode
+

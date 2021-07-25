@@ -1,6 +1,8 @@
 # react-intl-universal-extract
 Extract default messages in application using [react-intl-universal](https://github.com/alibaba/react-intl-universal).
 
+<img src="https://img.alicdn.com/imgextra/i2/O1CN01F39kXA1YPrUGwji16_!!6000000003052-2-tps-1230-567.png" width="700px">
+
 For example, suppose you have a file:
 ```jsx
   render() {

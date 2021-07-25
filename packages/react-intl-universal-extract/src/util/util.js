@@ -27,17 +27,16 @@ function processParameters(command, params) {
     }
     processedParams[key] = value;
   });
-  if (processedParams['exportLanguage']) {
-    processedParams.supportLocales = processedParams['exportLanguage'];
-  }
 
-  return _.assign({}, commonConfig, commandConfig, processedParams);
+  const mergedParams = _.assign({}, commonConfig, commandConfig, processedParams);
+  logger.verbose = mergedParams.verbose;
+  return mergedParams;
 }
 
 /**
  * Scan files and extract message
  * @param dirPath Directory path
- * @param options.extensions File extensions
+ * @param options.extensions File extensions ////
  * @param ig ignore files
  * @returns {{key: string, originalDefaultMessage: string, transformedDefaultMessage: string}[]}
  */
@@ -65,11 +64,11 @@ function scanFiles(dirPath, options, ig) {
  * @param {string} path
  */
 function processFile(path) {
-  // console.log(chalk.cyan('Scan file:', path));
+  logger.info('Processing file: ', path)
   const content = fs.readFileSync(path, 'utf-8').toString();
   const invalidMessages = getNoDefaultMessages(content, path);
   const messages = extractMessages(content, path).concat(invalidMessages);
-  // messages.forEach((message) => console.log(` - key="${message.key}" originalDefaultMessage="${message.originalDefaultMessage}" transformedDefaultMessage="${message.transformedDefaultMessage}"`));
+  messages.forEach((message) => logger.log(` - key="${message.key}" originalDefaultMessage="${message.originalDefaultMessage}" transformedDefaultMessage="${message.transformedDefaultMessage}"`));
   return messages;
 }
 
@@ -111,22 +110,28 @@ function extractMessages(content, path) {
  * }[]} messages
  */
 function verifyMessages(messages) {
-  // console.log(chalk.magenta('================== Verifing Messages =================='));
+  logger.info('Start to verify messages...');
 
   let isOK = true;
   for (let i = 0, len = messages.length; i < len; ++i) {
     let currentMessage = messages[i];
     if (currentMessage.isValid === false && currentMessage.invalidType == 'no_default') {
       isOK = false;
-      console.warn(`❌ The key="${currentMessage.key}" has no defalut message ${currentMessage.path}`);
+      logger.error(`The key="${currentMessage.key}" has no defalut message ${currentMessage.path}`);
       continue;
     }
     const duplicate = _.find(messages, (message) => (currentMessage.key === message.key && currentMessage.originalDefaultMessage != null && message.originalDefaultMessage != null && currentMessage.originalDefaultMessage !== message.originalDefaultMessage));
     if (duplicate) {
       isOK = false;
-      console.warn(`❌ The key="${currentMessage.key}" has different default message "${currentMessage.originalDefaultMessage}" - ${currentMessage.path}`);
+      logger.error(`The key="${currentMessage.key}" has different default message "${currentMessage.originalDefaultMessage}" - ${currentMessage.path}`);
     }
   }
+  if (isOK) {
+    logger.success('All messages are valid.');
+  } else {
+    logger.error('Some messages are invalid.');
+  }
+
   return isOK;
 }
 
@@ -168,9 +173,39 @@ function transformDefaultMessage(message, shouldTrim) {
   return message;
 }
 
+const logger = {
+  verbose: false,
+  log: (...arg) => {
+    if (logger.verbose) {
+      console.log(...arg);
+    }
+  },
+  success: (...arg) => {
+    if (logger.verbose) {
+      console.log(chalk.green(...arg));
+    }
+  },
+  error: (...arg) => {
+    if (logger.verbose) {
+      console.log(chalk.red(...arg));
+    }
+  },
+  warning: (...arg) => {
+    if (logger.verbose) {
+      console.log(chalk.yellow(...arg));
+    }
+  },
+  info: (...arg) => {
+    if (logger.verbose) {
+      console.log(chalk.cyan(...arg));
+    }
+  },
+}
+
 module.exports = {
   processParameters,
   scanFiles,
   verifyMessages,
-  getNoDefaultMessages
+  getNoDefaultMessages,
+  logger,
 };

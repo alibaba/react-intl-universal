@@ -1,9 +1,8 @@
 const fs = require('fs');
 const pathTool = require('path');
-const chalk = require('chalk');
 const _ = require('lodash');
 const ignore = require('ignore');
-const { processParameters, scanFiles, verifyMessages } = require('../util/util');
+const { processParameters, scanFiles, verifyMessages, logger } = require('../util/util');
 const cwd = process.cwd();
 let ignoreFiles;
 
@@ -15,7 +14,8 @@ const extract = (options = {}) => {
   const params = processParameters('extract', options);
   ignoreFiles = ignore().add(_.get(params, 'ignore', []));
   const startPath = pathTool.join(cwd, params.sourcePath);
-  // console.log(chalk.magenta(`================== Start to scan ==================`));
+  logger.info('Start to extract.');
+  logger.log('Paramters:', JSON.stringify(params))
   let messages = scanFiles(startPath, params, ignoreFiles);
   messages = _.sortBy(messages, 'key');
   if (verifyMessages(messages)) {
@@ -25,7 +25,7 @@ const extract = (options = {}) => {
     }
     return messages;
   } else {
-    console.error(chalk.red('In order to continute to process file, please resolve the problems above first'))
+    logger.error('In order to continute to process file, please resolve the problems above first');
   }
   return [];
 };
@@ -36,15 +36,21 @@ const extract = (options = {}) => {
  * @param {string} filePath  
  */
 function writeFile(messages, filePath) {
-  const directoryPath = pathTool.dirname(filePath);
-  const sourceObj = {};
-  (messages || []).forEach(item => {
-    sourceObj[item.key] = item.transformedDefaultMessage;
-  });
-  if (!fs.existsSync(directoryPath)) {
-    fs.mkdirSync(directoryPath, { recursive: true });
+  logger.info('Writing file:', filePath);
+  try {
+    const directoryPath = pathTool.dirname(filePath);
+    const sourceObj = {};
+    (messages || []).forEach(item => {
+      sourceObj[item.key] = item.transformedDefaultMessage;
+    });
+    if (!fs.existsSync(directoryPath)) {
+      fs.mkdirSync(directoryPath, { recursive: true });
+    }
+    fs.writeFileSync(filePath, JSON.stringify(sourceObj, null, 2));
+  } catch (error) {
+    logger.error('Failed to write file', error.toString());
   }
-  fs.writeFileSync(filePath, JSON.stringify(sourceObj, null, 2));
+  logger.success('Successd to write file.');
 }
 
 module.exports = {

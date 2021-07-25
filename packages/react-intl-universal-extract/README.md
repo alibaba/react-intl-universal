@@ -24,7 +24,7 @@ This package will generate a json file which contains the extracted messages.
 Note that if the default message contains variables in ES6 template strings format (`Hello ${name}`), it will be transformed to ICU format (`Hello {name}`).
 
 ## Install
-```
+```sh
 npm install --save-dev react-intl-universal-extract
 ```
 
@@ -33,7 +33,7 @@ npm install --save-dev react-intl-universal-extract
 ### CLI
 
 In `package.json`, add a script:
-```
+```json
 "scripts": {
   "intl:extract": "react-intl-universal-extract --cmd extract --source-path ./src --output-path ./src/locales/en_US.json --verbose",
 }

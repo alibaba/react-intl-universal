@@ -25,7 +25,7 @@ Note that if the default message contains variables in ES6 template strings form
 
 ## Install
 ```
-tnpm ii --save-dev react-intl-universal-extract
+npm install --save-dev react-intl-universal-extract
 ```
 
 ## Usage

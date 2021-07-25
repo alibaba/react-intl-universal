@@ -185,20 +185,16 @@ const logger = {
       console.log(chalk.green(...arg));
     }
   },
-  error: (...arg) => {
-    if (logger.verbose) {
-      console.log(chalk.red(...arg));
-    }
-  },
-  warning: (...arg) => {
-    if (logger.verbose) {
-      console.log(chalk.yellow(...arg));
-    }
-  },
   info: (...arg) => {
     if (logger.verbose) {
       console.log(chalk.cyan(...arg));
     }
+  },
+  error: (...arg) => {
+    console.log(chalk.red(...arg));
+  },
+  warning: (...arg) => {
+    console.log(chalk.yellow(...arg));
   },
 }
 

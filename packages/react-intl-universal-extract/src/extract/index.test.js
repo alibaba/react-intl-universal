@@ -25,8 +25,8 @@ test("Test extract", () => {
   expect(getOriginal(result, 'basic3')).toBe('Default message for basic(3)');
   expect(getTransformed(result, 'basic3')).toBe('Default message for basic(3)');
 
-  expect(getOriginal(result, 'basic4')).toBe('Default message for basic(4) with 中文');
-  expect(getTransformed(result, 'basic4')).toBe('Default message for basic(4) with 中文');
+  expect(getOriginal(result, '特征4')).toBe('Default message for basic(4) with 中文');
+  expect(getTransformed(result, '特征4')).toBe('Default message for basic(4) with 中文');
 
   expect(getOriginal(result, 'basic5')).toBe('Default message for basic5 with 中文(5)');
   expect(getTransformed(result, 'basic5')).toBe('Default message for basic5 with 中文(5)');

@@ -1,5 +1,5 @@
 
-const DETECT_REGEXP = /(intl|IntlUtils)\s*\.\s*(get\s*\(\s*["'`]([\w\.-]+)["'`][\s\S]*?\)\s*\.\s*(defaultMessage|d)\s*\(\s*[`"']([\s\S]+?)[`"']|getHTML*\s*\(\s*["'`]([\w\.-]+)["'`][\s\S]*?\)\s*\.\s*(defaultMessage|d)\s*\(\s*(["'`<][\s\S]+?["'`>]))[\s*,]*\)/gm;
+const DETECT_REGEXP = /(intl|IntlUtils)\s*\.\s*(get\s*\(\s*["'`]([\s\S]+?)["'`][\s\S]*?\)\s*\.\s*(defaultMessage|d)\s*\(\s*[`"']([\s\S]+?)[`"']|getHTML*\s*\(\s*["'`]([\s\S]+?)["'`][\s\S]*?\)\s*\.\s*(defaultMessage|d)\s*\(\s*(["'`<][\s\S]+?["'`>]))[\s*,]*\)/gm;
 
 const NO_DEFAULT_REGEXP = /intl\s*\.\s*get(HTML)*\s*\(\s*["'`]([\w\.-]+)["'`]['"\w\.,{}:\s-]*\)\s*(?!\s*\.\s*(d|defaultMessage)\s*\(\s*[<'"`\s\\]+)/gm;
 

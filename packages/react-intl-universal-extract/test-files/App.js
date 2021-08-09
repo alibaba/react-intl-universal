@@ -14,7 +14,7 @@ class App extends Component {
         <div>{intl.get('basic1').defaultMessage('default message')}</div>
         <div>{intl.get('basic2').d('Default message for basic[2]')}</div>
         <div>{intl.get('basic3').d('Default message for basic(3)')}</div>
-        <div>{intl.get('basic4').d('Default message for basic(4) with 中文')}</div>
+        <div>{intl.get('特征4').d('Default message for basic(4) with 中文')}</div>
         <div>{intl.get('basic5').d('Default message for basic5 with 中文(5)')}</div>
         <div>{intl.get('basic6').d('Default message for basic6 with "123(中文)"')}</div>
 

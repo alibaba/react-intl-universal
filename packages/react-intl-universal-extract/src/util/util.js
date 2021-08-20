@@ -117,7 +117,7 @@ function verifyMessages(messages) {
     let currentMessage = messages[i];
     if (currentMessage.isValid === false && currentMessage.invalidType == 'no_default') {
       isOK = false;
-      logger.error(`The key="${currentMessage.key}" has no defalut message ${currentMessage.path}`);
+      logger.error(`The key="${currentMessage.key}" has no default message ${currentMessage.path}`);
       continue;
     }
     const duplicate = _.find(messages, (message) => (currentMessage.key === message.key && currentMessage.originalDefaultMessage != null && message.originalDefaultMessage != null && currentMessage.originalDefaultMessage !== message.originalDefaultMessage));

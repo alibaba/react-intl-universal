@@ -32,7 +32,7 @@
     "git-user-name": "2.0.0",
     "ignore": "^5.0.5",
     "invariant": "2.2.2",
-    "lodash": "4.17.4",
+    "lodash": "4.17.21",
     "parse-git-config": "2.0.3",
     "path": "0.12.7",
     "pify": "3.0.0",

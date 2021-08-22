@@ -3,7 +3,7 @@ const pathtool = require('path');
 const config = require('../../config');
 const chalk = require('chalk');
 const _ = require('lodash');
-const { DETECT_REGEXP, NO_DEFAULT_REGEXP } = require('./constant');
+const { DETECT_REGEXP } = require('./constant');
 
 
 /**
@@ -66,8 +66,7 @@ function scanFiles(dirPath, options, ig) {
 function processFile(path) {
   logger.info('Processing file: ', path)
   const content = fs.readFileSync(path, 'utf-8').toString();
-  const invalidMessages = getNoDefaultMessages(content, path);
-  const messages = extractMessages(content, path).concat(invalidMessages);
+  const messages = extractMessages(content, path);
   messages.forEach((message) => logger.log(` - key="${message.key}" originalDefaultMessage="${message.originalDefaultMessage}" transformedDefaultMessage="${message.transformedDefaultMessage}"`));
   return messages;
 }
@@ -81,10 +80,10 @@ function extractMessages(content, path) {
   const _messages = [];
   let match;
   while ((match = DETECT_REGEXP.exec(content)) != null) {
-    const keyIndex = match[3] ? 3 : 6;
+    const keyIndex = match[3] ? 3 : 4;
     const messageIndex = match[5] ? 5 : 8;
     let key = match[keyIndex];
-    let defaultMessage = match[messageIndex];
+    let defaultMessage = match[messageIndex] || key;
 
     // Trim "${variable}" to "{variable}"
     const shouldTrim = /\.(d|defaultMessage)\([\s\S]*`[\s\S]*\)/.test(match[0]);
@@ -136,26 +135,6 @@ function verifyMessages(messages) {
 }
 
 /**
- * Given file content, get intl object has no default message.
- * @param {string} content file content
- * @param {string} filePath file path
- */
-function getNoDefaultMessages(content, filePath) {
-  const _messages = [];
-  let match;
-  while ((match = NO_DEFAULT_REGEXP.exec(content)) != null) {
-    let key = match[2];
-    _messages.push({
-      key,
-      path: filePath,
-      isValid: false,
-      invalidType: 'no_default',
-    });
-  }
-  return _messages;
-}
-
-/**
  * Transform variables in source defaultMessage (such as ES6 template strings) to target defaultMessage (such as ICU format)
  * Example: 'Hello, ${name}. Welcome to ${where}!' -> 'Hello, {name}. Welcome to {where}!'
  * @param {string} message source defaultMessage
@@ -202,6 +181,5 @@ module.exports = {
   processParameters,
   scanFiles,
   verifyMessages,
-  getNoDefaultMessages,
   logger,
 };

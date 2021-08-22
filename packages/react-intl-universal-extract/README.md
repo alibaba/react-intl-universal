@@ -1,5 +1,10 @@
-# react-intl-universal-extract
-Extract default messages in application using [react-intl-universal](https://github.com/alibaba/react-intl-universal).
+# react-intl-universal-extract-pluto
+  - Since react-intl-universal-extract does not support Chinese as a key, based on react-intl-universal-extract, an entry - file supporting Chinese key extraction is released.
+
+  - If there is any infringement of react-intl-universal-extract, please contact the contributor in time to delete the copy and related content
+  
+  - Extract default messages in application using [react-intl-universal](https://github.com/alibaba/react-intl-universal).
+  - Support key to obtain Chinese key-value pairs
 
 ![react-intl-universal-extract](https://img.alicdn.com/imgextra/i4/O1CN01v8z1us1xc6TAXlHBC_!!6000000006463-2-tps-738-340.png)
 
@@ -9,6 +14,7 @@ For example, suppose you have a file:
   render() {
     const name = 'Tony';
     return (<>
+      {intl.get('hello')}
       {intl.get('hello1').d('Hello World')}
       {intl.get('hello2', {name} ).d(`Hello ${name}`)}
     </>);

@@ -1,6 +1,6 @@
 {
-  "name": "react-intl-universal-extract",
-  "version": "1.0.3",
+  "name": "react-intl-universal-extract-pluto",
+  "version": "1.0.5",
   "description": "A react-intl-universal message extractor",
   "keywords": [
     "intl",
@@ -23,6 +23,7 @@
     "preversion": "npm run clean && npm run build && npm run test",
     "prepublish": "npm run clean && npm run build"
   },
+  "homepage": "https://github.com/hongdeyuan/react-intl-universal#readme",
   "license": "BSD-3-Clause",
   "dependencies": {
     "chalk": "2.1.0",

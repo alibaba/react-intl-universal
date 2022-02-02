@@ -402,5 +402,4 @@ if(typeof Promise!=="function"){document.write('<script src="//f.alicdn.com/es6-
 This software is free to use under the BSD license.
 
 ## Donate
-![image](https://user-images.githubusercontent.com/3455798/152096022-3d5d0713-922b-4263-857f-f16195a7aa95.png)
-
+![image](https://user-images.githubusercontent.com/3455798/152097023-8f7f1724-65e7-493e-a9b5-7348e0f0c876.png)

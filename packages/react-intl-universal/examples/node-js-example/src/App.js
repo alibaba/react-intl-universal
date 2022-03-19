@@ -15,7 +15,7 @@ require('intl/locale-data/jsonp/zh.js');
 require('intl/locale-data/jsonp/fr.js');
 require('intl/locale-data/jsonp/ja.js');
 
-const SUPPOER_LOCALES = [
+const SUPPORTED_LOCALES = [
   {
     name: "English",
     value: "en-US"
@@ -43,7 +43,7 @@ class App extends Component {
 
   constructor(props) {
     super(props);
-    const currentLocale = SUPPOER_LOCALES[0].value; // Determine user's locale here
+    const currentLocale = SUPPORTED_LOCALES[0].value; // Determine user's locale here
     intl.init({
       currentLocale,
       locales: {

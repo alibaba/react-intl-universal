@@ -15,7 +15,7 @@ require('intl/locale-data/jsonp/zh.js');
 require('intl/locale-data/jsonp/fr.js');
 require('intl/locale-data/jsonp/ja.js');
 
-const SUPPOER_LOCALES = [
+const SUPPORTED_LOCALES = [
   {
     name: "English",
     value: "en-US"
@@ -70,7 +70,7 @@ class App extends Component {
       urlLocaleKey: "lang",
       cookieLocaleKey: "lang"
     });
-    if (!_.find(SUPPOER_LOCALES, { value: currentLocale })) {
+    if (!_.find(SUPPORTED_LOCALES, { value: currentLocale })) {
       currentLocale = "en-US";
     }
 
@@ -96,7 +96,7 @@ class App extends Component {
     return (
       <select onChange={this.onSelectLocale} defaultValue="">
         <option value="" disabled>Change Language</option>
-        {SUPPOER_LOCALES.map(locale => (
+        {SUPPORTED_LOCALES.map(locale => (
           <option key={locale.value} value={locale.value}>{locale.name}</option>
         ))}
       </select>

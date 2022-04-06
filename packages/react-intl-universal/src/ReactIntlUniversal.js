@@ -5,7 +5,6 @@ import escapeHtml from "escape-html";
 import cookie from "cookie";
 import queryParser from "querystring";
 import invariant from "invariant";
-import "console-polyfill";
 import * as constants from "./constants";
 import merge from "lodash.merge";
 

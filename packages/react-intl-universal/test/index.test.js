@@ -161,7 +161,7 @@ test("Message with Time", () => {
     intl.get("COUPON", {
       expires: expires
     })
-  ).toBe("优惠卷将在17:08:33过期");
+  ).toBe("优惠卷将在下午5:08:33过期");
 });
 
 test("Message with Currency", () => {
@@ -177,7 +177,7 @@ test("Message with Currency", () => {
     intl.get("SALE_PRICE", {
       price: price
     })
-  ).toBe("售价CN¥ 123,456.78");
+  ).toBe("售价¥123,456.78");
 });
 
 test("Message with plural", () => {

@@ -1,6 +1,6 @@
 {
   "name": "react-intl-universal",
-  "version": "2.5.1",
+  "version": "2.5.2",
   "description": "Internationalize React apps. Not only for React.Component but also for Vanilla JS.",
   "keywords": [
     "intl",
@@ -36,7 +36,7 @@
     "querystring": "^0.2.0"
   },
   "peerDependencies": {
-    "react": "^0.14.9 || ^15.0.0 || ^16.0.0 || ^17.0.0"
+    "react": "*"
   },
   "devDependencies": {
     "babel-cli": "^6.2.0",

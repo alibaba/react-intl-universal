@@ -8,5 +8,7 @@ module.exports = ({
   "COUPON": "优惠卷将在{expires, time, medium}过期",
   "TIME": "时间是{theTime, time}",
   "SALE_PRICE": "售价{price, number, CNY}",
-  "PHOTO": "你有{num}张照片"
+  "PHOTO": "你有{num}张照片",
+  "COMPANY":"{company}是一个国际集团公司",
+  "BUSINESS":"{company}处理国际性事务"
 });

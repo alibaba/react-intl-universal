@@ -368,3 +368,18 @@ test("Resolve directly if the environment is not browser", async () => {
   });
   expect(result).toBe(undefined);
 });
+
+test("Set default variables locale", () => {
+  intl.init({ locales, currentLocale: "zh-CN",
+    defaultVariables:{
+      company:"Jivation-Group"
+    }
+  });
+  expect(intl.get("COMPANY")).toBe("Jivation-Group是一个国际集团公司");
+  expect(intl.get("BUSINESS")).toBe("Jivation-Group处理国际性事务");
+  intl.init({ locales, currentLocale: "en-US", defaultVariables:{
+      company:"Jivation-Group"
+    } });
+  expect(intl.get("COMPANY")).toBe("Jivation-Group is a international group of companies");
+  expect(intl.get("BUSINESS")).toBe("Jivation-Group handle international business");
+});

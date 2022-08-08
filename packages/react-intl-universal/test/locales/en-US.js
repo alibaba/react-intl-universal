@@ -8,6 +8,8 @@ module.exports = ({
   "COUPON": "Coupon expires at {expires, time, medium}",
   "SALE_PRICE": "The price is {price, number, USD}",
   "PHOTO": "You have {num, plural, =0 {no photos.} =1 {one photo.} other {# photos.}}",
+  "COMPANY":"{company} is a international group of companies",
+  "BUSINESS":"{company} handle international business",
   "NESTED": {
     "HELLO": "Hello World",
     "HELLO_NAME": "Hello, {name}"

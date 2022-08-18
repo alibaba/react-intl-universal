@@ -1,5 +1,5 @@
 import ReactIntlUniversal from './ReactIntlUniversal';
 
-module.exports = new ReactIntlUniversal();
-module.exports.ReactIntlUniversal = ReactIntlUniversal;
-
+const defaultInstance = new ReactIntlUniversal();
+defaultInstance.ReactIntlUniversal = ReactIntlUniversal
+export default defaultInstance;

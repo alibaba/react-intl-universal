@@ -1,4 +1,4 @@
-import IntlPolyfill from "intl";
+import "intl";
 import React from "react";
 import IntlMessageFormat from "intl-messageformat";
 import escapeHtml from "escape-html";

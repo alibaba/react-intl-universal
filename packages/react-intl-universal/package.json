@@ -1,6 +1,6 @@
 {
   "name": "react-intl-universal",
-  "version": "2.5.3",
+  "version": "2.6.1",
   "description": "Internationalize React apps. Not only for React.Component but also for Vanilla JS.",
   "keywords": [
     "intl",
@@ -16,6 +16,12 @@
     "icu"
   ],
   "main": "./lib/index.js",
+  "exports": {
+    ".": {
+      "import": "./es/index.js",
+      "require": "./lib/index.js"
+    }
+  },
   "scripts": {
     "test": "jest --coverage",
     "test:watch": "jest --watch --verbose --coverage",

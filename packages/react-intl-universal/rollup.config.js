@@ -15,6 +15,10 @@ export default {
         {
             dest: 'lib/index.js',
             format: 'cjs'
+        },
+        {
+            dest: 'es/index.js',
+            format: 'es'
         }
     ],
     banner : copyright,

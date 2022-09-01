@@ -95,13 +95,15 @@ Note that you are not necessary to load all locale data, just load the current l
 ```js
 import intl from 'react-intl-universal';
 // common locale data
-require('intl/locale-data/jsonp/en.js');
-require('intl/locale-data/jsonp/zh.js');
+import 'intl/locale-data/jsonp/en.js';
+import 'intl/locale-data/jsonp/zh.js';
+import enUS from './locales/en-US.js';
+import zhCN from './locales/zh-CN.js';
 
 // app locale data
 const locales = {
-  "en-US": require('./locales/en-US.js'),
-  "zh-CN": require('./locales/zh-CN.js'),
+  "en-US": enUS,
+  "zh-CN": zhCN
 };
 
 class App extends Component {

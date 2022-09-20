@@ -90,7 +90,7 @@ npm install react-intl-universal --save
 ### Basic Example
 In the following example, we initialize `intl` with app locale data (`locales`) and determine which locale is used dynamically (`currentLocale`). Then use `intl.get(...)` to get the internationalized message. That's all. Pretty simple!
 
-Note that you are not necessary to load all locale data, just load the current locale data on demand. Please refer the [example](https://github.com/alibaba/react-intl-universal/blob/master/examples/browser-example/src/App.js#L72-L88) for more detail.
+Note that you are not necessary to load all locale data, just load the current locale data on demand. Please refer the [example](https://github.com/alibaba/react-intl-universal/blob/master/packages/react-intl-universal/examples/browser-example/src/App.js#L72-L88) for more detail.
 
 ```js
 import intl from 'react-intl-universal';
@@ -267,12 +267,12 @@ intl.getHTML('TIP'); // {React.Element}
 
 ## Component Internationalization
 When internationalizing a React component, you don't need to `intl.init` again.
-You could make it as [peerDependency](https://github.com/alibaba/react-intl-universal/blob/master/examples/component-example/package.json#L34), then just [load](https://github.com/alibaba/react-intl-universal/blob/master/examples/component-example/src/index.tsx#L16) the locale data in the compoent.
+You could make it as [peerDependency](https://github.com/alibaba/react-intl-universal/blob/master/examples/component-example/package.json#L34), then just [load](https://github.com/alibaba/react-intl-universal/tree/master/packages/react-intl-universal/examples/component-example/src/index.tsx#L16) the locale data in the compoent.
 
 ## App Examples
-- [Browser Apps](https://github.com/alibaba/react-intl-universal/blob/master/examples/browser-example/src/App.js)
-- [Server-side App](https://github.com/alibaba/react-intl-universal/blob/master/examples/node-js-example/src/App.js)
-- [Component](https://github.com/alibaba/react-intl-universal/blob/master/examples/component-example)
+- [Browser Apps](https://github.com/alibaba/react-intl-universal/blob/master/packages/react-intl-universal/examples/browser-example/src/App.js)
+- [Server-side App](https://github.com/alibaba/react-intl-universal/blob/master/packages/react-intl-universal/examples/node-js-example/src/App.js)
+- [Component](https://github.com/alibaba/react-intl-universal/tree/master/packages/react-intl-universal/examples/component-example)
 
 ## APIs Definition
 

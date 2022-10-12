@@ -22,6 +22,11 @@
 - [react-intl-universal demo](https://g.alicdn.com/alishu/common/0.0.95/intl-example/index.html)
 - [CodeSandbox](https://codesandbox.io/s/727pw9zoqx)
 
+## App Examples
+- [Browser Apps](https://github.com/alibaba/react-intl-universal/blob/master/packages/react-intl-universal/examples/browser-example/src/App.js)
+- [Server-side App](https://github.com/alibaba/react-intl-universal/blob/master/packages/react-intl-universal/examples/node-js-example/src/App.js)
+- [Component](https://github.com/alibaba/react-intl-universal/tree/master/packages/react-intl-universal/examples/component-example)
+
 ## Why Another Internationalization Solution for React?
 In case of internationalizing React apps, [react-intl](https://github.com/yahoo/react-intl) is one of most popular package in industry.  [react-intl](https://github.com/yahoo/react-intl) decorate your React.Component with wrapped component which is injected internationalized message dynamically so that the locale data is able to be loaded dynamically without reloading page. The following is the example code using  [react-intl](https://github.com/yahoo/react-intl).
 
@@ -267,12 +272,7 @@ intl.getHTML('TIP'); // {React.Element}
 
 ## Component Internationalization
 When internationalizing a React component, you don't need to `intl.init` again.
-You could make it as [peerDependency](https://github.com/alibaba/react-intl-universal/blob/master/examples/component-example/package.json#L34), then just [load](https://github.com/alibaba/react-intl-universal/tree/master/packages/react-intl-universal/examples/component-example/src/index.tsx#L16) the locale data in the compoent.
-
-## App Examples
-- [Browser Apps](https://github.com/alibaba/react-intl-universal/blob/master/packages/react-intl-universal/examples/browser-example/src/App.js)
-- [Server-side App](https://github.com/alibaba/react-intl-universal/blob/master/packages/react-intl-universal/examples/node-js-example/src/App.js)
-- [Component](https://github.com/alibaba/react-intl-universal/tree/master/packages/react-intl-universal/examples/component-example)
+You could make it as [peerDependency](https://github.com/alibaba/react-intl-universal/blob/master/packages/react-intl-universal/examples/component-example/package.json#L34), then just [load](https://github.com/alibaba/react-intl-universal/tree/master/packages/react-intl-universal/examples/component-example/src/index.tsx#L16) the locale data in the compoent.
 
 ## APIs Definition
 

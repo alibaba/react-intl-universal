@@ -82,9 +82,9 @@ Due to the problem above, we create [react-intl-universal](https://www.npmjs.com
 ## Get Started
 
 ### App Examples
-- [Browser Apps](https://github.com/alibaba/react-intl-universal/blob/master/packages/react-intl-universal/examples/browser-example)
-- [Server-side App](https://github.com/alibaba/react-intl-universal/blob/master/packages/react-intl-universal/examples/node-js-example)
-- [Component](https://github.com/alibaba/react-intl-universal/tree/master/packages/react-intl-universal/examples/component-example)
+- [Browser Apps](https://github.com/alibaba/react-intl-universal/blob/master/packages/react-intl-universal/examples/browser-example/pages/index.tsx)
+- [Server-side App](https://github.com/alibaba/react-intl-universal/blob/master/packages/react-intl-universal/examples/node-js-example/src/App.js)
+- [Component](https://github.com/alibaba/react-intl-universal/blob/master/packages/react-intl-universal/examples/component-example/src/index.tsx)
 
 
 ### Message With Variables

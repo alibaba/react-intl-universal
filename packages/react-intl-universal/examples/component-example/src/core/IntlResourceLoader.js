@@ -7,6 +7,7 @@ const locales = {
 
 export default {
   load() {
+    // Compoent doesn't need to setup currentLocale value.
     // Since intl is a singlton, you don't need to init it again. 
     // Just load the locale data in the component.
     intl.load(locales);

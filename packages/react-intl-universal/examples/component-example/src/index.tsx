@@ -13,6 +13,7 @@ export default class ExampleComponent extends React.Component<Props, State> {
 
   constructor(props: Props) {
     super(props);
+    // load the componet's locale data into intl singleton instance
     IntlResourceLoader.load();
   }
 

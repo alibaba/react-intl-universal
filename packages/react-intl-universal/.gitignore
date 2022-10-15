@@ -5,3 +5,4 @@ node_modules/
 tool/
 .idea
 npm-debug.log
+README.md

@@ -19,13 +19,7 @@
 - [react-intl-universal-extract](https://github.com/alibaba/react-intl-universal/tree/master/packages/react-intl-universal-extract) helps you generate a locale file easily.
 
 ## Live Demo
-- [react-intl-universal demo](https://g.alicdn.com/alishu/common/0.0.95/intl-example/index.html)
-- [CodeSandbox](https://codesandbox.io/s/727pw9zoqx)
-
-## App Examples
-- [Browser Apps](https://github.com/alibaba/react-intl-universal/blob/master/packages/react-intl-universal/examples/browser-example/src/App.js)
-- [Server-side App](https://github.com/alibaba/react-intl-universal/blob/master/packages/react-intl-universal/examples/node-js-example/src/App.js)
-- [Component](https://github.com/alibaba/react-intl-universal/tree/master/packages/react-intl-universal/examples/component-example)
+- [react-intl-universal demo](https://fe-tool.com/react-intl-universal)
 
 ## Why Another Internationalization Solution for React?
 In case of internationalizing React apps, [react-intl](https://github.com/yahoo/react-intl) is one of most popular package in industry.  [react-intl](https://github.com/yahoo/react-intl) decorate your React.Component with wrapped component which is injected internationalized message dynamically so that the locale data is able to be loaded dynamically without reloading page. The following is the example code using  [react-intl](https://github.com/yahoo/react-intl).
@@ -87,62 +81,11 @@ Due to the problem above, we create [react-intl-universal](https://www.npmjs.com
 
 ## Get Started
 
-### Install
-```sh
-npm install react-intl-universal --save
-```
+### App Examples
+- [Browser Apps](https://github.com/alibaba/react-intl-universal/blob/master/packages/react-intl-universal/examples/browser-example)
+- [Server-side App](https://github.com/alibaba/react-intl-universal/blob/master/packages/react-intl-universal/examples/node-js-example)
+- [Component](https://github.com/alibaba/react-intl-universal/tree/master/packages/react-intl-universal/examples/component-example)
 
-### Basic Example
-In the following example, we initialize `intl` with app locale data (`locales`) and determine which locale is used dynamically (`currentLocale`). Then use `intl.get(...)` to get the internationalized message. That's all. Pretty simple!
-
-Note that you are not necessary to load all locale data, just load the current locale data on demand. Please refer the [example](https://github.com/alibaba/react-intl-universal/blob/master/packages/react-intl-universal/examples/browser-example/src/App.js#L77-L88) for more detail.
-
-```js
-import intl from 'react-intl-universal';
-// common locale data
-import 'intl/locale-data/jsonp/en.js';
-import 'intl/locale-data/jsonp/zh.js';
-import enUS from './locales/en-US.js';
-import zhCN from './locales/zh-CN.js';
-
-// app locale data
-const locales = {
-  "en-US": enUS,
-  "zh-CN": zhCN
-};
-
-class App extends Component {
-
-  state = {initDone: false}
-
-  componentDidMount() {
-    this.loadLocales();
-  }
-
-  loadLocales() {
-    // init method will load CLDR locale data according to currentLocale
-    // react-intl-universal is singleton, so you should init it only once in your app
-    intl.init({
-      currentLocale: 'en-US', // TODO: determine locale here
-      locales,
-    })
-    .then(() => {
-      // After loading CLDR locale data, start to render
-	  this.setState({initDone: true});
-    });
-  }
-
-  render() {
-    return (
-      this.state.initDone &&
-      <div>
-        {intl.get('SIMPLE')}
-      </div>
-    );
-  }
-
-}
-```
 
 ### Message With Variables
 If the message contains variables the `{variable_name}` is substituted directly into the string. In the example below, there are two variables `{name}` and `{where}`,  the second argument representing the variables in `get` method are substituted into the string.

@@ -1,21 +1,29 @@
 {
-  "name": "react-intl-universal-browser-example",
-  "version": "1.0.0",
-  "private": true,
-  "author": "chiawei.tcw@alibaba-inc.com",
-  "license": "BSD-3-Clause",
-  "devDependencies": {
-    "react-scripts": "0.8.4"
+  "scripts": {
+    "start": "next",
+    "build": "next build && next export",
+    "export": "next export",
+    "start:prod": "next start"
   },
   "dependencies": {
-    "react-intl-universal": "*",
-    "axios": "^0.19.0",
-    "lodash": "^4.17.4",
-    "react": "^15.5.4",
-    "react-dom": "^15.5.4"
+    "next": "^12.3.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-intl-universal": "^2.6.6",
+    "use-force-update": "^1.0.10"
   },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build"
+  "license": "BSD-3-Clause",
+  "browser": {
+    "fs": false,
+    "path": false
+  },
+  "devDependencies": {
+    "@types/node": "18.0.3",
+    "@types/prismjs": "^1.26.0",
+    "@types/react": "18.0.15",
+    "@types/react-dom": "18.0.6",
+    "sass": "^1.55.0",
+    "single-line-log": "^1.1.2",
+    "typescript": "4.7.4"
   }
 }

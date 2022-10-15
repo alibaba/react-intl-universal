@@ -94,20 +94,10 @@ const ReactIntlUniversalExample: React.FC<any> = (props) => {
     </select>
   );
 
-  const packageName = (
-    <a
-      className="title"
-      href="https://github.com/alibaba/react-intl-universal"
-      target="_blank">
-      react-intl-universal
-    </a>
-  );
-
   return (
     <div>
       {initDone && (
         <div className="react-intl-universal-example">
-          {packageName}
           {localeSelector}
           <BasicComponent />
           <PluralComponent />

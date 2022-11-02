@@ -1,6 +1,6 @@
 {
   "name": "react-intl-universal-extract",
-  "version": "1.0.4",
+  "version": "1.0.6",
   "description": "A react-intl-universal message extractor",
   "keywords": [
     "intl",
@@ -14,12 +14,11 @@
   "bin": {
     "react-intl-universal-extract": "bin/index.js"
   },
-  "main": "./lib/index.js",
+  "main": "./src/index.js",
   "scripts": {
     "test": "jest --coverage",
     "test:watch": "jest --watch --verbose --coverage",
     "clean": "rimraf coverage/ lib/",
-    "build": "rollup -c rollup.config.js",
     "preversion": "npm run clean && npm run build && npm run test",
     "prepublish": "npm run clean && npm run build"
   },

@@ -18,6 +18,7 @@
   "scripts": {
     "test": "jest --coverage",
     "test:watch": "jest --watch --verbose --coverage",
+    "build": "echo \"use script in /src\"",
     "clean": "rimraf coverage/ lib/",
     "preversion": "npm run clean && npm run build && npm run test",
     "prepublish": "npm run clean && npm run build"

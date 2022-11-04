@@ -1,6 +1,6 @@
 {
   "name": "react-intl-universal",
-  "version": "2.6.10",
+  "version": "2.6.11",
   "description": "Internationalize React apps. Not only for React.Component but also for Vanilla JS.",
   "keywords": [
     "intl",
@@ -28,7 +28,8 @@
     "clean": "rimraf coverage/ lib/",
     "build": "rollup -c rollup.config.js && cp ../../README.md ./",
     "preversion": "npm run clean && npm run build && npm run test",
-    "prepublish": "npm run clean && npm run build"
+    "prepublish": "npm run clean && npm run build",
+    "postinstall": "node ./scripts/postinstall.js"
   },
   "license": "BSD-3-Clause",
   "dependencies": {

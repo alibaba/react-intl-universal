@@ -4,7 +4,7 @@ import useForceUpdate from 'use-force-update';
 import enUS from 'locales/en-US.json';
 import zhCN from 'locales/zh-CN.json';
 import zhTW from 'locales/zh-TW.json';
-import frFr from 'locales/fr-Fr.json';
+import frFr from 'locales/fr-FR.json';
 import jaJP from 'locales/ja-JP.json';
 
 import BasicComponent from 'components/basic';

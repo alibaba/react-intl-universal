@@ -15,7 +15,7 @@ For example, suppose you have a file:
   }  
 ```
 
-This package will generate a json file which contains the extracted messages.
+This tool will generate a json file which contains the extracted messages.
 
 ```json
 {

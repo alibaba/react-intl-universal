@@ -1,5 +1,5 @@
 # react-intl-universal-extract
-Extract [react-intl-universal](https://github.com/alibaba/react-intl-universal)'s default messages in source code to locale files.
+Extract [react-intl-universal](https://fe-tool.com/react-intl-universal)'s default messages in source code to locale files.
 
 ![react-intl-universal-extract](https://img.alicdn.com/imgextra/i4/O1CN01v8z1us1xc6TAXlHBC_!!6000000006463-2-tps-738-340.png)
 

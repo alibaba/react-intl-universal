@@ -6,7 +6,7 @@
 [![npm](https://img.shields.io/npm/dt/react-intl-universal.svg)](https://www.npmjs.com/package/react-intl-universal) [![npm](https://img.shields.io/npm/v/react-intl-universal.svg)](https://www.npmjs.com/package/react-intl-universal) [![npm](https://img.shields.io/npm/l/react-intl-universal.svg)](https://github.com/alibaba/react-intl-universal/blob/master/LICENSE.md)
 
 ## Features
-- Can be used not only in React.Component but also in Vanilla JS.
+- Can be used not only in React component but also in Vanilla JS.
 - Simple. Only three main API and one optional helper.
 - Display numbers, currency, dates and times for different locales.
 - Pluralize labels in strings.

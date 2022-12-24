@@ -1,8 +1,7 @@
 # react-intl-universal-extract
 Extract [react-intl-universal](https://fe-tool.com/react-intl-universal)'s default messages in source code to locale files.
 
-![react-intl-universal-extract](https://img.alicdn.com/imgextra/i4/O1CN01v8z1us1xc6TAXlHBC_!!6000000006463-2-tps-738-340.png)
-
+<img width="600" alt="image" src="https://img.alicdn.com/imgextra/i1/O1CN01WB2wMe1g5GiHzMAls_!!6000000004090-2-tps-2308-1090.png">
 
 For example, suppose you have a file:
 ```jsx

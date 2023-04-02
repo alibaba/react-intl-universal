@@ -338,13 +338,11 @@ if(typeof Promise!=="function"){document.write('<script src="//f.alicdn.com/es6-
 </script>
 ```
 
-## Tools
+## Other Frontend Tools
 - [react-intl-universal-extract](https://github.com/alibaba/react-intl-universal/tree/master/packages/react-intl-universal-extract): Extract default messages in application. This package will generate a json file which contains the extracted messages.
 - [react-intl-universal-pseudo-converter](https://github.com/ceszare/react-intl-universal-pseudo-converter): A  [pseudo-localization](https://en.wikipedia.org/wiki/Pseudolocalization) tool for testing internationalization.
+- [Smart JSON Editor](https://github.com/awesome-json/json-editor/blob/main/README.md): Online Error-tolerant JSON Editor.
 
 
 ## License
 This software is free to use under the BSD license.
-
-## Donate
-![image](https://user-images.githubusercontent.com/3455798/152097023-8f7f1724-65e7-493e-a9b5-7348e0f0c876.png)

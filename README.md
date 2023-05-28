@@ -327,15 +327,87 @@ const name = 'Tony';
 intl.getHTML('hello', {name}).d(<div>Hello</div>);
 ```
  
-## Browser Compatibility
-Before using [react-intl-universal](https://www.npmjs.com/package/react-intl-universal), you need to include scripts below in HTML to support older browser.
+## FAQ
+### 1. How to Internationalize Message in Constants Object
+
+If constants are defined outside of a React component, the message in `constants.fruits` may get loaded before `intl.init(...)`. This can cause a warning to be displayed, such as `react-intl-universal locales data "null" not exists`.
+
+```jsx
+// Wrong: the message in constants.fruits is loaded before `intl.init(...)`
+const constants = {
+  fruits : [
+    { label: intl.get('banana'), value: 'banana' },
+    { label: intl.get('apple'), value: 'apple' },
+  ]
+}
+function MyComponent() {
+  return <Select dataSource={constants.fruits} />
+}
 ```
-<!--[if lt IE 9]>
-<script src="//f.alicdn.com/es5-shim/4.5.7/es5-shim.min.js"></script>
-<![endif]-->
-<script>
-if(typeof Promise!=="function"){document.write('<script src="//f.alicdn.com/es6-shim/0.35.1/??es6-shim.min.js,es6-sham.min.js"><\/script>')}
-</script>
+
+To fix this, you should call `intl.init` before `render`.
+
+
+
+#### Solution 1
+Make the message object as a function, and call it at render function.
+
+```jsx
+const constants = {
+    fruits : () => [  // as arrow function
+        { label: intl.get('banana'), value: 'banana' },
+        { label: intl.get('apple'), value: 'apple' },
+    ]
+}
+function MyComponent() {
+    // fruits is a function which returns message when rendering
+    return <Select dataSource={constants.fruits()} />
+}
+```
+
+#### Solution 2
+Use [getter](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/get) syntax to make a function  call when that property is looked up
+
+```jsx
+const constants = {
+  fruits: [
+    {
+      get label() {
+        return intl.get("banana");
+      },
+      value: "banana",
+    },
+    {
+      get label() {
+        return intl.get("apple");
+      },
+      value: "apple",
+    },
+  ],
+};
+function MyComponent() {
+  // When "label" property is looked up, it actually make a function call 
+  return <Select dataSource={constants.fruits} />;
+}
+```
+
+
+### 2. How to Bind Event Handlers to an Internationalized Message
+
+```jsx
+const MyComp = (props) => {
+  const onClick = (e) => {
+    if (e.target.tagName === 'A') {
+      // event handler for "A" tag in the message
+    }
+  };
+  return (
+    // Wrap the message in a container and listen for the children's events.
+    <span onClick={onClick}>
+      {intl.getHTML('more_detail').d(<span>Please refer to the <a>document</a> for more detail.</span>)}
+    </span>
+  )
+}
 ```
 
 ## Other Frontend Tools

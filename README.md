@@ -24,8 +24,6 @@
 ## Usage Trend
 - [Usage Trend of react-intl-universal](https://npm-compare.com/react-intl-universal/#timeRange=FIVE_YEARS)
 
-https://npm-compare.com/react-intl-universal/#timeRange=FIVE_YEARS
-
 ## Why Another Internationalization Solution for React?
 In case of internationalizing React apps, [react-intl](https://github.com/yahoo/react-intl) is one of most popular package in industry.  [react-intl](https://github.com/yahoo/react-intl) decorate your React.Component with wrapped component which is injected internationalized message dynamically so that the locale data is able to be loaded dynamically without reloading page. The following is the example code using  [react-intl](https://github.com/yahoo/react-intl).
 

@@ -416,7 +416,8 @@ const MyComp = (props) => {
 ## Other Frontend Tools
 - [react-intl-universal-extract](https://github.com/alibaba/react-intl-universal/tree/master/packages/react-intl-universal-extract): Extract default messages in application. This package will generate a json file which contains the extracted messages.
 - [react-intl-universal-pseudo-converter](https://github.com/ceszare/react-intl-universal-pseudo-converter): A  [pseudo-localization](https://en.wikipedia.org/wiki/Pseudolocalization) tool for testing internationalization.
-- [Smart JSON Editor](https://github.com/awesome-json/json-editor/blob/main/README.md): Online Error-tolerant JSON Editor.
+- [JSON5 Editor](https://json-5.com): JSON for Humans.
+- [Compare NPM Packages](https://npm-compare.com): Find the Best npm Package for Your Project.
 
 
 ## License

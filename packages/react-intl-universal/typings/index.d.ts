@@ -99,6 +99,19 @@ declare module "react-intl-universal" {
         id: string,
         defaultMessage?: string,
     }
+    
+    const intl: {
+      determineLocale: typeof determineLocale;
+      formatHTMLMessage: typeof formatHTMLMessage;
+      formatMessage: typeof formatMessage;
+      get: typeof get;
+      getHTML: typeof getHTML;
+      getInitOptions: typeof getInitOptions;
+      init: typeof init;
+      load: typeof load;
+    };
+
+    export default intl;
 }
 
 declare interface String {

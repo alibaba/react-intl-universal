@@ -368,3 +368,15 @@ test("Resolve directly if the environment is not browser", async () => {
   });
   expect(result).toBe(undefined);
 });
+
+test("cache", () => {
+  const key = "HELLO";
+  const variables = { name: 'World' };
+  const currentLocale = "en-US"
+  const cacheKey = key + JSON.stringify(variables) + currentLocale;
+
+  intl.init({ locales, currentLocale });
+  
+  expect(intl.get(key, variables)).toBe("Hello, World");
+  expect(intl.cache[cacheKey]).toBe("Hello, World");
+});

@@ -84,8 +84,14 @@ class ReactIntlUniversal {
     }
 
     try {
-      const msgFormatter = new IntlMessageFormat(msg, currentLocale, formats);
-      return msgFormatter.format(variables);
+      const cacheKey = key + JSON.stringify(variables) + currentLocale;
+      let computedValue = this.cache[cacheKey];
+      if (typeof computedValue === 'undefined') {
+        const msgFormatter = new IntlMessageFormat(msg, currentLocale, formats);
+        computedValue = msgFormatter.format(variables);
+        this.cache[cacheKey] = computedValue;
+      }
+      return computedValue;
     } catch (err) {
       this.options.warningHandler(
         `react-intl-universal format message failed for key='${key}'.`,
@@ -187,6 +193,8 @@ class ReactIntlUniversal {
       this.options.formats,
       constants.defaultFormats
     );
+
+    this.cache = Object.create(null)
 
     return new Promise((resolve, reject) => {
       // init() will not load external common locale data anymore.

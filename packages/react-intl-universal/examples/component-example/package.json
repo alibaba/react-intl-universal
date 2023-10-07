@@ -31,6 +31,6 @@
     "react": "^16.0.0",
     "react-dom": "^16.0.0",
     "moment": "^2.22.1",
-    "react-intl-universal": "^1.x"
+    "react-intl-universal": "*"
   }
 }

@@ -1,6 +1,6 @@
 import React from "react";
 import cookie from "cookie";
-import intl from "../src/index";
+import intl, { createIntlCache } from "../src/index";
 import zhCN from "./locales/zh-CN";
 import enUS from "./locales/en-US";
 import enUSMore from "./locales/en-US-more";
@@ -374,9 +374,10 @@ test("cache", () => {
   const variables = { name: 'World' };
   const currentLocale = "en-US"
   const cacheKey = key + JSON.stringify(variables) + currentLocale;
-
-  intl.init({ locales, currentLocale });
+  const cache = createIntlCache()
   
+  intl.init({ locales, currentLocale }, cache);
+
   expect(intl.get(key, variables)).toBe("Hello, World");
   expect(intl.cache[cacheKey]).toBe("Hello, World");
 });

@@ -1,12 +1,12 @@
 import "intl";
 import React from "react";
-import IntlMessageFormat from "intl-messageformat";
 import escapeHtml from "escape-html";
 import cookie from "cookie";
 import queryParser from "querystring";
 import invariant from "invariant";
 import * as constants from "./constants";
 import merge from "lodash.merge";
+import { generateCacheKey, createFormattedMessage } from "./utils";
 
 String.prototype.defaultMessage = String.prototype.d = function (msg) {
   return this || msg || "";
@@ -84,14 +84,14 @@ class ReactIntlUniversal {
     }
 
     try {
-      const cacheKey = key + JSON.stringify(variables) + currentLocale;
-      let computedValue = this.cache[cacheKey];
-      if (typeof computedValue === 'undefined') {
-        const msgFormatter = new IntlMessageFormat(msg, currentLocale, formats);
-        computedValue = msgFormatter.format(variables);
-        this.cache[cacheKey] = computedValue;
+      if (this.cache) {
+        const cacheKey = generateCacheKey(key, variables, currentLocale);
+        if (!this.cache[cacheKey]) {
+          this.cache[cacheKey] = createFormattedMessage(msg, currentLocale, formats, variables);
+        }
+        return this.cache[cacheKey];
       }
-      return computedValue;
+      return createFormattedMessage(msg, currentLocale, formats, variables);
     } catch (err) {
       this.options.warningHandler(
         `react-intl-universal format message failed for key='${key}'.`,
@@ -180,9 +180,10 @@ class ReactIntlUniversal {
    * @param {Object} options
    * @param {string} options.currentLocale Current locale such as 'en-US'
    * @param {string} options.locales App locale data like {"en-US":{"key1":"value1"},"zh-CN":{"key1":"值1"}}
+   * @param {Object} [cache] explicit cache to prevent leaking memory, Initialize using createIntlCache
    * @returns {Promise}
    */
-  init(options = {}) {
+  init(options = {}, cache) {
     invariant(options.currentLocale, "options.currentLocale is required");
     invariant(options.locales, "options.locales is required");
 
@@ -194,7 +195,7 @@ class ReactIntlUniversal {
       constants.defaultFormats
     );
 
-    this.cache = Object.create(null)
+    this.cache = cache || null;
 
     return new Promise((resolve, reject) => {
       // init() will not load external common locale data anymore.

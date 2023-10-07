@@ -1,4 +1,5 @@
 import ReactIntlUniversal from './ReactIntlUniversal';
+import { createIntlCache } from './utils';
 
 const defaultInstance = new ReactIntlUniversal();
 // resolved by CommonJS module loader
@@ -33,5 +34,6 @@ export {
   getLocaleFromURL,
   getDescendantProp,
   getLocaleFromBrowser,
-  defaultInstance as default
+  defaultInstance as default,
+  createIntlCache
 };

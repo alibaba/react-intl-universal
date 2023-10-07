@@ -1,4 +1,4 @@
-import intl from 'react-intl-universal';
+import intl, { createIntlCache } from 'react-intl-universal';
 import React, { Component } from "react";
 import BasicComponent from "./Basic";
 import PluralComponent from "./Plural";
@@ -44,12 +44,20 @@ class App extends Component {
   constructor(props) {
     super(props);
     const currentLocale = SUPPORTED_LOCALES[0].value; // Determine user's locale here
-    intl.init({
-      currentLocale,
-      locales: {
-        [currentLocale]: require(`./locales/${currentLocale}`)
-      }
-    });
+    
+    // This is optional but highly recommended
+    // since it prevents memory leak
+    const cache = createIntlCache()
+
+    intl.init(
+      {
+        currentLocale,
+        locales: {
+          [currentLocale]: require(`./locales/${currentLocale}`)
+        }
+      },
+      cache
+    );
   }
 
   render() {

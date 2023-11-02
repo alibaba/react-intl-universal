@@ -60,7 +60,7 @@ declare module "react-intl-universal" {
     export function getHTML(key: string, value: any): string;
 
     /**
-     * Get the inital options 
+     * Get the inital options
      * @returns {Object} options includes currentLocale and locales
      */
     export function getInitOptions(): ReactIntlUniversalOptions;
@@ -79,7 +79,7 @@ declare module "react-intl-universal" {
 
     /**
      * Load more locales after init
-     * @param {Object} locales App locale data 
+     * @param {Object} locales App locale data
      */
     export function load(locales: { [key: string]: any }): void;
 
@@ -93,13 +93,14 @@ declare module "react-intl-universal" {
         localStorageLocaleKey?: string;
         warningHandler?: (message?: any, error?: any) => void;
         escapeHtml?: boolean;
+        debug?: boolean;
     }
-    
+
     export interface ReactIntlUniversalMessageDescriptor {
         id: string,
         defaultMessage?: string,
     }
-    
+
     const intl: {
       determineLocale: typeof determineLocale;
       formatHTMLMessage: typeof formatHTMLMessage;

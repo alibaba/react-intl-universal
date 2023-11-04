@@ -73,9 +73,10 @@ declare module "react-intl-universal" {
      * @param {Object} options.warningHandler Ability to accumulate missing messages using third party services like Sentry
      * @param {string} options.fallbackLocale Fallback locale such as 'zh-CN' to use if a key is not found in the current locale
      * @param {boolean} options.escapeHtml To escape html. Default value is true.
+     * @param {Object} [cache] explicit cache to prevent leaking memory, Initialize using createIntlCache
      * @returns {Promise}
      */
-    export function init(options: ReactIntlUniversalOptions): Promise<void>;
+    export function init(options: ReactIntlUniversalOptions, cache: { [key: string]: any }): Promise<void>;
 
     /**
      * Load more locales after init

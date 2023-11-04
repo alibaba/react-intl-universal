@@ -1,5 +1,5 @@
 import React from 'react';
-import intl from 'react-intl-universal';
+import intl, { createIntlCache } from 'react-intl-universal';
 import useForceUpdate from 'use-force-update';
 import enUS from 'locales/en-US.json';
 import zhCN from 'locales/zh-CN.json';
@@ -73,11 +73,18 @@ const ReactIntlUniversalExample: React.FC<any> = (props) => {
     setInitDone(true);
   }
 
+  // This is optional but highly recommended
+  // since it prevents memory leak
+  const cache = createIntlCache()
+
   const setCurrentLocale = (currentLocale: string) => {
-    intl.init({
-      currentLocale,
-      locales: LOCALE_DATA,
-    });
+    intl.init(
+      {
+        currentLocale,
+        locales: LOCALE_DATA,
+      },
+      cache
+    );
   };
 
   const onLocaleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {

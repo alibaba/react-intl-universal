@@ -93,6 +93,7 @@ declare module "react-intl-universal" {
         localStorageLocaleKey?: string;
         warningHandler?: (message?: any, error?: any) => void;
         escapeHtml?: boolean;
+        defaultVariables?: { [key: string]: any }
     }
     
     export interface ReactIntlUniversalMessageDescriptor {

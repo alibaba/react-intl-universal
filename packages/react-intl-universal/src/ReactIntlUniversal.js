@@ -21,6 +21,7 @@ class ReactIntlUniversal {
       escapeHtml: true, // disable escape html in variable mode
       // commonLocaleDataUrls: COMMON_LOCALE_DATA_URLS,
       fallbackLocale: null, // Locale to use if a key is not found in the current locale
+      defaultVariables: {} // Default variables in message
     };
   }
 
@@ -30,7 +31,7 @@ class ReactIntlUniversal {
    * @param {Object} variables Variables in message
    * @returns {string} message
    */
-  get(key, variables) {
+  get(key, variables = this.options.defaultVariables) {
     if (this.options.intlGetHook) {
       try {
         this.options.intlGetHook(key, this.options.currentLocale);

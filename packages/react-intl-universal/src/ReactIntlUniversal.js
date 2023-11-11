@@ -19,8 +19,8 @@ class ReactIntlUniversal {
       locales: {}, // app locale data like {"en-US":{"key1":"value1"},"zh-CN":{"key1":"值1"}}
       warningHandler: function warn(...msg) { console.warn(...msg) }, // ability to accumulate missing messages using third party services
       escapeHtml: true, // disable escape html in variable mode
-      // commonLocaleDataUrls: COMMON_LOCALE_DATA_URLS,
       fallbackLocale: null, // Locale to use if a key is not found in the current locale
+      debug: false, // If debugger mode is on, the message will be wrapped by a span with key
     };
   }
 
@@ -80,18 +80,19 @@ class ReactIntlUniversal {
         variables[i] = value;
       }
     } else {
-      return msg;
+      return this.options.debug ? this.createReactElementMessage('span', key, msg, this.options.debug) : msg;
     }
 
     try {
       const msgFormatter = new IntlMessageFormat(msg, currentLocale, formats);
-      return msgFormatter.format(variables);
+      const nextMessage = msgFormatter.format(variables);
+      return this.options.debug ? this.createReactElementMessage('span', key, nextMessage, this.options.debug) : nextMessage;
     } catch (err) {
       this.options.warningHandler(
         `react-intl-universal format message failed for key='${key}'.`,
         err.message
       );
-      return msg;
+      return this.options.debug ? this.createReactElementMessage('span', key, msg, this.options.debug) : msg;
     }
   }
 
@@ -111,17 +112,7 @@ class ReactIntlUniversal {
     }
     let msg = this.get(key, variables);
     if (msg) {
-      const el = React.createElement("span", {
-        dangerouslySetInnerHTML: {
-          __html: msg
-        }
-      });
-      // when key exists, it should still return element if there's defaultMessage() after getHTML()
-      const defaultMessage = () => el;
-      return Object.assign(
-        { defaultMessage: defaultMessage, d: defaultMessage },
-        el
-      );
+      return this.createReactElementMessage('span', key, msg, this.options.debug);
     }
     return "";
   }
@@ -251,6 +242,21 @@ class ReactIntlUniversal {
   getLocaleFromBrowser() {
     return navigator.language || navigator.userLanguage;
   }
+
+  createReactElementMessage(elem, key, msg, debug) {
+    const el = React.createElement(elem, {
+      alt: debug ? key : undefined,
+      dangerouslySetInnerHTML: {
+        __html: msg
+      }
+    });
+    const defaultMessage = () => el;
+    return Object.assign(
+      { defaultMessage: defaultMessage, d: defaultMessage },
+      el
+    );
+  }
+
 }
 
 export default ReactIntlUniversal;

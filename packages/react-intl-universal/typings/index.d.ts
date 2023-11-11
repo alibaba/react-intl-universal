@@ -73,6 +73,7 @@ declare module "react-intl-universal" {
      * @param {Object} options.warningHandler Ability to accumulate missing messages using third party services like Sentry
      * @param {string} options.fallbackLocale Fallback locale such as 'zh-CN' to use if a key is not found in the current locale
      * @param {boolean} options.escapeHtml To escape html. Default value is true.
+     * @param {boolean} options.debug If debugger mode is on, the message will be wrapped by a span with key
      * @returns {Promise}
      */
     export function init(options: ReactIntlUniversalOptions): Promise<void>;
@@ -93,6 +94,7 @@ declare module "react-intl-universal" {
         localStorageLocaleKey?: string;
         warningHandler?: (message?: any, error?: any) => void;
         escapeHtml?: boolean;
+        debug?: boolean;
     }
     
     export interface ReactIntlUniversalMessageDescriptor {

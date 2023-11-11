@@ -413,13 +413,22 @@ describe("Test for debug mode", () => {
   });
   test("should return html with variables by using getHTML method if debug mode is true", () => {
     innerIntl.init({ locales, currentLocale: "en-US", debug: true });
-    let reactEl = innerIntl.getHTML("TIP_VAR", {
+    const reactEl = innerIntl.getHTML("TIP_VAR", {
       message: "your message"
     });
     expect(reactEl.props.dangerouslySetInnerHTML.__html).toBe(
       "This is<span>your message</span>"
     );
-    expect(innerIntl.getHTML("TIP_VAR").props.alt).toBe("TIP_VAR");
+    expect(reactEl.props.alt).toBe("TIP_VAR");
+  });
+  test("should return html without variables by using getHTML method if debug mode is true", () => {
+    innerIntl.init({ locales, currentLocale: "en-US", debug: true });
+    let reactEl = innerIntl.getHTML("TIP");
+    expect(reactEl.props.dangerouslySetInnerHTML.__html).toBe(
+      "This is <span>HTML</span>"
+    );
+
+    expect(reactEl.props.alt).toBe("TIP");
   });
   test("should has defaultMessage method in after get calling", () => {
     innerIntl.init({ locales, currentLocale: "zh-CN", debug: true });

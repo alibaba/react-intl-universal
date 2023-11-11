@@ -30,7 +30,7 @@ class ReactIntlUniversal {
    * @param {Object} variables Variables in message
    * @returns {string} message
    */
-  get(key, variables) {
+  _getFormattedMessage(key, variables) {
     if (this.options.intlGetHook) {
       try {
         this.options.intlGetHook(key, this.options.currentLocale);
@@ -41,6 +41,7 @@ class ReactIntlUniversal {
     invariant(key, "key is required");
     const { locales, currentLocale, formats } = this.options;
 
+    // 1. check if the locale data and key exists
     if (!locales || !locales[currentLocale]) {
       let errorMsg = `react-intl-universal locales data "${currentLocale}" not exists.`;
       if (!currentLocale) {
@@ -66,6 +67,8 @@ class ReactIntlUniversal {
         return "";
       }
     }
+
+    // 2. handle security issue for variables
     if (variables) {
       variables = Object.assign({}, variables);
       // HTML message with variables. Escape it to avoid XSS attack.
@@ -81,16 +84,18 @@ class ReactIntlUniversal {
         }
         variables[i] = value;
       }
-    } else {
-      // no variable, just return the message
-      return this.options.debug ? this.createReactElementMessage('span', key, msg, this.options.debug) : msg;
     }
 
-    // fill variables
+    // 3. resolve variables
     try {
-      const msgFormatter = new IntlMessageFormat(msg, currentLocale, formats);
-      const nextMessage = msgFormatter.format(variables);
-      return nextMessage;
+      let finalMsg;
+      if (variables) { // format message with variables
+        const msgFormatter = new IntlMessageFormat(msg, currentLocale, formats);
+        finalMsg = msgFormatter.format(variables);
+      } else { // no variables, just return the message
+        finalMsg = msg;
+      }
+      return finalMsg
     } catch (err) {
       this.options.warningHandler(
         `react-intl-universal format message failed for key='${key}'.`,
@@ -101,15 +106,26 @@ class ReactIntlUniversal {
   }
 
   /**
+   * Get the formatted message by key
+   * @param {string} key The string representing key in locale data file
+   * @param {Object} variables Variables in message
+   * @returns {string} message
+   */
+  get(key, variables) {
+    const msg = this._getFormattedMessage(key, variables);
+    return this.options.debug ? this._getSpanElementMessage(key, msg) : msg;
+  }
+
+  /**
    * Get the formatted html message by key.
    * @param {string} key The string representing key in locale data file
    * @param {Object} variables Variables in message
-   * @returns {React.Element} message
+   * @returns {React.ReactElement} html message
   */
   getHTML(key, variables) {
-    let msg = this.get(key, variables);
+    let msg = this._getFormattedMessage(key, variables);
     if (msg) {
-      return this.createReactElementMessage('span', key, msg, this.options.debug);
+      return this._getSpanElementMessage(key, msg);
     }
     return "";
   }
@@ -161,7 +177,8 @@ class ReactIntlUniversal {
    * Initialize properties and load CLDR locale data according to currentLocale
    * @param {Object} options
    * @param {string} options.currentLocale Current locale such as 'en-US'
-   * @param {string} options.locales App locale data like {"en-US":{"key1":"value1"},"zh-CN":{"key1":"值1"}}
+   * @param {any} options.locales App locale data like {"en-US":{"key1":"value1"},"zh-CN":{"key1":"值1"}}
+   * @param {boolean} [options.debug] debug mode
    * @returns {Promise}
    */
   init(options = {}) {
@@ -240,9 +257,9 @@ class ReactIntlUniversal {
     return navigator.language || navigator.userLanguage;
   }
 
-  createReactElementMessage(elem, key, msg, debug) {
-    const el = React.createElement(elem, {
-      alt: debug ? key : undefined,
+  _getSpanElementMessage(key, msg) {
+    const el = React.createElement('span', {
+      alt: this.options.debug ? key : undefined,
       dangerouslySetInnerHTML: {
         __html: msg
       }

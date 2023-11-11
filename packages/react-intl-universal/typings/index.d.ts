@@ -42,22 +42,15 @@ declare module "react-intl-universal" {
      * @param {Object} variables Variables in message
      * @returns {string} message
      */
-    export function get(key: string, variables: any): string;
-
-    /**
-     * Get the formatted html message by key.
-     * @param {string} key The string representing key in locale data file
-     * @returns {React.Element} message
-     */
-    export function getHTML(key: string): string;
+    export function get(key: string, variables?: any): string;
 
     /**
      * Get the formatted html message by key.
      * @param {string} key The string representing key in locale data file
      * @param {Object} variables Variables in message
-     * @returns {React.Element} message
+     * @returns {React.ReactElement} message
      */
-    export function getHTML(key: string, value: any): string;
+    export function getHTML(key: string, variables?: any): string;
 
     /**
      * Get the inital options 
@@ -73,7 +66,7 @@ declare module "react-intl-universal" {
      * @param {Object} options.warningHandler Ability to accumulate missing messages using third party services like Sentry
      * @param {string} options.fallbackLocale Fallback locale such as 'zh-CN' to use if a key is not found in the current locale
      * @param {boolean} options.escapeHtml To escape html. Default value is true.
-     * @param {boolean} options.debug If debugger mode is on, the message will be wrapped by a span with key
+     * @param {boolean} options.debug debug mode
      * @returns {Promise}
      */
     export function init(options: ReactIntlUniversalOptions): Promise<void>;

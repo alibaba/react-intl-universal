@@ -6,6 +6,7 @@ import enUS from "./locales/en-US";
 import enUSMore from "./locales/en-US-more";
 import LocalStorageMock from "./util/LocalStorageMock";
 global.localStorage = new LocalStorageMock;
+const dataKey = 'data-i18n-key';
 
 const locales = {
   "en-US": enUS,
@@ -388,7 +389,7 @@ describe("Test for debug mode", () => {
   });
   test("should output key by using get method if debug mode is true", () => {
     innerIntl.init({ locales, currentLocale: "zh-CN", debug: true });
-    expect(innerIntl.get("SIMPLE").props.alt).toBe("SIMPLE");
+    expect(innerIntl.get("SIMPLE").props[dataKey]).toBe("SIMPLE");
   });
   test("should output string by using get method if debug mode is false", () => {
     innerIntl.init({ locales, currentLocale: "zh-CN", debug: false });
@@ -396,11 +397,11 @@ describe("Test for debug mode", () => {
   });
   test("should output key by using getHTML method if debug mode is true", () => {
     innerIntl.init({ locales, currentLocale: "zh-CN", debug: true });
-    expect(innerIntl.getHTML("TIP").props.alt).toBe("TIP");
+    expect(innerIntl.getHTML("TIP").props[dataKey]).toBe("TIP");
   });
   test("should return original DOM without key by using getHTML method if debug mode is false", () => {
     innerIntl.init({ locales, currentLocale: "zh-CN", debug: false });
-    expect(innerIntl.getHTML("TIP").props.alt).toBeUndefined();
+    expect(innerIntl.getHTML("TIP").props[dataKey]).toBeUndefined();
   });
   test("should return html with variables by using getHTML method if debug mode is false", () => {
     innerIntl.init({ locales, currentLocale: "en-US", debug: false });
@@ -419,7 +420,7 @@ describe("Test for debug mode", () => {
     expect(reactEl.props.dangerouslySetInnerHTML.__html).toBe(
       "This is<span>your message</span>"
     );
-    expect(reactEl.props.alt).toBe("TIP_VAR");
+    expect(reactEl.props[dataKey]).toBe("TIP_VAR");
   });
   test("should return html without variables by using getHTML method if debug mode is true", () => {
     innerIntl.init({ locales, currentLocale: "en-US", debug: true });
@@ -428,7 +429,7 @@ describe("Test for debug mode", () => {
       "This is <span>HTML</span>"
     );
 
-    expect(reactEl.props.alt).toBe("TIP");
+    expect(reactEl.props[dataKey]).toBe("TIP");
   });
   test("should has defaultMessage method in after get calling", () => {
     innerIntl.init({ locales, currentLocale: "zh-CN", debug: true });

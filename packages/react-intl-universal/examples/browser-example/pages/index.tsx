@@ -75,7 +75,7 @@ const ReactIntlUniversalExample: React.FC<any> = (props) => {
 
   const setCurrentLocale = (currentLocale: string) => {
     intl.init({
-      debug: true,
+      // debug: true,
       currentLocale,
       locales: LOCALE_DATA,
     });

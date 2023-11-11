@@ -88,6 +88,7 @@ declare module "react-intl-universal" {
         warningHandler?: (message?: any, error?: any) => void;
         escapeHtml?: boolean;
         debug?: boolean;
+        dataKey?: string;
     }
     
     export interface ReactIntlUniversalMessageDescriptor {

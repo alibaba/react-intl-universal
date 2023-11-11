@@ -20,7 +20,8 @@ class ReactIntlUniversal {
       warningHandler: function warn(...msg) { console.warn(...msg) }, // ability to accumulate missing messages using third party services
       escapeHtml: true, // disable escape html in variable mode
       fallbackLocale: null, // Locale to use if a key is not found in the current locale
-      debug: false, // If debugger mode is on, the message will be wrapped by a span with key
+      debug: false, // If debugger mode is on, the message will be wrapped by a span
+      dataKey: 'data-i18n-key', // If debugger mode is on, the message will be wrapped by a span with this data key
     };
   }
 
@@ -108,7 +109,7 @@ class ReactIntlUniversal {
   /**
    * Get the formatted message by key
    * @param {string} key The string representing key in locale data file
-   * @param {Object} variables Variables in message
+   * @param {Object} [variables] Variables in message
    * @returns {string} message
    */
   get(key, variables) {
@@ -119,7 +120,7 @@ class ReactIntlUniversal {
   /**
    * Get the formatted html message by key.
    * @param {string} key The string representing key in locale data file
-   * @param {Object} variables Variables in message
+   * @param {Object} [variables] Variables in message
    * @returns {React.ReactElement} html message
   */
   getHTML(key, variables) {
@@ -258,12 +259,15 @@ class ReactIntlUniversal {
   }
 
   _getSpanElementMessage(key, msg) {
-    const el = React.createElement('span', {
-      alt: this.options.debug ? key : undefined,
+    const options = {
       dangerouslySetInnerHTML: {
         __html: msg
       }
-    });
+    };
+    if (this.options.debug) {
+      options[this.options.dataKey] = key
+    }
+    const el = React.createElement('span', options);
     // when key exists, it should still return element if there's defaultMessage() after getHTML()
     const defaultMessage = () => el;
     return Object.assign(

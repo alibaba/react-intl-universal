@@ -42,9 +42,11 @@ class ReactIntlUniversal {
     const { locales, currentLocale, formats } = this.options;
 
     if (!locales || !locales[currentLocale]) {
-      this.options.warningHandler(
-        `react-intl-universal locales data "${currentLocale}" not exists.`
-      );
+      let errorMsg = `react-intl-universal locales data "${currentLocale}" not exists.`;
+      if (!currentLocale) {
+        errorMsg += ' More info: https://github.com/alibaba/react-intl-universal/issues/144#issuecomment-1345193138'
+      }
+      this.options.warningHandler(errorMsg);
       return "";
     }
     let msg = this.getDescendantProp(locales[currentLocale], key);
@@ -80,19 +82,21 @@ class ReactIntlUniversal {
         variables[i] = value;
       }
     } else {
+      // no variable, just return the message
       return this.options.debug ? this.createReactElementMessage('span', key, msg, this.options.debug) : msg;
     }
 
+    // fill variables
     try {
       const msgFormatter = new IntlMessageFormat(msg, currentLocale, formats);
       const nextMessage = msgFormatter.format(variables);
-      return this.options.debug ? this.createReactElementMessage('span', key, nextMessage, this.options.debug) : nextMessage;
+      return nextMessage;
     } catch (err) {
       this.options.warningHandler(
         `react-intl-universal format message failed for key='${key}'.`,
         err.message
       );
-      return this.options.debug ? this.createReactElementMessage('span', key, msg, this.options.debug) : msg;
+      return msg;
     }
   }
 
@@ -103,13 +107,6 @@ class ReactIntlUniversal {
    * @returns {React.Element} message
   */
   getHTML(key, variables) {
-    if (this.options.intlGetHook) {
-      try {
-        this.options.intlGetHook(key, this.options.currentLocale);
-      } catch (e) {
-        console.log('intl get hook error: ', e);
-      }
-    }
     let msg = this.get(key, variables);
     if (msg) {
       return this.createReactElementMessage('span', key, msg, this.options.debug);
@@ -181,7 +178,7 @@ class ReactIntlUniversal {
 
     return new Promise((resolve, reject) => {
       // init() will not load external common locale data anymore.
-      // But, it still return a Promise for abckward compatibility.
+      // But, it still return a Promise for backward compatibility.
       resolve();
     });
   }
@@ -250,6 +247,7 @@ class ReactIntlUniversal {
         __html: msg
       }
     });
+    // when key exists, it should still return element if there's defaultMessage() after getHTML()
     const defaultMessage = () => el;
     return Object.assign(
       { defaultMessage: defaultMessage, d: defaultMessage },

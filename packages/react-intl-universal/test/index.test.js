@@ -369,6 +369,18 @@ test("Resolve directly if the environment is not browser", async () => {
   expect(result).toBe(undefined);
 });
 
+describe("Exceptional cases", () => {
+  let innerIntl;
+  beforeEach(() => {
+    innerIntl = new ReactIntlUniversal();
+  });
+  test("should call intl.init before render", () => {
+    const warningHandler = jest.spyOn(console, 'warn');
+    innerIntl.get("SIMPLE");
+    expect(warningHandler).toHaveBeenCalledWith(`react-intl-universal locales data "null" not exists. More info: https://github.com/alibaba/react-intl-universal/issues/144#issuecomment-1345193138`);
+  });
+})
+
 describe("Test for debug mode", () => {
   let innerIntl;
   beforeEach(() => {
@@ -391,13 +403,23 @@ describe("Test for debug mode", () => {
     expect(innerIntl.getHTML("TIP").props.alt).toBeUndefined();
   });
   test("should return html with variables by using getHTML method if debug mode is false", () => {
-    innerIntl.init({ locales, currentLocale: "en-US" });
-    let reactEl = intl.getHTML("TIP_VAR", {
+    innerIntl.init({ locales, currentLocale: "en-US", debug: false });
+    let reactEl = innerIntl.getHTML("TIP_VAR", {
       message: "your message"
     });
     expect(reactEl.props.dangerouslySetInnerHTML.__html).toBe(
       "This is<span>your message</span>"
     );
+  });
+  test("should return html with variables by using getHTML method if debug mode is true", () => {
+    innerIntl.init({ locales, currentLocale: "en-US", debug: true });
+    let reactEl = innerIntl.getHTML("TIP_VAR", {
+      message: "your message"
+    });
+    expect(reactEl.props.dangerouslySetInnerHTML.__html).toBe(
+      "This is<span>your message</span>"
+    );
+    expect(innerIntl.getHTML("TIP_VAR").props.alt).toBe("TIP_VAR");
   });
   test("should has defaultMessage method in after get calling", () => {
     innerIntl.init({ locales, currentLocale: "zh-CN", debug: true });

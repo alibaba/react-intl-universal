@@ -19,8 +19,9 @@ class ReactIntlUniversal {
       locales: {}, // app locale data like {"en-US":{"key1":"value1"},"zh-CN":{"key1":"值1"}}
       warningHandler: function warn(...msg) { console.warn(...msg) }, // ability to accumulate missing messages using third party services
       escapeHtml: true, // disable escape html in variable mode
-      // commonLocaleDataUrls: COMMON_LOCALE_DATA_URLS,
       fallbackLocale: null, // Locale to use if a key is not found in the current locale
+      debug: false, // If debugger mode is on, the message will be wrapped by a span
+      dataKey: 'data-i18n-key', // If debugger mode is on, the message will be wrapped by a span with this data key
     };
   }
 
@@ -30,7 +31,7 @@ class ReactIntlUniversal {
    * @param {Object} variables Variables in message
    * @returns {string} message
    */
-  get(key, variables) {
+  _getFormattedMessage(key, variables) {
     if (this.options.intlGetHook) {
       try {
         this.options.intlGetHook(key, this.options.currentLocale);
@@ -41,10 +42,13 @@ class ReactIntlUniversal {
     invariant(key, "key is required");
     const { locales, currentLocale, formats } = this.options;
 
+    // 1. check if the locale data and key exists
     if (!locales || !locales[currentLocale]) {
-      this.options.warningHandler(
-        `react-intl-universal locales data "${currentLocale}" not exists.`
-      );
+      let errorMsg = `react-intl-universal locales data "${currentLocale}" not exists.`;
+      if (!currentLocale) {
+        errorMsg += ' More info: https://github.com/alibaba/react-intl-universal/issues/144#issuecomment-1345193138'
+      }
+      this.options.warningHandler(errorMsg);
       return "";
     }
     let msg = this.getDescendantProp(locales[currentLocale], key);
@@ -64,6 +68,8 @@ class ReactIntlUniversal {
         return "";
       }
     }
+
+    // 2. handle security issue for variables
     if (variables) {
       variables = Object.assign({}, variables);
       // HTML message with variables. Escape it to avoid XSS attack.
@@ -79,13 +85,18 @@ class ReactIntlUniversal {
         }
         variables[i] = value;
       }
-    } else {
-      return msg;
     }
 
+    // 3. resolve variables
     try {
-      const msgFormatter = new IntlMessageFormat(msg, currentLocale, formats);
-      return msgFormatter.format(variables);
+      let finalMsg;
+      if (variables) { // format message with variables
+        const msgFormatter = new IntlMessageFormat(msg, currentLocale, formats);
+        finalMsg = msgFormatter.format(variables);
+      } else { // no variables, just return the message
+        finalMsg = msg;
+      }
+      return finalMsg
     } catch (err) {
       this.options.warningHandler(
         `react-intl-universal format message failed for key='${key}'.`,
@@ -96,32 +107,26 @@ class ReactIntlUniversal {
   }
 
   /**
+   * Get the formatted message by key
+   * @param {string} key The string representing key in locale data file
+   * @param {Object} [variables] Variables in message
+   * @returns {string} message
+   */
+  get(key, variables) {
+    const msg = this._getFormattedMessage(key, variables);
+    return this.options.debug ? this._getSpanElementMessage(key, msg) : msg;
+  }
+
+  /**
    * Get the formatted html message by key.
    * @param {string} key The string representing key in locale data file
-   * @param {Object} variables Variables in message
-   * @returns {React.Element} message
+   * @param {Object} [variables] Variables in message
+   * @returns {React.ReactElement} html message
   */
   getHTML(key, variables) {
-    if (this.options.intlGetHook) {
-      try {
-        this.options.intlGetHook(key, this.options.currentLocale);
-      } catch (e) {
-        console.log('intl get hook error: ', e);
-      }
-    }
-    let msg = this.get(key, variables);
+    let msg = this._getFormattedMessage(key, variables);
     if (msg) {
-      const el = React.createElement("span", {
-        dangerouslySetInnerHTML: {
-          __html: msg
-        }
-      });
-      // when key exists, it should still return element if there's defaultMessage() after getHTML()
-      const defaultMessage = () => el;
-      return Object.assign(
-        { defaultMessage: defaultMessage, d: defaultMessage },
-        el
-      );
+      return this._getSpanElementMessage(key, msg);
     }
     return "";
   }
@@ -173,7 +178,8 @@ class ReactIntlUniversal {
    * Initialize properties and load CLDR locale data according to currentLocale
    * @param {Object} options
    * @param {string} options.currentLocale Current locale such as 'en-US'
-   * @param {string} options.locales App locale data like {"en-US":{"key1":"value1"},"zh-CN":{"key1":"值1"}}
+   * @param {any} options.locales App locale data like {"en-US":{"key1":"value1"},"zh-CN":{"key1":"值1"}}
+   * @param {boolean} [options.debug] debug mode
    * @returns {Promise}
    */
   init(options = {}) {
@@ -190,7 +196,7 @@ class ReactIntlUniversal {
 
     return new Promise((resolve, reject) => {
       // init() will not load external common locale data anymore.
-      // But, it still return a Promise for abckward compatibility.
+      // But, it still return a Promise for backward compatibility.
       resolve();
     });
   }
@@ -251,6 +257,25 @@ class ReactIntlUniversal {
   getLocaleFromBrowser() {
     return navigator.language || navigator.userLanguage;
   }
+
+  _getSpanElementMessage(key, msg) {
+    const options = {
+      dangerouslySetInnerHTML: {
+        __html: msg
+      }
+    };
+    if (this.options.debug) {
+      options[this.options.dataKey] = key
+    }
+    const el = React.createElement('span', options);
+    // when key exists, it should still return element if there's defaultMessage() after getHTML()
+    const defaultMessage = () => el;
+    return Object.assign(
+      { defaultMessage: defaultMessage, d: defaultMessage },
+      el
+    );
+  }
+
 }
 
 export default ReactIntlUniversal;

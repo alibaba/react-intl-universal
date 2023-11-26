@@ -1,4 +1,4 @@
-import intl from 'react-intl-universal';
+import intl from 'core/intl';
 
 const util = {
   getMessage: () => intl.get('MESSAGE_NOT_IN_COMPONENT'),

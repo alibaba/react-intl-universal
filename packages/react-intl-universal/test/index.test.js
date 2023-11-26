@@ -1,11 +1,12 @@
 import React from "react";
 import cookie from "cookie";
-import intl from "../src/index";
+import intl, { ReactIntlUniversal } from "../src/index";
 import zhCN from "./locales/zh-CN";
 import enUS from "./locales/en-US";
 import enUSMore from "./locales/en-US-more";
 import LocalStorageMock from "./util/LocalStorageMock";
 global.localStorage = new LocalStorageMock;
+const dataKey = 'data-i18n-key';
 
 const locales = {
   "en-US": enUS,
@@ -367,4 +368,71 @@ test("Resolve directly if the environment is not browser", async () => {
     value: createElement,
   });
   expect(result).toBe(undefined);
+});
+
+describe("Exceptional cases", () => {
+  let innerIntl;
+  beforeEach(() => {
+    innerIntl = new ReactIntlUniversal();
+  });
+  test("should call intl.init before render", () => {
+    const warningHandler = jest.spyOn(console, 'warn');
+    innerIntl.get("SIMPLE");
+    expect(warningHandler).toHaveBeenCalledWith(`react-intl-universal locales data "null" not exists. More info: https://github.com/alibaba/react-intl-universal/issues/144#issuecomment-1345193138`);
+  });
+})
+
+describe("Test for debug mode", () => {
+  let innerIntl;
+  beforeEach(() => {
+    innerIntl = new ReactIntlUniversal();
+  });
+  test("should output key by using get method if debug mode is true", () => {
+    innerIntl.init({ locales, currentLocale: "zh-CN", debug: true });
+    expect(innerIntl.get("SIMPLE").props[dataKey]).toBe("SIMPLE");
+  });
+  test("should output string by using get method if debug mode is false", () => {
+    innerIntl.init({ locales, currentLocale: "zh-CN", debug: false });
+    expect(innerIntl.get("SIMPLE")).toBe("简单");
+  });
+  test("should output key by using getHTML method if debug mode is true", () => {
+    innerIntl.init({ locales, currentLocale: "zh-CN", debug: true });
+    expect(innerIntl.getHTML("TIP").props[dataKey]).toBe("TIP");
+  });
+  test("should return original DOM without key by using getHTML method if debug mode is false", () => {
+    innerIntl.init({ locales, currentLocale: "zh-CN", debug: false });
+    expect(innerIntl.getHTML("TIP").props[dataKey]).toBeUndefined();
+  });
+  test("should return html with variables by using getHTML method if debug mode is false", () => {
+    innerIntl.init({ locales, currentLocale: "en-US", debug: false });
+    let reactEl = innerIntl.getHTML("TIP_VAR", {
+      message: "your message"
+    });
+    expect(reactEl.props.dangerouslySetInnerHTML.__html).toBe(
+      "This is<span>your message</span>"
+    );
+  });
+  test("should return html with variables by using getHTML method if debug mode is true", () => {
+    innerIntl.init({ locales, currentLocale: "en-US", debug: true });
+    const reactEl = innerIntl.getHTML("TIP_VAR", {
+      message: "your message"
+    });
+    expect(reactEl.props.dangerouslySetInnerHTML.__html).toBe(
+      "This is<span>your message</span>"
+    );
+    expect(reactEl.props[dataKey]).toBe("TIP_VAR");
+  });
+  test("should return html without variables by using getHTML method if debug mode is true", () => {
+    innerIntl.init({ locales, currentLocale: "en-US", debug: true });
+    let reactEl = innerIntl.getHTML("TIP");
+    expect(reactEl.props.dangerouslySetInnerHTML.__html).toBe(
+      "This is <span>HTML</span>"
+    );
+
+    expect(reactEl.props[dataKey]).toBe("TIP");
+  });
+  test("should has defaultMessage method in after get calling", () => {
+    innerIntl.init({ locales, currentLocale: "zh-CN", debug: true });
+    expect(innerIntl.get("TIP").d).not.toBeUndefined();
+  });
 });

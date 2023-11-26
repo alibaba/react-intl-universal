@@ -216,6 +216,26 @@ intl.getHTML('TIP'); // {React.Element}
 ### Helper
 [react-intl-universal](https://www.npmjs.com/package/react-intl-universal) provides a utility helping developer determine the user's `currentLocale`. As the running examples, when user select a new locale, it redirect user new location like `http://localhost:3000?lang=en-US`. Then, we can use `intl.determineLocale` to get the locale from URL. It can also support determine user's locale via cookie, localStorage, and browser default language. Refer to the APIs section for more detail.
 
+
+## Debugger mode
+When developing a website with multiple languages (i18n), translators are usually responsible for translating the content instead of the web developer. However, translators often struggle to find the specific message they need to edit on the webpage because they don't know its key. This leads to them having to ask the developer for the key, resulting in a lot of time wasted on communication.
+
+To solve this issue, a solution is proposed: When the debugger mode in `react-intl-universal` is enabled, each message on the webpage will be wrapped in a special span element with the key "data-i18n-key". This way, translators can easily see the key of the message and make the necessary edits themselves using some message management system, without needing to ask the developer.
+
+Enabling debugger mode:
+
+```js
+intl.init({
+  // ...
+  debug: true
+})
+```
+
+Message will be wrapped in a span element with the key "data-i18n-key":
+
+![debugger mode](https://github.com/alibaba/react-intl-universal/assets/3455798/172723f0-c241-4aee-9691-9abe4001b0f5)
+
+
 ## Component Internationalization
 When internationalizing a React component, you don't need to `intl.init` again.
 You could make it as [peerDependency](https://github.com/alibaba/react-intl-universal/blob/master/packages/react-intl-universal/examples/component-example/package.json#L34), then just [load](https://github.com/alibaba/react-intl-universal/tree/master/packages/react-intl-universal/examples/component-example/src/index.tsx#L16) the locale data in the compoent.
@@ -231,6 +251,8 @@ You could make it as [peerDependency](https://github.com/alibaba/react-intl-univ
    * @param {Object} options.locales App locale data like {"en-US":{"key1":"value1"},"zh-CN":{"key1":"值1"}}
    * @param {Object} options.warningHandler Ability to accumulate missing messages using third party services. See https://github.com/alibaba/react-intl-universal/releases/tag/1.11.1
    * @param {string} options.fallbackLocale Fallback locale such as 'zh-CN' to use if a key is not found in the current locale
+   * @param {boolean} options.debug If debugger mode is on, the message will be wrapped by a span with data key
+   * @param {string} options.dataKey If debugger mode is on, the message will be wrapped by a span with this data key. Default value 'data-i18n-key'
    * @returns {Promise}
    */
   init(options)

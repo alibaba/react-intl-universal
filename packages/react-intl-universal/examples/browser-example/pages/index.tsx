@@ -1,5 +1,5 @@
 import React from 'react';
-import intl from 'react-intl-universal';
+import intl from 'core/intl';
 import useForceUpdate from 'use-force-update';
 import enUS from 'locales/en-US.json';
 import zhCN from 'locales/zh-CN.json';
@@ -75,6 +75,7 @@ const ReactIntlUniversalExample: React.FC<any> = (props) => {
 
   const setCurrentLocale = (currentLocale: string) => {
     intl.init({
+      // debug: true,
       currentLocale,
       locales: LOCALE_DATA,
     });

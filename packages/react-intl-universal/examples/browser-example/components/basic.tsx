@@ -1,5 +1,5 @@
 import React from 'react'
-import intl from 'react-intl-universal';
+import intl from 'core/intl';
 
 const BasicComponent: React.FC<any> = () => {
   return (

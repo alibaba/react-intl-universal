@@ -25,7 +25,7 @@
 [Usage Trend of react-intl-universal](https://npm-compare.com/react-intl-universal/#timeRange=FIVE_YEARS)
 
 <a href="https://npm-compare.com/react-intl-universal#timeRange=FIVE_YEARS" target="_blank">
-  <img src="https://npm-compare.com/img/npm-trend/FIVE_YEARS/react-intl-universal.png" width="100%" alt="npm usage trend" />
+  <img src="https://npm-compare.com/img/npm-trend/FIVE_YEARS/react-intl-universal.png" width="100%" alt="npm usage trend of react-intl-universal" />
 </a>
 
 ## Why Another Internationalization Solution for React?

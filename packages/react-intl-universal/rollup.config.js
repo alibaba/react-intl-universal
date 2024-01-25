@@ -25,7 +25,6 @@ export default {
     external : [
         'invariant',
         'intl-messageformat',
-        'intl',
         'escape-html',
         'cookie',
         'querystring',

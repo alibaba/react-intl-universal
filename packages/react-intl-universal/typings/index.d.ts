@@ -67,6 +67,7 @@ declare module "react-intl-universal" {
      * @param {string} options.fallbackLocale Fallback locale such as 'zh-CN' to use if a key is not found in the current locale
      * @param {boolean} options.escapeHtml To escape html. Default value is true.
      * @param {boolean} options.debug debug mode
+     * @param {Object} options.xmlParser Parser for the XML tags used in messages (eg: `{ span: children => '<span>' + children + '</span>' }`)
      * @returns {Promise}
      */
     export function init(options: ReactIntlUniversalOptions): Promise<void>;
@@ -89,6 +90,7 @@ declare module "react-intl-universal" {
         escapeHtml?: boolean;
         debug?: boolean;
         dataKey?: string;
+        xmlParser?: { [tag: string]: (children: string) => string };
     }
     
     export interface ReactIntlUniversalMessageDescriptor {

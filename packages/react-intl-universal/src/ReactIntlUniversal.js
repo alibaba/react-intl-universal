@@ -21,6 +21,7 @@ class ReactIntlUniversal {
       fallbackLocale: null, // Locale to use if a key is not found in the current locale
       debug: false, // If debugger mode is on, the message will be wrapped by a span
       dataKey: 'data-i18n-key', // If debugger mode is on, the message will be wrapped by a span with this data key
+      xmlParser: { span: chunks => `<span>${chunks}</span>` }, // If there are XML tags present in the message, parsers should be added per tag
     };
   }
 
@@ -39,7 +40,7 @@ class ReactIntlUniversal {
       }
     }
     invariant(key, "key is required");
-    const { locales, currentLocale, formats } = this.options;
+    const { locales, currentLocale, formats, xmlParser } = this.options;
 
     // 1. check if the locale data and key exists
     if (!locales || !locales[currentLocale]) {
@@ -91,7 +92,7 @@ class ReactIntlUniversal {
       let finalMsg;
       if (variables) { // format message with variables
         const msgFormatter = new IntlMessageFormat(msg, currentLocale, formats);
-        finalMsg = msgFormatter.format(variables);
+        finalMsg = msgFormatter.format(Object.assign(xmlParser, variables));
       } else { // no variables, just return the message
         finalMsg = msg;
       }

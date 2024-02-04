@@ -114,6 +114,16 @@ test("HTML Message with variables", () => {
   );
 });
 
+test("HTML Message with variables and custom XML parser", () => {
+  intl.init({ locales, currentLocale: "en-US", xmlParser: { div: children => '<div>' + children + '</div>' } });
+  let reactEl = intl.getHTML("TIP_VAR_DIV", {
+    message: "your message"
+  });
+  expect(reactEl.props.dangerouslySetInnerHTML.__html).toBe(
+    "This is<div>your message</div>"
+  );
+});
+
 test("HTML Message with XSS attack", () => {
   intl.init({ locales, currentLocale: "en-US" });
   let reactEl = intl.getHTML("TIP_VAR", {

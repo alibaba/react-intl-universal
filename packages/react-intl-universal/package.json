@@ -36,7 +36,7 @@
   "dependencies": {
     "cookie": "^0.3.1",
     "escape-html": "^1.0.3",
-    "intl-messageformat": "^7.8.4",
+    "intl-messageformat": "^10.5.11",
     "invariant": "^2.2.2",
     "lodash.merge": "^4.6.2",
     "object-keys": "^1.0.11",

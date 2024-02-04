@@ -39,8 +39,7 @@
     "intl-messageformat": "^7.8.4",
     "invariant": "^2.2.2",
     "lodash.merge": "^4.6.2",
-    "object-keys": "^1.0.11",
-    "querystring": "^0.2.0"
+    "object-keys": "^1.0.11"
   },
   "peerDependencies": {
     "react": "*"

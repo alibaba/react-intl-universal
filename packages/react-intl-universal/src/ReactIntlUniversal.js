@@ -5,7 +5,6 @@ import cookie from "cookie";
 import invariant from "invariant";
 import * as constants from "./constants";
 import merge from "lodash.merge";
-import url from "url";
 
 String.prototype.defaultMessage = String.prototype.d = function (msg) {
   return this || msg || "";
@@ -234,7 +233,7 @@ class ReactIntlUniversal {
     if (urlLocaleKey) {
       let query = location.search.split("?");
       if (query.length >= 2) {
-        const params = new url.URLSearchParams(query[1]);
+        const params = new URLSearchParams(query[1]);
         if (params.has(urlLocaleKey)) {
           return params.get(urlLocaleKey);
         }

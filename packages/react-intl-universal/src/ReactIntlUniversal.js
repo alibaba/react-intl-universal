@@ -76,8 +76,7 @@ class ReactIntlUniversal {
         if (
           this.options.escapeHtml === true &&
           (typeof value === "string" || value instanceof String) &&
-          value.indexOf("<") >= 0 &&
-          value.indexOf(">") >= 0
+          value.indexOf("<") >= 0
         ) {
           value = escapeHtml(value);
         }

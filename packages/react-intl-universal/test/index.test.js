@@ -297,11 +297,7 @@ test("Get locale from localStorage", () => {
 test("Get locale from URL", () => {
   expect(intl.getLocaleFromURL({ urlLocaleKey: "lang" })).toBe(undefined);
 
-  // change url in jsdom: https://github.com/facebook/jest/issues/890
-  Object.defineProperty(window.location, "search", {
-    writable: true,
-    value: "?lang=en-US"
-  });
+  window.history.pushState({}, '', `?lang=en-US`);
   expect(intl.getLocaleFromURL({ urlLocaleKey: "lang" })).toBe("en-US");
 });
 

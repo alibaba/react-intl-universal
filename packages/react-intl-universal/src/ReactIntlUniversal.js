@@ -20,7 +20,7 @@ class ReactIntlUniversal {
       fallbackLocale: null, // Locale to use if a key is not found in the current locale
       debug: false, // If debugger mode is on, the message will be wrapped by a span
       dataKey: 'data-i18n-key', // If debugger mode is on, the message will be wrapped by a span with this data key
-      xmlParser: { span: chunks => `<span>${chunks}</span>` }, // If there are XML tags present in the message, parsers should be added per tag
+      xmlParser: { span: children => `<span>${children}</span>` }, // If there are XML tags present in the message, parsers should be added per tag. https://formatjs.io/docs/intl-messageformat/#rich-text-support
     };
   }
 

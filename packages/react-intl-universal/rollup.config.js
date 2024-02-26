@@ -27,7 +27,6 @@ export default {
         'intl-messageformat',
         'escape-html',
         'cookie',
-        'querystring',
         'react',
         'console-polyfill',
         'lodash.merge',

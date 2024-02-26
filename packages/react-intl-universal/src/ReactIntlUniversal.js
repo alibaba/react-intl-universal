@@ -2,7 +2,6 @@ import React from "react";
 import IntlMessageFormat from "intl-messageformat";
 import escapeHtml from "escape-html";
 import cookie from "cookie";
-import queryParser from "querystring";
 import invariant from "invariant";
 import * as constants from "./constants";
 import merge from "lodash.merge";
@@ -78,8 +77,7 @@ class ReactIntlUniversal {
         if (
           this.options.escapeHtml === true &&
           (typeof value === "string" || value instanceof String) &&
-          value.indexOf("<") >= 0 &&
-          value.indexOf(">") >= 0
+          value.indexOf("<") >= 0
         ) {
           value = escapeHtml(value);
         }
@@ -235,8 +233,10 @@ class ReactIntlUniversal {
     if (urlLocaleKey) {
       let query = location.search.split("?");
       if (query.length >= 2) {
-        let params = queryParser.parse(query[1]);
-        return params && params[urlLocaleKey];
+        const params = new URLSearchParams(query[1]);
+        if (params.has(urlLocaleKey)) {
+          return params.get(urlLocaleKey);
+        }
       }
     }
   }

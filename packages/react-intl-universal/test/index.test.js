@@ -125,12 +125,19 @@ test("HTML Message with variables and custom XML parser", () => {
 });
 
 test("HTML Message with XSS attack", () => {
-  intl.init({ locales, currentLocale: "en-US" });
+  intl.init({
+    locales,
+    currentLocale: "en-US",
+    xmlParser: {
+      span: children => `<span>${children}</span>`,
+      script: children => `<script>${children}</script>`
+    }
+  });
   let reactEl = intl.getHTML("TIP_VAR", {
-    message: "<sctipt>alert(1)</script>"
+    message: "<script>alert(1)</script>"
   });
   expect(reactEl.props.dangerouslySetInnerHTML.__html).toBe(
-    "This is<span>&lt;sctipt&gt;alert(1)&lt;/script&gt;</span>"
+    "This is<span>&lt;script&gt;alert(1)&lt;/script&gt;</span>"
   );
 });
 

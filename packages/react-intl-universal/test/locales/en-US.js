@@ -3,6 +3,7 @@ module.exports = ({
   "HELLO": "Hello, {name}",
   "TIP": "This is <span>HTML</span>",
   "TIP_VAR": "This is<span>{message}</span>",
+  "TIP_VAR_DIV": "This is<div>{message}</div>",
   "SALE_START": "Sale begins {start, date}",
   "SALE_END": "Sale begins {start, date, long}",
   "COUPON": "Coupon expires at {expires, time, medium}",

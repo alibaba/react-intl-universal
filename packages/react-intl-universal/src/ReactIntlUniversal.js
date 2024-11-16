@@ -1,7 +1,6 @@
 import React from "react";
 import IntlMessageFormat from "intl-messageformat";
 import escapeHtml from "escape-html";
-import cookie from "cookie";
 import invariant from "invariant";
 import * as constants from "./constants";
 import merge from "lodash.merge";
@@ -214,9 +213,17 @@ class ReactIntlUniversal {
 
   getLocaleFromCookie(options) {
     const { cookieLocaleKey } = options;
-    if (cookieLocaleKey) {
-      let params = cookie.parse(document.cookie);
-      return params && params[cookieLocaleKey];
+    if (cookieLocaleKey && typeof document !== 'undefined') {
+      const cookies = document.cookie.split(';'); // Split on semicolon only
+      const cookieObj = {};
+
+      cookies.forEach((cookie) => {
+        const [key, value] = cookie.trim().split('='); // Trim leading/trailing spaces
+        if (key) {
+          cookieObj[key] = decodeURIComponent(value); // cookie values may be URL-encoded
+        }
+      });
+      return cookieObj[cookieLocaleKey];
     }
   }
 

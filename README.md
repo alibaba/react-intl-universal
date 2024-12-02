@@ -288,6 +288,12 @@ You could make it as [peerDependency](https://github.com/alibaba/react-intl-univ
   determineLocale(options)
 
   /**
+  * Change current locale
+  * @param {string} newLocale Current locale such as 'en-US'
+  */
+  changeCurrentLocale(newCurrentLocale)
+
+  /**
    * Get the inital options 
    * @returns {Object} options includes currentLocale and locales
    */

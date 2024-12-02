@@ -1,6 +1,6 @@
 {
   "name": "react-intl-universal",
-  "version": "2.11.3",
+  "version": "2.11.5",
   "description": "Internationalize React apps. Not only for React component but also for Vanilla JS.",
   "keywords": [
     "intl",
@@ -34,12 +34,10 @@
   },
   "license": "BSD-3-Clause",
   "dependencies": {
-    "cookie": "^0.3.1",
     "escape-html": "^1.0.3",
     "intl-messageformat": "^7.8.4",
-    "invariant": "^2.2.2",
-    "lodash.merge": "^4.6.2",
-    "object-keys": "^1.0.11"
+    "invariant": "^2.2.4",
+    "lodash.merge": "^4.6.2"
   },
   "peerDependencies": {
     "react": "*"

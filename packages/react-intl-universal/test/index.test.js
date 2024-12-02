@@ -1,5 +1,4 @@
 import React from "react";
-import cookie from "cookie";
 import intl, { ReactIntlUniversal } from "../src/index";
 import zhCN from "./locales/zh-CN";
 import enUS from "./locales/en-US";
@@ -18,6 +17,13 @@ test("Set specific locale", () => {
   expect(intl.get("SIMPLE")).toBe("简单");
   intl.init({ locales, currentLocale: "en-US" });
   expect(intl.get("SIMPLE")).toBe("Simple");
+});
+
+test("Change specific locale", () => {
+  intl.init({ locales, currentLocale: "en-US" });
+  expect(intl.get("SIMPLE")).toBe("Simple");
+  intl.changeCurrentLocale("zh-CN");
+  expect(intl.get("SIMPLE")).toBe("简单");
 });
 
 test("Message with variables", () => {
@@ -285,7 +291,8 @@ test("Default HTML message", () => {
 });
 
 test("Get locale from cookie", () => {
-  document.cookie = cookie.serialize("lang", "en-US");
+  document.cookie = "lang=en-US";
+  document.cookie = "other=1";
   expect(intl.getLocaleFromCookie({ cookieLocaleKey: "lang" })).toBe("en-US");
 });
 
@@ -307,7 +314,8 @@ test("Get locale from browser", () => {
 
 test("Determine Locale", () => {
   expect(intl.determineLocale()).toBe("en-US");
-  document.cookie = cookie.serialize("lang", "zh-CN");
+  document.cookie = "lang=zh-CN";
+  document.cookie = "other=1";
   expect(intl.determineLocale({ cookieLocaleKey: "lang" })).toBe("zh-CN");
 });
 

@@ -9,6 +9,7 @@ const getHTML = defaultInstance.getHTML.bind(defaultInstance);
 const formatMessage = defaultInstance.formatMessage.bind(defaultInstance);
 const formatHTMLMessage = defaultInstance.formatHTMLMessage.bind(defaultInstance);
 const determineLocale = defaultInstance.determineLocale.bind(defaultInstance);
+const changeCurrentLocale = defaultInstance.changeCurrentLocale.bind(defaultInstance);
 const init = defaultInstance.init.bind(defaultInstance);
 const getInitOptions = defaultInstance.getInitOptions.bind(defaultInstance);
 const load = defaultInstance.load.bind(defaultInstance);
@@ -25,6 +26,7 @@ export {
   formatMessage,
   formatHTMLMessage,
   determineLocale,
+  changeCurrentLocale,
   init,
   getInitOptions,
   load,

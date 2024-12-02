@@ -291,7 +291,7 @@ You could make it as [peerDependency](https://github.com/alibaba/react-intl-univ
   * Change current locale
   * @param {string} newLocale Current locale such as 'en-US'
   */
-  changeCurrentLocale(newCurrentLocale)
+  changeCurrentLocale(newLocale)
 
   /**
    * Get the inital options 

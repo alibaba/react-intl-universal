@@ -193,7 +193,7 @@ intl.get('HELLO', { name }).d(`Hello, ${name}`); // "Hello, Tony"
 And `getHTML` also supports default message.
 ```jsx
 const name = 'Tony';
-intl.getHTML('HELLO').d(<div>Hello, {name}</div>) // React.Element with "<div>Hello, Tony</div>"
+intl.getHTML('HELLO', { name }).d(<div>Hello, {name}</div>) // React.Element with "<div>Hello, Tony</div>"
 ```
 
 

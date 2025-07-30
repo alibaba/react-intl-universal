@@ -1,5 +1,11 @@
 declare module "react-intl-universal" {
     /**
+     * Change current locale
+     * @param {string} newLocale Current locale such as 'en-US'
+     */
+    export function changeCurrentLocale(newLocale: string): void;
+
+    /**
      * Helper: determine user's locale via URL, cookie, and browser's language.
      * You may not need this API, if you have other rules to determine user's locale.
      * @param {string} options.urlLocaleKey URL's query Key to determine locale. Example: if URL=http://localhost?lang=en-US, then set it 'lang'

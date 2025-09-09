@@ -382,7 +382,7 @@ describe("Exceptional cases", () => {
   test("should call intl.init before render", () => {
     const warningHandler = jest.spyOn(console, 'warn');
     innerIntl.get("SIMPLE");
-    expect(warningHandler).toHaveBeenCalledWith(`react-intl-universal locales data "null" not exists. More info: https://github.com/alibaba/react-intl-universal/issues/144#issuecomment-1345193138`);
+    expect(warningHandler).toHaveBeenCalledWith(`react-intl-universal locales data \"null\" not exists.Check if the key \"SIMPLE\" is used before it is initialized. More info: https://github.com/alibaba/react-intl-universal/issues/144#issuecomment-1345193138`);
   });
 })
 

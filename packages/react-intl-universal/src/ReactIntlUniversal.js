@@ -43,7 +43,7 @@ class ReactIntlUniversal {
     if (!locales || !locales[currentLocale]) {
       let errorMsg = `react-intl-universal locales data "${currentLocale}" not exists.`;
       if (!currentLocale) {
-        errorMsg += ' More info: https://github.com/alibaba/react-intl-universal/issues/144#issuecomment-1345193138'
+        errorMsg += `Check if the key "${key}" is used before it is initialized. More info: https://github.com/alibaba/react-intl-universal/issues/144#issuecomment-1345193138`;
       }
       this.options.warningHandler(errorMsg);
       return "";

@@ -100,17 +100,17 @@ declare module "react-intl-universal" {
    * @example
    * // For English locale (en-US):
    * formatList(["str1", "str2", "str3"])
-   * // Returns: ['str1', ', ', 'str2', ', ', 'str3'] (with comma separators)
+   * // Returns: ['str1', ', ', 'str2', ', ', 'str3'] (with comma separators) => Render as: ``str1, str2, str3``` in React.js
    * 
    * @example
    * // For Chinese locale (zh-CN):
    * formatList(["str1", "str2", "str3"])
-   * // Returns: ['str1', '、', 'str2', '、', 'str3'] (with ideographic comma separators)
+   * // Returns: ['str1', '、', 'str2', '、', 'str3'] (with ideographic comma separators) => Render as: ``str1、str2、str3``` in React.js
    * 
    * @example
    * // With custom options for disjunction (or) in English:
    * formatList(["str1", "str2", "str3"], { type: "disjunction" })
-   * // Returns: ['str1', ', ', 'str2', ', or ', 'str3']
+   * // Returns: ['str1', ', ', 'str2', ', or ', 'str3']  => Render as: ``str1, str2, or str3``` in React.js
    */
   export function formatList(
     nodeList: React.ReactNode[],
@@ -186,23 +186,19 @@ declare module "react-intl-universal" {
    * 
    * @example
    * // For English locale (en-US):
-   * formatNumber(1234.56)
-   * // => "1,234.56"
+   * formatNumber(1234.56) // => "1,234.56"
    * 
    * @example
    * // For German locale (de-DE):
-   * formatNumber(1234.56)
-   * // => "1.234,56"
+   * formatNumber(1234.56) // => "1.234,56"
    * 
    * @example
    * // For Chinese locale (zh-CN):
-   * formatNumber(1234.56)
-   * // => "1,234.56"
+   * formatNumber(1234.56) // => "1,234.56"
    * 
    * @example
    * // Invalid number input:
-   * formatNumber("not-a-number")
-   * // => "not-a-number"
+   * formatNumber("not-a-number") // => "not-a-number"
    */
   export function formatNumber(number: number): string;
 

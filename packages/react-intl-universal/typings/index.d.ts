@@ -88,14 +88,29 @@ declare module "react-intl-universal" {
 
   /**
    * Formats a list of React nodes for proper internationalized formatting.
-   * @param {React.ReactNode[]} nodeList Array of React nodes to format
-   * @param {Intl.ListFormatOptions} options Intl.ListFormat options (defaults to narrow style). See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/ListFormat/ListFormat
-   * @returns {React.ReactNode[]} Array of React nodes formatted with appropriate separators/conjunctions
+   * This method properly handles locale-specific list formatting with appropriate separators and conjunctions.
+   * 
+   * @param {React.ReactNode[]} nodeList - Array of React nodes to format. Can include strings, numbers, or React elements.
+   * @param {Intl.ListFormatOptions} options - Intl.ListFormat options for customizing the formatting style and type.
+   *   - style: 'long' | 'short' | 'narrow' - Controls the length of the separators (default: 'narrow')
+   *   - type: 'conjunction' | 'disjunction' | 'unit' - Controls the type of list pattern (default: 'conjunction')
+   *   See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/ListFormat/ListFormat for details.
+   * @returns {React.ReactNode[]} Array of React nodes formatted with locale-appropriate separators and conjunctions.
    * 
    * @example
-   * formatList(["str1", "str2", "str2"])
-   * // Returns: ['str1', ',', 'str2', ',', 'str3'] in en-US
-   * // Returns: ['str1', '、', 'str2', '、', 'str3'] in zh-CN
+   * // For English locale (en-US):
+   * formatList(["str1", "str2", "str3"])
+   * // Returns: ['str1', ', ', 'str2', ', ', 'str3'] (with comma separators)
+   * 
+   * @example
+   * // For Chinese locale (zh-CN):
+   * formatList(["str1", "str2", "str3"])
+   * // Returns: ['str1', '、', 'str2', '、', 'str3'] (with ideographic comma separators)
+   * 
+   * @example
+   * // With custom options for disjunction (or) in English:
+   * formatList(["str1", "str2", "str3"], { type: "disjunction" })
+   * // Returns: ['str1', ', ', 'str2', ', or ', 'str3']
    */
   export function formatList(
     nodeList: React.ReactNode[],
@@ -103,25 +118,28 @@ declare module "react-intl-universal" {
   ): ReactNode[];
 
   /**
-   * Returns locale-specific parentheses format for the current language
+   * Returns locale-specific parentheses format for the current language.
+   * This method wraps the provided content with appropriate parentheses based on the current locale.
    * 
    * @description
-   * This method determines whether to use full-width parentheses (（）) or 
-   * half-width parentheses (()) based on the current locale. 
+   * This method determines whether to use full-width parentheses "（）" or 
+   * half-width parentheses "()" based on the current locale. 
    * Full-width parentheses are used for Chinese, Japanese, and Korean locales,
    * while half-width parentheses are used for all other locales.
+   * This ensures proper typographic conventions are followed for different languages.
    * 
-   * @param {React.ReactNode} node - The content to be wrapped in parentheses
+   * @param {React.ReactNode} node - The content to be wrapped in parentheses. Can be a string, number, or React element.
    * @returns {ReactNode[]} An array containing:
-   *   - Left parenthesis (（ or ( depending on locale)
+   *   - Left parenthesis "（" or "(" depending on locale
    *   - The provided node/content
-   *   - Right parenthesis (） or ) depending on locale)
+   *   - Right parenthesis "）" or ")" depending on locale
    * 
    * @example
    * // For Chinese locale (zh-CN):
    * formatParentheses("Description") 
    * // => ['（', 'Description', '）'] => Render as: ```<>（Description）</>``` in React.js
    * 
+   * @example
    * // For English locale (en-US):
    * formatParentheses("Description") 
    * // => ['(', 'Description', ')']  => Render as: ```<>(Description)</>``` in React.js
@@ -129,9 +147,64 @@ declare module "react-intl-universal" {
   export function formatParentheses(node: ReactNode): ReactNode[];
 
   /**
-   * Returns locale-specific colon character for the current language
+   * Returns locale-specific colon character for the current language.
+   * 
+   * @description
+   * This method determines whether to use a full-width colon "：" or 
+   * half-width colon ": " based on the current locale. 
+   * 
+   * @returns {string} The locale-appropriate colon character.
+   *   - Full-width colon "：" for Chinese, Japanese, and Korean locales
+   *   - Half-width colon ": " for all other locales
+   * 
+   * @example
+   * // For Chinese locale (zh-CN):
+   * getColon() 
+   * // => "："
+   * 
+   * @example
+   * // For English locale (en-US):
+   * getColon() 
+   * // => ": "
+   * 
+   * @example
+   * // Usage in a React component:
+   * <div>{intl.get("LABEL_NAME")}{intl.getColon()}{intl.get("VALUE")}</div>
    */
   export function getColon(): string;
+
+  /**
+   * Formats a number according to the current locale.
+   * 
+   * @description
+   * This method formats a number according to the current locale's conventions,
+   * including decimal separators, digit grouping, and other locale-specific formatting rules.
+   * If the input is not a valid number, it returns the original value unchanged.
+   * 
+   * @param {number} number - The number to format. Can be an integer or float.
+   * @returns {string} The formatted number.
+   * 
+   * @example
+   * // For English locale (en-US):
+   * formatNumber(1234.56)
+   * // => "1,234.56"
+   * 
+   * @example
+   * // For German locale (de-DE):
+   * formatNumber(1234.56)
+   * // => "1.234,56"
+   * 
+   * @example
+   * // For Chinese locale (zh-CN):
+   * formatNumber(1234.56)
+   * // => "1,234.56"
+   * 
+   * @example
+   * // Invalid number input:
+   * formatNumber("not-a-number")
+   * // => "not-a-number"
+   */
+  export function formatNumber(number: number): string;
 
   export interface ReactIntlUniversalOptions {
     currentLocale?: string;

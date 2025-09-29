@@ -327,7 +327,7 @@ class ReactIntlUniversal {
       return number;
     }
     try {
-      return new Intl.NumberFormat(this.options.currentLocale, {}).format(number); // TODO 缓存
+      return new Intl.NumberFormat(this.options.currentLocale, {}).format(number);
     } catch (error) {
       console.error('Error formatting number:', error);
       return number;

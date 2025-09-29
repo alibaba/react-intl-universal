@@ -9,7 +9,7 @@ const dataKey = 'data-i18n-key';
 
 const locales = {
   "en-US": enUS,
-  "zh-CN": zhCN
+  "zh-CN": zhCN,
 };
 
 test("Set specific locale", () => {
@@ -438,5 +438,358 @@ describe("Test for debug mode", () => {
   test("should has defaultMessage method in after get calling", () => {
     innerIntl.init({ locales, currentLocale: "zh-CN", debug: true });
     expect(innerIntl.get("TIP").d).not.toBeUndefined();
+  });
+});
+
+
+describe("Test for formatList", () => {
+  const element = React.createElement("div", { className: 'test' });
+
+  test("formatList should format string array correctly with en-US locale", () => {
+    intl.init({ locales, currentLocale: "en-US" });
+    expect(intl.formatList([
+      "str1",
+      "str2",
+      "str3",
+    ])).toEqual([
+      'str1',
+      ', ',
+      'str2',
+      ', ',
+      'str3',
+    ]);
+  });
+
+  test("formatList should format string array with disjunction type correctly", () => {
+    intl.init({ locales, currentLocale: "en-US" });
+    expect(intl.formatList([
+      "str1",
+      "str2",
+      "str3",
+    ], {
+      type: "disjunction"
+    })).toEqual([
+      'str1',
+      ', ',
+      'str2',
+      ', or ',
+      'str3',
+    ]);
+  });
+
+  test("formatList should format React component array correctly with en-US locale", () => {
+    intl.init({ locales, currentLocale: "en-US" });
+    expect(intl.formatList([
+      "str1",
+      "str2",
+      element,
+    ])).toEqual([
+      "str1",
+      ", ",
+      "str2",
+      ", ",
+      element,
+    ]);
+  });
+
+  test("formatList should format string array correctly with zh-CN locale", () => {
+    intl.init({ locales, currentLocale: "zh-CN" });
+    expect(intl.formatList([
+      "str1",
+      "str2",
+      "str3",
+    ])).toEqual([
+      'str1',
+      '、',
+      'str2',
+      '、',
+      'str3',
+    ]);
+  });
+
+  test("formatList should format React component array correctly with zh-CN locale", () => {
+    intl.init({ locales, currentLocale: "zh-CN" });
+    expect(intl.formatList([
+      "str1",
+      "str2",
+      element,
+    ])).toEqual([
+      "str1",
+      '、',
+      "str2",
+      '、',
+      element,
+    ]);
+  });
+
+  test("formatList should format string array with conjunction type correctly", () => {
+    intl.init({ locales, currentLocale: "en-US" });
+    expect(intl.formatList([
+      "str1",
+      "str2",
+      "str3",
+    ], {
+      type: "conjunction"
+    })).toEqual([
+      'str1',
+      ', ',
+      'str2',
+      ', and ',
+      'str3',
+    ]);
+  });
+
+  test("formatList should format string array with unit type correctly", () => {
+    intl.init({ locales, currentLocale: "en-US" });
+    expect(intl.formatList([
+      "str1",
+      "str2",
+      "str3",
+    ], {
+      type: "unit"
+    })).toEqual([
+      'str1',
+      ', ',
+      'str2',
+      ', ',
+      'str3',
+    ]);
+  });
+
+  test("formatList should format string array with short style correctly", () => {
+    intl.init({ locales, currentLocale: "en-US" });
+    expect(intl.formatList([
+      "str1",
+      "str2",
+      "str3",
+    ], {
+      style: "short"
+    })).toEqual([
+      'str1',
+      ', ',
+      'str2',
+      ', & ',
+      'str3',
+    ]);
+  });
+
+  test("formatList should format string array with narrow style correctly", () => {
+    intl.init({ locales, currentLocale: "en-US" });
+    expect(intl.formatList([
+      "str1",
+      "str2",
+      "str3",
+    ], {
+      style: "narrow"
+    })).toEqual([
+      'str1',
+      ', ',
+      'str2',
+      ', ',
+      'str3',
+    ]);
+  });
+
+  test("formatList should format string array with combination of type and style options", () => {
+    intl.init({ locales, currentLocale: "en-US" });
+    expect(intl.formatList([
+      "str1",
+      "str2",
+      "str3",
+    ], {
+      type: "disjunction",
+      style: "short"
+    })).toEqual([
+      'str1',
+      ', ',
+      'str2',
+      ', or ',
+      'str3',
+    ]);
+  });
+
+  test("formatList should handle empty array correctly", () => {
+    intl.init({ locales, currentLocale: "en-US" });
+    expect(intl.formatList([])).toEqual([]);
+  });
+
+  test("formatList should handle single element array correctly", () => {
+    intl.init({ locales, currentLocale: "en-US" });
+    expect(intl.formatList(["str1"])).toEqual(["str1"]);
+  });
+
+  test("formatList should handle two element array correctly with en-US locale", () => {
+    intl.init({ locales, currentLocale: "en-US" });
+    expect(intl.formatList([
+      "str1",
+      "str2",
+    ])).toEqual([
+      'str1',
+      ', ',
+      'str2',
+    ]);
+  });
+
+  test("formatList should handle two element array correctly with zh-CN locale", () => {
+    intl.init({ locales, currentLocale: "zh-CN" });
+    expect(intl.formatList([
+      "str1",
+      "str2",
+    ])).toEqual([
+      'str1',
+      '、',
+      'str2',
+    ]);
+  });
+
+  test("formatList should handle two element array with disjunction type correctly", () => {
+    intl.init({ locales, currentLocale: "en-US" });
+    expect(intl.formatList([
+      "str1",
+      "str2",
+    ], {
+      type: "disjunction"
+    })).toEqual([
+      'str1',
+      ' or ',
+      'str2',
+    ]);
+  });
+
+  test("formatList should format string array correctly with ja-JP locale", () => {
+    intl.init({ locales, currentLocale: "ja-JP" });
+    expect(intl.formatList([
+      "str1",
+      "str2",
+      "str3",
+    ])).toEqual([
+      'str1',
+      '、',
+      'str2',
+      '、',
+      'str3',
+    ]);
+  });
+
+  test("formatList should format React component array correctly with ja-JP locale", () => {
+    intl.init({ locales, currentLocale: "ja-JP" });
+    expect(intl.formatList([
+      "str1",
+      "str2",
+      element,
+    ])).toEqual([
+      "str1",
+      '、',
+      "str2",
+      '、',
+      element,
+    ]);
+  });
+
+  test("formatList should handle two element array correctly with ja-JP locale", () => {
+    intl.init({ locales, currentLocale: "ja-JP" });
+    expect(intl.formatList([
+      "str1",
+      "str2",
+    ])).toEqual([
+      'str1',
+      '、',
+      'str2',
+    ]);
+  });
+
+});
+
+
+describe("Test for getColon", () => {
+  beforeEach(() => {
+    intl.init({ locales, currentLocale: "en-US" });
+  });
+
+  test("should return half-width colon for non-full-width locales", () => {
+    expect(intl.getColon()).toEqual(": ");
+  });
+
+  test("should return full-width colon for full-width locales", () => {
+    intl.init({ locales, currentLocale: "zh-CN" });
+    expect(intl.getColon()).toEqual("：");
+
+    intl.init({ locales, currentLocale: "ja-JP" });
+    expect(intl.getColon()).toEqual("：");
+
+    intl.init({ locales, currentLocale: "ko-KR" });
+    expect(intl.getColon()).toEqual("：");
+  });
+});
+
+
+describe("Test for formatParentheses", () => {
+  beforeEach(() => {
+    intl.init({ locales, currentLocale: "en-US" });
+  });
+
+  test("should return half-width parentheses for non-full-width locales", () => {
+    expect(intl.formatParentheses("test")).toEqual(["(", "test", ")"]);
+  });
+
+  test("should return full-width parentheses for full-width locales", () => {
+    intl.init({ locales, currentLocale: "zh-CN" });
+    expect(intl.formatParentheses("test")).toEqual(["（", "test", "）"]);
+
+    intl.init({ locales, currentLocale: "ja-JP" });
+    expect(intl.formatParentheses("test")).toEqual(["（", "test", "）"]);
+
+    intl.init({ locales, currentLocale: "ko-KR" });
+    expect(intl.formatParentheses("test")).toEqual(["（", "test", "）"]);
+  });
+
+  test("should handle different input types", () => {
+    expect(intl.formatParentheses("")).toEqual(["(", "", ")"]);
+    expect(intl.formatParentheses(123)).toEqual(["(", 123, ")"]);
+    expect(intl.formatParentheses(null)).toEqual(["(", null, ")"]);
+  });
+});
+
+
+describe("Test for formatNumber", () => {
+
+  test("should format number correctly for en-US locale", () => {
+    intl.init({ locales, currentLocale: "en-US" });
+    expect(intl.formatNumber(1234567)).toBe("1,234,567");
+    expect(intl.formatNumber(1234.567)).toBe("1,234.567");
+    expect(intl.formatNumber(0)).toBe("0");
+  });
+
+  test("should format number correctly for zh-CN locale", () => {
+    intl.init({ locales, currentLocale: "zh-CN" });
+    expect(intl.formatNumber(1234567)).toBe("1,234,567");
+    expect(intl.formatNumber(1234.567)).toBe("1,234.567");
+    expect(intl.formatNumber(0)).toBe("0");
+  });
+
+  test("should format number correctly for de-DE locale", () => {
+    intl.init({ locales, currentLocale: "de-DE" });
+    expect(intl.formatNumber(1234.567)).toBe("1.234,567");
+  });
+
+  test("should format number correctly for fr-FR locale", () => {
+    intl.init({ locales, currentLocale: "fr-FR" });
+    expect(intl.formatNumber(1234.567)).toBe("1 234,567");
+  });
+
+  test("should handle edge cases", () => {
+    intl.init({ locales, currentLocale: "en-US" });
+    expect(intl.formatNumber(NaN)).toBeNaN();
+    // Intl.NumberFormat formats Infinity as "∞" string
+    expect(intl.formatNumber(Infinity)).toBe("∞");
+    expect(intl.formatNumber(-Infinity)).toBe("-∞");
+    expect(intl.formatNumber(null)).toBeNull();
+    expect(intl.formatNumber(undefined)).toBeUndefined();
+    expect(intl.formatNumber("not a number")).toBe("not a number");
+  });
+
+  test("should handle large numbers", () => {
+    intl.init({ locales, currentLocale: "en-US" });
+    expect(intl.formatNumber(1e15)).toBe("1,000,000,000,000,000");
   });
 });

@@ -169,7 +169,7 @@ class ReactIntlUniversal {
       this.getLocaleFromBrowser()
     );
   }
-  
+
   /**
    * Change current locale
    * @param {string} newLocale Current locale such as 'en-US'
@@ -278,6 +278,60 @@ class ReactIntlUniversal {
 
   getLocaleFromBrowser() {
     return navigator.language || navigator.userLanguage;
+  }
+
+  formatList(nodeList, options = { style: 'narrow' }) {
+    if (!Array.isArray(nodeList)) return []
+    if (nodeList.length === 0) return [];
+
+    // Create a mapping from placeholder strings to React nodes
+    const nodeMap = {};
+    const placeholders = nodeList.map((node, index) => {
+      const placeholder = index.toString();
+      nodeMap[placeholder] = node;
+      return placeholder;
+    });
+
+    // Create list formatter with specified locale and options
+    const formatter = new Intl.ListFormat(this.options.currentLocale, options);
+
+    // Get formatted parts (elements, literals like separators/conjunctions)
+    const parts = formatter.formatToParts(placeholders);
+
+    // Transform formatted parts back to React nodes
+    return parts.map(part => {
+      // Element is replaced with original nodes
+      if (part.type === 'element') {
+        return nodeMap[part.value];
+      }
+      // Literal remains as a string
+      return part.value;
+    });
+  }
+
+  formatParentheses(node) {
+    const currentLocale = this.options.currentLocale;
+    const isFullWidth = constants.fullWidthLocales.includes(currentLocale);
+    return isFullWidth ? ['（', node, '）'] : ['(', node, ')'];
+  }
+
+  getColon() {
+    const currentLocale = this.options.currentLocale;
+    const isFullWidth = constants.fullWidthLocales.includes(currentLocale);
+    return isFullWidth ? '：' : ': ';
+  }
+
+  formatNumber(number) {
+    // Return original value if not a number
+    if (typeof number !== 'number' || isNaN(number)) {
+      return number;
+    }
+    try {
+      return new Intl.NumberFormat(this.options.currentLocale, {}).format(number); // TODO 缓存
+    } catch (error) {
+      console.error('Error formatting number:', error);
+      return number;
+    }
   }
 
   _getSpanElementMessage(key, msg) {

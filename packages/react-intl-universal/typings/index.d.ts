@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { JSX, ReactNode } from "react";
 
 declare module "react-intl-universal" {
   /**
@@ -90,7 +90,7 @@ declare module "react-intl-universal" {
    * Formats a list of React nodes for proper internationalized formatting.
    * This method properly handles locale-specific list formatting with appropriate separators and conjunctions.
    * 
-   * @param {React.ReactNode[]} nodeList - Array of React nodes to format. Can include strings, numbers, or React elements.
+   * @param {React.ReactNode[]} nodeList - Array of React nodes to format.
    * @param {Intl.ListFormatOptions} options - Intl.ListFormat options for customizing the formatting style and type.
    *   - style: 'long' | 'short' | 'narrow' - Controls the length of the separators (default: 'narrow')
    *   - type: 'conjunction' | 'disjunction' | 'unit' - Controls the type of list pattern (default: 'conjunction')
@@ -230,12 +230,18 @@ declare module "react-intl-universal" {
     getInitOptions: typeof getInitOptions;
     init: typeof init;
     load: typeof load;
+    formatList: typeof formatList;
+    formatParentheses: typeof formatParentheses;
+    getColon: typeof getColon;
+    formatNumber: typeof formatNumber;
   };
 
   export default intl;
 }
 
-declare interface String {
-  defaultMessage(msg: string | JSX.Element): string;
-  d(msg: string | JSX.Element): string;
+declare global {
+  interface String {
+    defaultMessage(msg: string | JSX.Element): string;
+    d(msg: string | JSX.Element): string;
+  }
 }

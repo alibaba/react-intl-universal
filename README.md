@@ -298,6 +298,52 @@ You could make it as [peerDependency](https://github.com/alibaba/react-intl-univ
    * @returns {Object} options includes currentLocale and locales
    */
   getInitOptions()
+
+  /**
+   * Formats a list of React nodes for proper internationalized formatting.
+   * @param {React.ReactNode[]} nodeList - Array of React nodes to format.
+   * @param {Intl.ListFormatOptions} options - Intl.ListFormat options.
+   * @returns {React.ReactNode[]} Array of React nodes formatted with locale-appropriate separators.
+   * 
+   * @example
+   * For en-US locale: formatList(["str1", "str2"]) => Returns: ["str1", ", ", "str2"] => Render as: "str1, str2" in React.js
+   * For zh-CN locale: formatList(["str1", "str2"]) => Returns: ["str1", "、", "str2"] => Render as: "str1、str2" in React.js
+   */
+  formatList(nodeList, options)
+
+  /**
+   * Returns locale-specific parentheses format for the current language.
+   * @param {React.ReactNode} node - The content to be wrapped in parentheses.
+   * @returns {ReactNode[]} An array containing left parenthesis, content, and right parenthesis.
+   * 
+   * @example
+   * For en-US locale: formatParentheses("str1") => Returns ["(", "str1", ")"] => Render as "(str1)" in React.js
+   * For zh-CN locale: formatParentheses("str1") => Returns ["（", "str1", "）"] => Render as "（str1）" in React.js
+   */
+  formatParentheses(node)
+
+  /**
+   * Returns locale-specific colon character for the current language.
+   * @returns {string} The locale-appropriate colon character.
+   * 
+   * @example
+   * For en-US locale: <>{intl.get("LABEL_NAME")}{intl.getColon()}{intl.get("VALUE")}</> => Returns "label: value"
+   * For zh-CN locale: <>{intl.get("LABEL_NAME")}{intl.getColon()}{intl.get("VALUE")}</> => Returns "label：value"
+   */
+  getColon()
+
+  /**
+   * Formats a number according to the current locale.
+   * @param {number} number - The number to format.
+   * @returns {string} The formatted number.
+   * 
+   * @example
+   * For en-US locale: formatNumber(1234.56) => Returns "1,234.56"
+   * For de-DE locale: formatNumber(1234.56) => Returns "1.234,567"
+   * For fr-FR locale: formatNumber(1234.56) => Returns "1 234,567"
+   */
+  formatNumber(number)
+
 ```
 
 

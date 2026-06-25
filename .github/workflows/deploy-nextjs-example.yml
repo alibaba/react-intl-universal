@@ -1,0 +1,71 @@
+name: Deploy Next.js example to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            packages/react-intl-universal/package-lock.json
+            packages/react-intl-universal/examples/nextjs-example/package-lock.json
+
+      - name: Install package dependencies
+        working-directory: packages/react-intl-universal
+        run: npm ci
+
+      - name: Build react-intl-universal
+        working-directory: packages/react-intl-universal
+        run: npm run build
+
+      - name: Install example dependencies
+        working-directory: packages/react-intl-universal/examples/nextjs-example
+        run: npm ci
+
+      - name: Build static example
+        working-directory: packages/react-intl-universal/examples/nextjs-example
+        env:
+          GITHUB_PAGES: true
+        run: |
+          npm run build
+          touch out/.nojekyll
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: packages/react-intl-universal/examples/nextjs-example/out
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

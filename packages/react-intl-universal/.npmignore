@@ -3,5 +3,8 @@ examples/
 src/
 test/
 tool/
+tmp/
 rollup.config.*
+babel.config.*
+tsconfig*.json
 .*

@@ -1,20 +1,98 @@
-import React from "react";
-import IntlMessageFormat from "intl-messageformat";
+import React, { type ReactElement, type ReactNode } from "react";
+import { IntlMessageFormat, type Formats } from "intl-messageformat";
 import escapeHtml from "escape-html";
 import invariant from "invariant";
-import * as constants from "./constants";
 import merge from "lodash.merge";
+import * as constants from "./constants";
 
-String.prototype.defaultMessage = String.prototype.d = function (msg) {
-  return this || msg || "";
-};
+export type LocaleData = Record<string, any>;
+export type LocaleMap = Record<string, LocaleData>;
+export type Variables = Record<string, any>;
+export type WarningHandler = (...msg: any[]) => void;
+export type IntlGetHook = (key: string, currentLocale: string | null) => void;
+
+export interface ReactIntlUniversalOptions {
+  currentLocale?: string | null;
+  locales?: LocaleMap;
+  warningHandler?: WarningHandler;
+  escapeHtml?: boolean;
+  fallbackLocale?: string | null;
+  debug?: boolean;
+  dataKey?: string;
+  formats?: Partial<Formats>;
+  intlGetHook?: IntlGetHook;
+  urlLocaleKey?: string;
+  cookieLocaleKey?: string;
+  localStorageLocaleKey?: string;
+  commonLocaleDataUrls?: Record<string, string>;
+}
+
+export interface ReactIntlUniversalResolvedOptions {
+  currentLocale: string | null;
+  locales: LocaleMap;
+  warningHandler: WarningHandler;
+  escapeHtml: boolean;
+  fallbackLocale: string | null;
+  debug: boolean;
+  dataKey: string;
+  formats?: Partial<Formats>;
+  intlGetHook?: IntlGetHook;
+  urlLocaleKey?: string;
+  cookieLocaleKey?: string;
+  localStorageLocaleKey?: string;
+  commonLocaleDataUrls?: Record<string, string>;
+}
+
+export interface ReactIntlUniversalMessageDescriptor {
+  id: string;
+  defaultMessage?: string;
+}
+
+export interface ReactIntlUniversalHTMLMessageDescriptor {
+  id: string;
+  defaultMessage?: string | ReactElement;
+}
+
+export interface ElementDefaultMessageMethods {
+  defaultMessage(msg?: string | ReactElement): ReactElement;
+  d(msg?: string | ReactElement): ReactElement;
+}
+
+export type HTMLMessage = string | (ReactElement & ElementDefaultMessageMethods);
+
+declare global {
+  interface Navigator {
+    userLanguage?: string;
+  }
+
+  interface String {
+    defaultMessage(msg?: string): string;
+    defaultMessage<T extends ReactElement>(msg: T): string | T;
+    defaultMessage(msg: string | ReactElement): string | ReactElement;
+    d(msg?: string): string;
+    d<T extends ReactElement>(msg: T): string | T;
+    d(msg: string | ReactElement): string | ReactElement;
+  }
+}
+
+function stringDefaultMessage<T extends string | ReactElement>(
+  this: string | String,
+  msg?: T
+): string | T {
+  return this.toString() || msg || "";
+}
+
+String.prototype.defaultMessage = stringDefaultMessage as String["defaultMessage"];
+String.prototype.d = stringDefaultMessage as String["d"];
 
 class ReactIntlUniversal {
+  options: ReactIntlUniversalResolvedOptions;
+
   constructor() {
     this.options = {
       currentLocale: null, // Current locale such as 'en-US'
       locales: {}, // app locale data like {"en-US":{"key1":"value1"},"zh-CN":{"key1":"值1"}}
-      warningHandler: function warn(...msg) { console.warn(...msg) }, // ability to accumulate missing messages using third party services
+      warningHandler: function warn(...msg: any[]) { console.warn(...msg) }, // ability to accumulate missing messages using third party services
       escapeHtml: true, // disable escape html in variable mode
       fallbackLocale: null, // Locale to use if a key is not found in the current locale
       debug: false, // If debugger mode is on, the message will be wrapped by a span
@@ -24,11 +102,11 @@ class ReactIntlUniversal {
 
   /**
    * Get the formatted message by key
-   * @param {string} key The string representing key in locale data file
-   * @param {Object} variables Variables in message
-   * @returns {string} message
+   * @param key The string representing key in locale data file
+   * @param variables Variables in message
+   * @returns message
    */
-  _getFormattedMessage(key, variables) {
+  _getFormattedMessage(key: string, variables?: Variables): string {
     if (this.options.intlGetHook) {
       try {
         this.options.intlGetHook(key, this.options.currentLocale);
@@ -40,7 +118,7 @@ class ReactIntlUniversal {
     const { locales, currentLocale, formats } = this.options;
 
     // 1. check if the locale data and key exists
-    if (!locales || !locales[currentLocale]) {
+    if (!currentLocale || !locales || !locales[currentLocale]) {
       let errorMsg = `react-intl-universal locales data "${currentLocale}" not exists.`;
       if (!currentLocale) {
         errorMsg += `Check if the key "${key}" is used before it is initialized. More info: https://github.com/alibaba/react-intl-universal/issues/144#issuecomment-1345193138`;
@@ -77,7 +155,7 @@ class ReactIntlUniversal {
           (typeof value === "string" || value instanceof String) &&
           value.indexOf("<") >= 0
         ) {
-          value = escapeHtml(value);
+          value = escapeHtml(value.toString());
         }
         variables[i] = value;
       }
@@ -87,40 +165,42 @@ class ReactIntlUniversal {
     try {
       let finalMsg;
       if (variables) { // format message with variables
-        const msgFormatter = new IntlMessageFormat(msg, currentLocale, formats);
+        const msgFormatter = new IntlMessageFormat(String(msg), currentLocale, formats, {
+          ignoreTag: true
+        });
         finalMsg = msgFormatter.format(variables);
       } else { // no variables, just return the message
         finalMsg = msg;
       }
-      return finalMsg
+      return finalMsg as string;
     } catch (err) {
       this.options.warningHandler(
         `react-intl-universal format message failed for key='${key}'.`,
-        err.message
+        err instanceof Error ? err.message : String(err)
       );
-      return msg;
+      return msg as string;
     }
   }
 
   /**
    * Get the formatted message by key
-   * @param {string} key The string representing key in locale data file
-   * @param {Object} [variables] Variables in message
-   * @returns {string} message
+   * @param key The string representing key in locale data file
+   * @param variables Variables in message
+   * @returns message
    */
-  get(key, variables) {
+  get(key: string, variables?: Variables): string {
     const msg = this._getFormattedMessage(key, variables);
-    return this.options.debug ? this._getSpanElementMessage(key, msg) : msg;
+    return (this.options.debug ? this._getSpanElementMessage(key, msg) : msg) as unknown as string;
   }
 
   /**
    * Get the formatted html message by key.
-   * @param {string} key The string representing key in locale data file
-   * @param {Object} [variables] Variables in message
-   * @returns {React.ReactElement} html message
-  */
-  getHTML(key, variables) {
-    let msg = this._getFormattedMessage(key, variables);
+   * @param key The string representing key in locale data file
+   * @param variables Variables in message
+   * @returns html message
+   */
+  getHTML(key: string, variables?: Variables): HTMLMessage {
+    const msg = this._getFormattedMessage(key, variables);
     if (msg) {
       return this._getSpanElementMessage(key, msg);
     }
@@ -129,39 +209,39 @@ class ReactIntlUniversal {
 
   /**
    * As same as get(...) API
-   * @param {Object} options
-   * @param {string} options.id
-   * @param {string} options.defaultMessage
-   * @param {Object} variables Variables in message
-   * @returns {string} message
-  */
-  formatMessage(messageDescriptor, variables) {
+   * @param messageDescriptor options
+   * @param variables Variables in message
+   * @returns message
+   */
+  formatMessage(
+    messageDescriptor: ReactIntlUniversalMessageDescriptor,
+    variables?: Variables
+  ): string {
     const { id, defaultMessage } = messageDescriptor;
-    return this.get(id, variables).defaultMessage(defaultMessage);
+    return this.get(id, variables).defaultMessage(defaultMessage ?? "");
   }
 
   /**
    * As same as getHTML(...) API
-   * @param {Object} options
-   * @param {string} options.id
-   * @param {React.Element} options.defaultMessage
-   * @param {Object} variables Variables in message
-   * @returns {React.Element} message
-  */
-  formatHTMLMessage(messageDescriptor, variables) {
+   * @param messageDescriptor options
+   * @param variables Variables in message
+   * @returns message
+   */
+  formatHTMLMessage(
+    messageDescriptor: ReactIntlUniversalHTMLMessageDescriptor,
+    variables?: Variables
+  ): string | ReactElement {
     const { id, defaultMessage } = messageDescriptor;
-    return this.getHTML(id, variables).defaultMessage(defaultMessage);
+    return this.getHTML(id, variables).defaultMessage(defaultMessage ?? "");
   }
 
   /**
    * Helper: determine user's locale via URL, cookie, localStorage, and browser's language.
    * You may not need this API, if you have other rules to determine user's locale.
-   * @param {string} options.urlLocaleKey URL's query Key to determine locale. Example: if URL=http://localhost?lang=en-US, then set it 'lang'
-   * @param {string} options.cookieLocaleKey Cookie's Key to determine locale. Example: if cookie=lang:en-US, then set it 'lang'
-   * @param {string} options.localStorageLocaleKey LocalStorage's Key to determine locale such as 'lang'
-   * @returns {string} determined locale such as 'en-US'
+   * @param options options to determine locale
+   * @returns determined locale such as 'en-US'
    */
-  determineLocale(options = {}) {
+  determineLocale(options: ReactIntlUniversalOptions = {}): string | null | undefined {
     return (
       this.getLocaleFromURL(options) ||
       this.getLocaleFromCookie(options) ||
@@ -172,9 +252,9 @@ class ReactIntlUniversal {
 
   /**
    * Change current locale
-   * @param {string} newLocale Current locale such as 'en-US'
+   * @param newLocale Current locale such as 'en-US'
    */
-  changeCurrentLocale(newLocale) {
+  changeCurrentLocale(newLocale: string): void {
     if (!this.options.locales || !this.options.locales[newLocale]) {
       let errorMsg = `react-intl-universal locales data "${newLocale}" not exists.`;
       if (!this.options.locales) {
@@ -188,13 +268,10 @@ class ReactIntlUniversal {
 
   /**
    * Initialize properties and load CLDR locale data according to currentLocale
-   * @param {Object} options
-   * @param {string} options.currentLocale Current locale such as 'en-US'
-   * @param {any} options.locales App locale data like {"en-US":{"key1":"value1"},"zh-CN":{"key1":"值1"}}
-   * @param {boolean} [options.debug] debug mode
-   * @returns {Promise}
+   * @param options init options
+   * @returns promise for backward compatibility
    */
-  init(options = {}) {
+  init(options: ReactIntlUniversalOptions = {}): Promise<void> {
     invariant(options.currentLocale, "options.currentLocale is required");
     invariant(options.locales, "options.locales is required");
 
@@ -206,7 +283,7 @@ class ReactIntlUniversal {
       constants.defaultFormats
     );
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       // init() will not load external common locale data anymore.
       // But, it still return a Promise for backward compatibility.
       resolve();
@@ -216,22 +293,22 @@ class ReactIntlUniversal {
   /**
    * Get the inital options
    */
-  getInitOptions() {
+  getInitOptions(): ReactIntlUniversalResolvedOptions {
     return this.options;
   }
 
   /**
    * Load more locales after init
    */
-  load(locales) {
+  load(locales: LocaleMap): void {
     merge(this.options.locales, locales);
   }
 
-  getLocaleFromCookie(options) {
+  getLocaleFromCookie(options: ReactIntlUniversalOptions): string | undefined {
     const { cookieLocaleKey } = options;
     if (cookieLocaleKey && typeof document !== 'undefined') {
       const cookies = document.cookie.split(';'); // Split on semicolon only
-      const cookieObj = {};
+      const cookieObj: Record<string, string> = {};
 
       cookies.forEach((cookie) => {
         const [key, value] = cookie.trim().split('='); // Trim leading/trailing spaces
@@ -243,17 +320,17 @@ class ReactIntlUniversal {
     }
   }
 
-  getLocaleFromLocalStorage(options) {
+  getLocaleFromLocalStorage(options: ReactIntlUniversalOptions): string | null | undefined {
     const { localStorageLocaleKey } = options;
     if (localStorageLocaleKey && window.localStorage) {
       return localStorage.getItem(localStorageLocaleKey);
     }
   }
 
-  getLocaleFromURL(options) {
+  getLocaleFromURL(options: ReactIntlUniversalOptions): string | null | undefined {
     const { urlLocaleKey } = options;
     if (urlLocaleKey) {
-      let query = location.search.split("?");
+      const query = location.search.split("?");
       if (query.length >= 2) {
         const params = new URLSearchParams(query[1]);
         if (params.has(urlLocaleKey)) {
@@ -263,7 +340,7 @@ class ReactIntlUniversal {
     }
   }
 
-  getDescendantProp(locale, key) {
+  getDescendantProp(locale: LocaleData, key: string): any {
 
     if (locale[key]) {
       return locale[key];
@@ -276,16 +353,16 @@ class ReactIntlUniversal {
     return msg;
   }
 
-  getLocaleFromBrowser() {
+  getLocaleFromBrowser(): string | undefined {
     return navigator.language || navigator.userLanguage;
   }
 
-  formatList(nodeList, options = { style: 'narrow' }) {
+  formatList(nodeList: ReactNode[], options: Intl.ListFormatOptions = { style: 'narrow' }): ReactNode[] {
     if (!Array.isArray(nodeList)) return []
     if (nodeList.length === 0) return [];
 
     // Create a mapping from placeholder strings to React nodes
-    const nodeMap = {};
+    const nodeMap: Record<string, ReactNode> = {};
     const placeholders = nodeList.map((node, index) => {
       const placeholder = index.toString();
       nodeMap[placeholder] = node;
@@ -293,7 +370,7 @@ class ReactIntlUniversal {
     });
 
     // Create list formatter with specified locale and options
-    const formatter = new Intl.ListFormat(this.options.currentLocale, options);
+    const formatter = new Intl.ListFormat(this.options.currentLocale || undefined, options);
 
     // Get formatted parts (elements, literals like separators/conjunctions)
     const parts = formatter.formatToParts(placeholders);
@@ -309,33 +386,35 @@ class ReactIntlUniversal {
     });
   }
 
-  formatParentheses(node) {
+  formatParentheses(node: ReactNode): ReactNode[] {
     const currentLocale = this.options.currentLocale;
-    const isFullWidth = constants.fullWidthLocales.includes(currentLocale);
+    const isFullWidth = constants.fullWidthLocales.includes(currentLocale || "");
     return isFullWidth ? ['（', node, '）'] : ['(', node, ')'];
   }
 
-  getColon() {
+  getColon(): string {
     const currentLocale = this.options.currentLocale;
-    const isFullWidth = constants.fullWidthLocales.includes(currentLocale);
+    const isFullWidth = constants.fullWidthLocales.includes(currentLocale || "");
     return isFullWidth ? '：' : ': ';
   }
 
-  formatNumber(number) {
+  formatNumber(number: number): string | number;
+  formatNumber<T>(number: T): T;
+  formatNumber(number: unknown): unknown {
     // Return original value if not a number
     if (typeof number !== 'number' || isNaN(number)) {
       return number;
     }
     try {
-      return new Intl.NumberFormat(this.options.currentLocale, {}).format(number);
+      return new Intl.NumberFormat(this.options.currentLocale || undefined, {}).format(number);
     } catch (error) {
       console.error('Error formatting number:', error);
       return number;
     }
   }
 
-  _getSpanElementMessage(key, msg) {
-    const options = {
+  _getSpanElementMessage(key: string, msg: string): ReactElement & ElementDefaultMessageMethods {
+    const options: Record<string, unknown> = {
       dangerouslySetInnerHTML: {
         __html: msg
       }
@@ -351,7 +430,6 @@ class ReactIntlUniversal {
       el
     );
   }
-
 }
 
 export default ReactIntlUniversal;

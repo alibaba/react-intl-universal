@@ -1,12 +1,12 @@
 import React from 'react'
-import intl from 'core/intl';
+import ExampleBlock from 'components/example-block';
 
 const BasicComponent: React.FC<any> = () => {
   return (
     <div>
-      <div className="title">Basic Examples:</div>
-      <div>{intl.get('SIMPLE')}</div>
-      <div>{intl.get('HELLO', { name: 'Tony', where: 'Alibaba' })}</div>
+      <div className="title">Plain string messages</div>
+      <ExampleBlock code={"<div>{intl.get('SIMPLE').d('Simple Sentence')}</div>"} />
+      <ExampleBlock code={"<div>{intl.get('HELLO', { username: 'Tony' }).d('Hello, {username}!')}</div>"} />
     </div>
   );
 }

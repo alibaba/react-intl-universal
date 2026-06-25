@@ -7,9 +7,11 @@
   },
   "dependencies": {
     "next": "^12.3.1",
+    "prism-react-renderer": "^2.4.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-intl-universal": "*",
+    "react-live": "^4.1.8",
     "use-force-update": "^1.0.10"
   },
   "license": "BSD-3-Clause",
@@ -20,11 +22,11 @@
   "devDependencies": {
     "@types/node": "18.0.3",
     "@types/prismjs": "^1.26.0",
-    "@types/react": "18.0.15",
+    "@types/react": "^18.3.12",
     "@types/react-dom": "18.0.6",
     "sass": "^1.55.0",
     "single-line-log": "^1.1.2",
-    "typescript": "4.7.4"
+    "typescript": "^6.0.3"
   },
   "repository": "git@github.com:alibaba/react-intl-universal.git"
 }

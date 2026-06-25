@@ -1,9 +1,7 @@
 # react-intl-universal
 [react-intl-universal](https://github.com/alibaba/react-intl-universal) is a React internationalization package developed by [Alibaba Group](http://www.alibabagroup.com).
 
-
-
-[![npm](https://img.shields.io/npm/dt/react-intl-universal.svg)](https://www.npmjs.com/package/react-intl-universal) [![npm](https://img.shields.io/npm/v/react-intl-universal.svg)](https://www.npmjs.com/package/react-intl-universal) [![npm](https://img.shields.io/npm/l/react-intl-universal.svg)](https://github.com/alibaba/react-intl-universal/blob/master/LICENSE.md)
+[![react-intl-universal downloads](https://img.shields.io/npm/dw/react-intl-universal.svg)](https://npm-compare.com/react-intl-universal) [![react-intl-universal version](https://img.shields.io/npm/v/react-intl-universal.svg)](https://www.npmjs.com/package/react-intl-universal) [![npm](https://img.shields.io/npm/l/react-intl-universal.svg)](https://github.com/alibaba/react-intl-universal/blob/master/LICENSE.md)
 
 ## Features
 - Can be used not only in React component but also in Vanilla JS.
@@ -11,7 +9,7 @@
 - Display numbers, currency, dates and times for different locales.
 - Pluralize labels in strings.
 - Support variables in message.
-- Support HTML in message.
+- Support React rich text component interpolation in message.
 - Support for 150+ languages.
 - Runs in the browser and Node.js.
 - Message format is strictly implemented by [ICU standards](http://userguide.icu-project.org/formatparse/messages).
@@ -170,7 +168,7 @@ if `type` is `time`, `format` has the following values:
 - `long` shows times with hours, minutes, seconds, and timezone
 
 ### Default Message
-When the specific key does't exist in current locale, you may want to make it return a default message. Use `defaultMessage` method after `get` method. For example,
+When a key is missing from the current locale, use `.d(...)` / `.defaultMessage(...)` to provide a default message. These methods also give extraction tools a source message to collect, write into locale files, and send for translation. Call them after `get(...)`:
 
 Locale data:
 ```json
@@ -181,24 +179,49 @@ Locale data:
 JS code:
 ```jsx
 const name = 'Tony';
-intl.get('HELLO', { name }).defaultMessage(`Hello, ${name}`); // "Hello, Tony"
+intl.get('HELLO', { name }).defaultMessage('Hello, {name}'); // "Hello, Tony"
 ```
 
 Or using `d` for short:
 ```jsx
 const name = 'Tony';
-intl.get('HELLO', { name }).d(`Hello, ${name}`); // "Hello, Tony"
+intl.get('HELLO', { name }).d('Hello, {name}'); // "Hello, Tony"
 ```
 
-And `getHTML` also supports default message.
+`getHTML` also supports default message as a legacy API, but new React code should prefer rich text interpolation with `get`.
 ```jsx
 const name = 'Tony';
 intl.getHTML('HELLO', { name }).d(<div>Hello, {name}</div>) // React.Element with "<div>Hello, Tony</div>"
 ```
 
 
-### HTML Message
-The `get` method returns string message. For HTML message, use `getHTML` instead. For example,
+### Rich Text Message
+Use `get` as the unified API for messages. It supports plain strings, HTML-like markup, and React elements through rich tag formatter functions.
+
+Locale data:
+```json
+{ "MORE_DETAIL": "Please read <link>{name} <strong>document</strong></link>." }
+```
+JSX code:
+```jsx
+intl.get('MORE_DETAIL', {
+  name: 'Tony',
+  link: chunks => <a href="/docs">{chunks}</a>,
+  strong: chunks => <strong>{chunks}</strong>,
+}).d('Please read <link>{name} <strong>document</strong></link>.');
+// [
+//   "Please read ",
+//   <a href="/docs">Tony <strong>document</strong></a>,
+//   "."
+// ]
+```
+
+Each tag formatter receives the formatted content inside that tag. In the example above, `link` receives `["Tony ", <strong>document</strong>]` as `chunks` and wraps it with an anchor. This follows the [intl-messageformat rich text support](https://formatjs.github.io/docs/intl-messageformat/#rich-text-support) pattern.
+
+Rich tag names are matched exactly and case-sensitively with formatter keys. Ordinary React node placeholders such as `{icon: <Icon />}` are not the supported rich text contract; use tag formatters like `<icon></icon>` when you need React components in translated text.
+
+### Legacy HTML Message
+`getHTML` is kept for backward compatibility with existing HTML string messages. For new code, prefer `get` so plain text, markup, and React components can use the same API.
 
 Locale data:
 ```json
@@ -206,7 +229,7 @@ Locale data:
 ```
 JS code:
 ```js
-intl.getHTML('TIP'); // {React.Element}
+intl.getHTML('TIP'); // legacy React.Element wrapper
 ```
 
 ### Helper
@@ -262,15 +285,19 @@ You could make it as [peerDependency](https://github.com/alibaba/react-intl-univ
 
 
   /**
-   * Get the formatted message by key
+   * Get the formatted message by key.
+   * Returns string for plain messages.
+   * Returns React-renderable chunks array when variables contain rich tag formatter functions
+   * and every parsed rich tag has a matching formatter.
    * @param {string} key The string representing key in locale data file
    * @param {Object} variables Variables in message
-   * @returns {string} message
+   * @returns {string|React.ReactNode[]} message
    */
   get(key, variables)
 
   /**
-   * Get the formatted html message by key.
+   * Legacy API: get the formatted html message by key.
+   * Prefer get(key, variables) with rich tag formatter functions for new React code.
    * @param {string} key The string representing key in locale data file
    * @param {Object} variables Variables in message
    * @returns {React.Element} message
@@ -357,13 +384,13 @@ As mentioned in the issue [Mirror react-intl API](https://github.com/alibaba/rea
    * @param {string} options.id 
    * @param {string} options.defaultMessage
    * @param {Object} variables Variables in message
-   * @returns {string} message
+   * @returns {string|React.ReactNode[]} message
   */
   formatMessage(options, variables)
 ```
 ```js
   /**
-   * As same as getHTML(...) API
+   * Legacy API: as same as getHTML(...) API
    * @param {Object} options 
    * @param {string} options.id 
    * @param {React.Element} options.defaultMessage
@@ -377,17 +404,17 @@ For example, the `formatMessage` API
 
 ```js
 const name = 'Tony';
-intl.formatMessage({ id:'hello', defaultMessage: `Hello, ${name}`}, {name});
+intl.formatMessage({ id:'hello', defaultMessage: 'Hello, {name}'}, {name});
 ```
  
  is equivalent to `get` API
  
 ```js
 const name = 'Tony';
-intl.get('hello', {name}).d(`Hello, ${name}`);
+intl.get('hello', {name}).d('Hello, {name}');
 ```
 
-And the `formatHTMLMessage` API
+And the legacy `formatHTMLMessage` API
 ```js
 const name = 'Tony';
 intl.formatHTMLMessage({ id:'hello', defaultMessage: <div>Hello</div>}, {name});
@@ -465,8 +492,20 @@ function MyComponent() {
 ```
 
 
-### 2. How to Bind Event Handlers to an Internationalized Message
+### 2. How to Put Links or Components in an Internationalized Message
 
+For new React code, use `get` with rich tag formatter functions. The locale message controls the sentence, and React code controls the actual component.
+
+**Legacy pattern:**
+
+Locale data:
+```json
+{
+  "more_detail": "Please refer to the <a>document</a> for more detail."
+}
+```
+
+JSX code:
 ```jsx
 const MyComp = (props) => {
   const onClick = (e) => {
@@ -474,21 +513,44 @@ const MyComp = (props) => {
       // event handler for "A" tag in the message
     }
   };
+
   return (
-    // Wrap the message in a container and listen for the children's events.
     <span onClick={onClick}>
       {intl.getHTML('more_detail').d(<span>Please refer to the <a>document</a> for more detail.</span>)}
     </span>
-  )
+  );
+};
+```
+
+**Recommended pattern:**
+
+Locale data:
+```json
+{
+  "more_detail": "Please refer to the <link>document</link> for more detail."
 }
 ```
 
-## Other Frontend Tools
-- [react-intl-universal-extract](https://github.com/alibaba/react-intl-universal/tree/master/packages/react-intl-universal-extract): Extract default messages in application. This package will generate a json file which contains the extracted messages.
-- [react-intl-universal-pseudo-converter](https://github.com/ceszare/react-intl-universal-pseudo-converter): A  [pseudo-localization](https://en.wikipedia.org/wiki/Pseudolocalization) tool for testing internationalization.
-- [JSON5 Editor](https://json-5.com): JSON for Humans.
-- [Compare NPM Packages](https://npm-compare.com): Find the Best npm Package for Your Project.
+JSX code:
+```jsx
+const MyComp = () => {
+  const handleLinkClick = () => {
+    // event handler for the link
+  };
 
+  return (
+    <span>
+      {intl.get('more_detail', {
+        link: chunks => <a href="/docs" onClick={handleLinkClick}>{chunks}</a>,
+      }).d('Please refer to the <link>document</link> for more detail.')}
+    </span>
+  );
+};
+```
+
+## Usage Trend
+
+[Usage Trend of react-intl-universal](https://npm-compare.com/react-intl-universal)
 
 ## License
 This software is free to use under the BSD license.

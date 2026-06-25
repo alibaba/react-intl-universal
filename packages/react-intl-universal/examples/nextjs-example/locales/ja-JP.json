@@ -1,8 +1,18 @@
 {
   "SIMPLE": "単文",
-  "HELLO": "もしもし {name}, {where}へようこそ！",
+  "HELLO": "こんにちは、{username}！",
   "TIP": "これは<span style='color:red'>HTML</span>です",
   "TIP_VAR": "これは<span style='color:red'>{message}</span>です",
+  "RICH_LINK": "詳しくは<link>ドキュメント</link>をご覧ください。",
+  "RICH_MULTIPLE_CHUNKS": "<user>{username}</user> の便は<status>遅延</status>していますが、<gift>無料 {service}</gift>を使えます。",
+  "LEGACY_LINK_BEFORE": "詳しくは",
+  "LEGACY_LINK_TEXT": "ドキュメント",
+  "LEGACY_LINK_AFTER": "をご覧ください。",
+  "LEGACY_BADGE_BEFORE": "<strong>{username}</strong> の便は",
+  "LEGACY_BADGE_STATUS": "遅延",
+  "LEGACY_BADGE_BETWEEN": "していますが、",
+  "LEGACY_BADGE_GIFT": "無料 {service}",
+  "LEGACY_BADGE_AFTER": "を使えます。",
   "SALE_START": "販売開始{start, date}",
   "SALE_END": "販売終了日{end, date, long}",
   "COUPON": "クーポンは{expires,time,medium}に失効します",
@@ -10,4 +20,3 @@
   "PHOTO": "{photoNum, plural, =0 {あなたは0} other {#}}枚の写真があります",
   "MESSAGE_NOT_IN_COMPONENT": "react-intl-universalはReact.Componentにないメッセージを国際化することができます"
 }
-

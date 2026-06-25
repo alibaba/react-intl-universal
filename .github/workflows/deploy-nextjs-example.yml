@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: self-hosted
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout
@@ -55,7 +55,7 @@ jobs:
           path: packages/react-intl-universal/examples/nextjs-example/out
 
   deploy:
-    runs-on: self-hosted
+    runs-on: ubuntu-22.04
     needs: build
     environment:
       name: github-pages

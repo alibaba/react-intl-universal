@@ -5,22 +5,45 @@ import invariant from "invariant";
 import merge from "lodash.merge";
 import * as constants from "./constants";
 
-export type LocaleData = Record<string, any>;
-export type LocaleMap = Record<string, LocaleData>;
-export type Variables = Record<string, any>;
-export type WarningHandler = (...msg: any[]) => void;
-export type IntlGetHook = (key: string, currentLocale: string | null) => void;
+export type ReactIntlUniversalLocaleData = Record<string, any>;
+export type ReactIntlUniversalLocaleMap = Record<string, ReactIntlUniversalLocaleData>;
+export type ReactIntlUniversalVariables = Record<string, any>;
+export type ReactIntlUniversalWarningHandler = (...msg: any[]) => void;
+export type ReactIntlUniversalIntlGetHook = (key: string, currentLocale: string | null) => void;
+export type ReactIntlUniversalPrimitiveMessageValue = string | number | bigint | boolean | null | undefined | Date;
+export type ReactIntlUniversalPrimitiveMessageVariables = Record<string, ReactIntlUniversalPrimitiveMessageValue>;
+// A rich tag formatter maps the translated tag body to a React node, e.g.
+// "<link>docs</link>" with { link: chunks => <a>{chunks}</a> }.
+export type ReactIntlUniversalRichTagFormatter = (chunks: ReactNode[]) => ReactNode;
+export type ReactIntlUniversalRichMessageValue =
+  ReactIntlUniversalPrimitiveMessageValue | ReactIntlUniversalRichTagFormatter;
+export type ReactIntlUniversalRichMessageVariables = Record<string, ReactIntlUniversalRichMessageValue>;
+// Keep the old string return type for ordinary values, and return rich chunks only
+// when at least one value is a rich tag formatter function.
+export type ReactIntlUniversalIntlMessageResult<TValues extends Record<string, unknown>> =
+  Extract<TValues[keyof TValues], ReactIntlUniversalRichTagFormatter> extends never
+    ? string
+    : ReactIntlUniversalRichMessageResult;
+
+interface ReactIntlUniversalRichMessageDefaultMessageMethods {
+  defaultMessage(msg?: string): ReactIntlUniversalRichMessageResult;
+  d(msg?: string): ReactIntlUniversalRichMessageResult;
+}
+
+export type ReactIntlUniversalRichMessageResult =
+  ReactNode[] & ReactIntlUniversalRichMessageDefaultMessageMethods;
+export type ReactIntlUniversalFormattedMessage = string | ReactIntlUniversalRichMessageResult;
 
 export interface ReactIntlUniversalOptions {
   currentLocale?: string | null;
-  locales?: LocaleMap;
-  warningHandler?: WarningHandler;
+  locales?: ReactIntlUniversalLocaleMap;
+  warningHandler?: ReactIntlUniversalWarningHandler;
   escapeHtml?: boolean;
   fallbackLocale?: string | null;
   debug?: boolean;
   dataKey?: string;
   formats?: Partial<Formats>;
-  intlGetHook?: IntlGetHook;
+  intlGetHook?: ReactIntlUniversalIntlGetHook;
   urlLocaleKey?: string;
   cookieLocaleKey?: string;
   localStorageLocaleKey?: string;
@@ -29,14 +52,14 @@ export interface ReactIntlUniversalOptions {
 
 export interface ReactIntlUniversalResolvedOptions {
   currentLocale: string | null;
-  locales: LocaleMap;
-  warningHandler: WarningHandler;
+  locales: ReactIntlUniversalLocaleMap;
+  warningHandler: ReactIntlUniversalWarningHandler;
   escapeHtml: boolean;
   fallbackLocale: string | null;
   debug: boolean;
   dataKey: string;
   formats?: Partial<Formats>;
-  intlGetHook?: IntlGetHook;
+  intlGetHook?: ReactIntlUniversalIntlGetHook;
   urlLocaleKey?: string;
   cookieLocaleKey?: string;
   localStorageLocaleKey?: string;
@@ -53,12 +76,67 @@ export interface ReactIntlUniversalHTMLMessageDescriptor {
   defaultMessage?: string | ReactElement;
 }
 
-export interface ElementDefaultMessageMethods {
+interface ReactIntlUniversalElementDefaultMessageMethods {
   defaultMessage(msg?: string | ReactElement): ReactElement;
   d(msg?: string | ReactElement): ReactElement;
 }
 
-export type HTMLMessage = string | (ReactElement & ElementDefaultMessageMethods);
+export type ReactIntlUniversalHTMLMessage =
+  string | (ReactElement & ReactIntlUniversalElementDefaultMessageMethods);
+
+// The source is carried through formatting so get(...).d(...) can know whether
+// the locale message won and the default message should be ignored.
+type MessageSource = "currentLocale" | "fallbackLocale" | "missing";
+
+interface ResolvedMessageSource {
+  key: string;
+  locale: string | null;
+  message: any;
+  source: MessageSource;
+  keyExists: boolean;
+}
+
+interface MessageFormatResult {
+  value: ReactIntlUniversalFormattedMessage;
+  source: ResolvedMessageSource;
+}
+
+interface RichMessageContext {
+  instance: ReactIntlUniversal;
+  key: string;
+  variables?: ReactIntlUniversalVariables;
+  keyExists: boolean;
+}
+
+interface MissingMessageContext {
+  instance: ReactIntlUniversal;
+  key: string;
+  variables?: ReactIntlUniversalVariables;
+}
+
+interface AstElement {
+  type?: number;
+  value?: unknown;
+  children?: AstElement[];
+  options?: Record<string, { value?: AstElement[] }>;
+}
+
+// get("missing") returns an empty string for backward compatibility. Store the
+// key and variables briefly so the chained empty-string .d(...) call can format
+// the fallback message with the same ICU/rich-text rules.
+let missingMessageContext: MissingMessageContext | null = null;
+
+function setMissingMessageContext(context: MissingMessageContext): void {
+  missingMessageContext = context;
+}
+
+function clearMissingMessageContext(): void {
+  missingMessageContext = null;
+}
+
+function isRichMessageResult(value: unknown): value is ReactIntlUniversalRichMessageResult {
+  return Array.isArray(value) && typeof (value as Partial<ReactIntlUniversalRichMessageResult>).defaultMessage === "function";
+}
 
 declare global {
   interface Navigator {
@@ -78,8 +156,27 @@ declare global {
 function stringDefaultMessage<T extends string | ReactElement>(
   this: string | String,
   msg?: T
-): string | T {
-  return this.toString() || msg || "";
+): string | T | ReactIntlUniversalRichMessageResult {
+  const currentMessage = this.toString();
+  if (currentMessage) {
+    // A real locale/fallback-locale message always wins over .d(...).
+    return currentMessage;
+  }
+
+  if (typeof msg === "string" || msg instanceof String) {
+    const context = missingMessageContext;
+    clearMissingMessageContext();
+    if (context) {
+      return context.instance._formatDefaultMessageFallback(
+        context.key,
+        msg.toString(),
+        context.variables
+      );
+    }
+  }
+
+  clearMissingMessageContext();
+  return msg || "";
 }
 
 String.prototype.defaultMessage = stringDefaultMessage as String["defaultMessage"];
@@ -106,7 +203,7 @@ class ReactIntlUniversal {
    * @param variables Variables in message
    * @returns message
    */
-  _getFormattedMessage(key: string, variables?: Variables): string {
+  _resolveMessageSource(key: string): ResolvedMessageSource {
     if (this.options.intlGetHook) {
       try {
         this.options.intlGetHook(key, this.options.currentLocale);
@@ -115,7 +212,7 @@ class ReactIntlUniversal {
       }
     }
     invariant(key, "key is required");
-    const { locales, currentLocale, formats } = this.options;
+    const { locales, currentLocale } = this.options;
 
     // 1. check if the locale data and key exists
     if (!currentLocale || !locales || !locales[currentLocale]) {
@@ -124,26 +221,96 @@ class ReactIntlUniversal {
         errorMsg += `Check if the key "${key}" is used before it is initialized. More info: https://github.com/alibaba/react-intl-universal/issues/144#issuecomment-1345193138`;
       }
       this.options.warningHandler(errorMsg);
-      return "";
+      return {
+        key,
+        locale: currentLocale,
+        message: "",
+        source: "missing",
+        keyExists: false,
+      };
     }
     let msg = this.getDescendantProp(locales[currentLocale], key);
+    let source: MessageSource = "currentLocale";
+    let locale = currentLocale;
     if (msg == null) {
       if (this.options.fallbackLocale) {
         msg = this.getDescendantProp(locales[this.options.fallbackLocale], key);
+        source = "fallbackLocale";
+        locale = this.options.fallbackLocale;
         if (msg == null) {
           this.options.warningHandler(
             `react-intl-universal key "${key}" not defined in ${currentLocale} or the fallback locale, ${this.options.fallbackLocale}`
           );
-          return "";
+          return {
+            key,
+            locale: currentLocale,
+            message: "",
+            source: "missing",
+            keyExists: false,
+          };
         }
       } else {
         this.options.warningHandler(
           `react-intl-universal key "${key}" not defined in ${currentLocale}`
         );
-        return "";
+        return {
+          key,
+          locale: currentLocale,
+          message: "",
+          source: "missing",
+          keyExists: false,
+        };
       }
     }
 
+    return {
+      key,
+      locale,
+      message: msg,
+      source,
+      keyExists: true,
+    };
+  }
+
+  _getFormattedMessageResult(
+    key: string,
+    variables?: ReactIntlUniversalVariables,
+    options: { forcePlain?: boolean } = {}
+  ): MessageFormatResult {
+    const source = this._resolveMessageSource(key);
+    if (!source.keyExists) {
+      return { value: "", source };
+    }
+
+    const value = options.forcePlain
+      ? this._formatPlainMessage(key, source.message, variables)
+      : this._formatMessage(key, source.message, variables);
+
+    return { value, source };
+  }
+
+  _getFormattedMessage(key: string, variables?: ReactIntlUniversalVariables): ReactIntlUniversalFormattedMessage {
+    return this._getFormattedMessageResult(key, variables).value;
+  }
+
+  _formatMessage(
+    key: string,
+    msg: any,
+    variables?: ReactIntlUniversalVariables
+  ): ReactIntlUniversalFormattedMessage {
+    const richResult = this._tryFormatRichMessage(key, msg, variables);
+    if (richResult) {
+      return richResult;
+    }
+    return this._formatPlainMessage(key, msg, variables);
+  }
+
+  _formatPlainMessage(
+    key: string,
+    msg: any,
+    variables?: ReactIntlUniversalVariables,
+    options: { defaultMessage?: boolean } = {}
+  ): string {
     // 2. handle security issue for variables
     if (variables) {
       variables = Object.assign({}, variables);
@@ -165,7 +332,9 @@ class ReactIntlUniversal {
     try {
       let finalMsg;
       if (variables) { // format message with variables
-        const msgFormatter = new IntlMessageFormat(String(msg), currentLocale, formats, {
+        // Plain formatting must not interpret rich tags as formatter tags.
+        // getHTML also uses this path so legacy HTML strings stay as strings.
+        const msgFormatter = new IntlMessageFormat(this._escapeHtmlTagApostrophes(String(msg)), this.options.currentLocale || undefined, this.options.formats, {
           ignoreTag: true
         });
         finalMsg = msgFormatter.format(variables);
@@ -175,11 +344,173 @@ class ReactIntlUniversal {
       return finalMsg as string;
     } catch (err) {
       this.options.warningHandler(
-        `react-intl-universal format message failed for key='${key}'.`,
+        options.defaultMessage
+          ? `react-intl-universal format default message failed for key='${key}'.`
+          : `react-intl-universal format message failed for key='${key}'.`,
         err instanceof Error ? err.message : String(err)
       );
       return msg as string;
     }
+  }
+
+  // Legacy HTML strings often use single-quoted attributes. Escape those
+  // apostrophes before ICU parsing so placeholders after the attribute still work.
+  _escapeHtmlTagApostrophes(msg: string): string {
+    return msg.replace(/<\/?[A-Za-z][^<>]*>/g, (tag) => tag.replace(/'/g, "''"));
+  }
+
+  _formatDefaultMessageFallback(
+    key: string,
+    msg: string,
+    variables?: ReactIntlUniversalVariables
+  ): string | ReactIntlUniversalRichMessageResult {
+    // Missing-key fallback uses the same formatting path as locale messages.
+    // This keeps .d("Hello, {name}") consistent with locale data.
+    const richResult = this._tryFormatRichMessage(key, msg, variables);
+    if (richResult) {
+      return richResult;
+    }
+    return this._formatPlainMessage(key, msg, variables, { defaultMessage: true });
+  }
+
+  _tryFormatRichMessage(
+    key: string,
+    msg: any,
+    variables?: ReactIntlUniversalVariables
+  ): ReactIntlUniversalRichMessageResult | null {
+    // Only formatter functions opt into rich text. React elements passed as
+    // ordinary {placeholder} values are intentionally treated as unsupported.
+    if (!variables || !this._hasFormatterFunction(variables)) {
+      return null;
+    }
+
+    let formatter: IntlMessageFormat;
+    try {
+      formatter = new IntlMessageFormat(String(msg), this.options.currentLocale || undefined, this.options.formats);
+    } catch (err) {
+      this._warnRichFormatFailure(key, err);
+      return null;
+    }
+
+    // intl-messageformat only calls formatter values for real tags. Inspect the
+    // AST first so unmatched tags can fall back to plain formatting instead of
+    // throwing during render.
+    const tagNames = this._getRichTagNames(formatter.getAst() as AstElement[]);
+    if (tagNames.length === 0) {
+      return null;
+    }
+
+    const unmatchedTags = tagNames.filter((tagName) => typeof variables[tagName] !== "function");
+    if (unmatchedTags.length > 0) {
+      this.options.warningHandler(
+        `react-intl-universal rich text message contains unmatched tag(s) for key='${key}'.`,
+        unmatchedTags.join(", ")
+      );
+      return null;
+    }
+
+    try {
+      const formatted = formatter.format<ReactNode>(variables);
+      return this._normalizeRichMessageResult(key, formatted, variables, true);
+    } catch (err) {
+      this._warnRichFormatFailure(key, err);
+      return null;
+    }
+  }
+
+  _hasFormatterFunction(variables: ReactIntlUniversalVariables): boolean {
+    return Object.keys(variables).some((key) => typeof variables[key] === "function");
+  }
+
+  _getRichTagNames(ast: AstElement[]): string[] {
+    const tagNames = new Set<string>();
+    const visit = (element: AstElement): void => {
+      if (element.type === 8 && typeof element.value === "string") {
+        tagNames.add(element.value);
+      }
+
+      if (Array.isArray(element.children)) {
+        element.children.forEach(visit);
+      }
+
+      if (element.options) {
+        Object.keys(element.options).forEach((optionKey) => {
+          const option = element.options?.[optionKey];
+          if (Array.isArray(option?.value)) {
+            option.value.forEach(visit);
+          }
+        });
+      }
+    };
+
+    ast.forEach(visit);
+    return Array.from(tagNames);
+  }
+
+  _normalizeRichMessageResult(
+    key: string,
+    value: string | ReactNode | ReactNode[],
+    variables: ReactIntlUniversalVariables | undefined,
+    keyExists: boolean
+  ): ReactIntlUniversalRichMessageResult {
+    const chunks = (Array.isArray(value) ? value : [value]) as ReactNode[];
+    return this._attachRichMessageHelpers(chunks, {
+      instance: this,
+      key,
+      variables,
+      keyExists,
+    });
+  }
+
+  _attachRichMessageHelpers(
+    chunks: ReactNode[],
+    context: RichMessageContext
+  ): ReactIntlUniversalRichMessageResult {
+    const result = chunks as ReactIntlUniversalRichMessageResult;
+    const defaultMessage = (msg?: string): ReactIntlUniversalRichMessageResult => {
+      if (context.keyExists || msg == null) {
+        return result;
+      }
+
+      const formatted = context.instance._formatDefaultMessageFallback(
+        context.key,
+        msg,
+        context.variables
+      );
+      if (isRichMessageResult(formatted)) {
+        return formatted;
+      }
+      return context.instance._normalizeRichMessageResult(
+        context.key,
+        formatted,
+        context.variables,
+        false
+      );
+    };
+
+    Object.defineProperties(result, {
+      // Match the existing chainable API without making these helper methods
+      // visible when React iterates the chunks array.
+      defaultMessage: {
+        value: defaultMessage,
+        enumerable: false,
+        configurable: true,
+      },
+      d: {
+        value: defaultMessage,
+        enumerable: false,
+        configurable: true,
+      },
+    });
+
+    return result;
+  }
+
+  _warnRichFormatFailure(key: string, err: unknown): void {
+    this.options.warningHandler(
+      `react-intl-universal rich format message failed for key='${key}'.`,
+      err instanceof Error ? err.message : String(err)
+    );
   }
 
   /**
@@ -188,21 +519,52 @@ class ReactIntlUniversal {
    * @param variables Variables in message
    * @returns message
    */
-  get(key: string, variables?: Variables): string {
-    const msg = this._getFormattedMessage(key, variables);
+  get(key: string): string;
+  get(key: string, variables: ReactIntlUniversalPrimitiveMessageVariables): string;
+  // This non-generic overload gives inline rich tag formatter functions a
+  // contextual chunks type while preserving string returns for primitive values.
+  get(key: string, variables: ReactIntlUniversalRichMessageVariables): ReactIntlUniversalRichMessageResult;
+  get(key: string, variables: ReactIntlUniversalVariables): string;
+  get(key: string, variables?: ReactIntlUniversalVariables): ReactIntlUniversalFormattedMessage {
+    clearMissingMessageContext();
+    const result = this._getFormattedMessageResult(key, variables);
+    if (!result.source.keyExists) {
+      // The next chained string .d(...) call will consume this context.
+      setMissingMessageContext({ instance: this, key, variables });
+      return "";
+    }
+
+    const msg = result.value;
+    if (isRichMessageResult(msg)) {
+      return this.options.debug ? this._getRichSpanElementMessage(key, msg, variables, true) : msg;
+    }
+
     return (this.options.debug ? this._getSpanElementMessage(key, msg) : msg) as unknown as string;
   }
 
   /**
    * Get the formatted html message by key.
+   * @deprecated Use get(...) as the unified API for plain strings, HTML strings,
+   * and rich React component interpolation. getHTML remains available for legacy
+   * HTML-string rendering.
    * @param key The string representing key in locale data file
    * @param variables Variables in message
    * @returns html message
    */
-  getHTML(key: string, variables?: Variables): HTMLMessage {
-    const msg = this._getFormattedMessage(key, variables);
+  getHTML(key: string, variables?: ReactIntlUniversalVariables): ReactIntlUniversalHTMLMessage {
+    clearMissingMessageContext();
+    // getHTML is legacy string-HTML rendering. Force plain mode so rich tag
+    // formatter functions are not interpreted as React components here.
+    const result = this._getFormattedMessageResult(key, variables, { forcePlain: true });
+    if (!result.source.keyExists) {
+      // Preserve getHTML("missing").d(<span />) behavior.
+      setMissingMessageContext({ instance: this, key, variables });
+      return "";
+    }
+
+    const msg = result.value;
     if (msg) {
-      return this._getSpanElementMessage(key, msg);
+      return this._getSpanElementMessage(key, msg as string);
     }
     return "";
   }
@@ -214,22 +576,42 @@ class ReactIntlUniversal {
    * @returns message
    */
   formatMessage(
+    messageDescriptor: ReactIntlUniversalMessageDescriptor
+  ): string;
+  formatMessage(
     messageDescriptor: ReactIntlUniversalMessageDescriptor,
-    variables?: Variables
-  ): string {
+    variables: ReactIntlUniversalPrimitiveMessageVariables
+  ): string;
+  formatMessage(
+    messageDescriptor: ReactIntlUniversalMessageDescriptor,
+    variables: ReactIntlUniversalRichMessageVariables
+  ): ReactIntlUniversalRichMessageResult;
+  formatMessage(
+    messageDescriptor: ReactIntlUniversalMessageDescriptor,
+    variables: ReactIntlUniversalVariables
+  ): string;
+  formatMessage(
+    messageDescriptor: ReactIntlUniversalMessageDescriptor,
+    variables?: ReactIntlUniversalVariables
+  ): ReactIntlUniversalFormattedMessage {
     const { id, defaultMessage } = messageDescriptor;
-    return this.get(id, variables).defaultMessage(defaultMessage ?? "");
+    // Delegate to get(...).defaultMessage(...) so descriptor and chain APIs keep
+    // identical missing-key and rich-text fallback behavior.
+    const message = variables === undefined ? this.get(id) : this.get(id, variables);
+    return (message as ReactIntlUniversalFormattedMessage).defaultMessage(defaultMessage ?? "") as ReactIntlUniversalFormattedMessage;
   }
 
   /**
    * As same as getHTML(...) API
+   * @deprecated Use formatMessage(...) or get(...) as the unified API. This
+   * method remains available for legacy HTML-string rendering.
    * @param messageDescriptor options
    * @param variables Variables in message
    * @returns message
    */
   formatHTMLMessage(
     messageDescriptor: ReactIntlUniversalHTMLMessageDescriptor,
-    variables?: Variables
+    variables?: ReactIntlUniversalVariables
   ): string | ReactElement {
     const { id, defaultMessage } = messageDescriptor;
     return this.getHTML(id, variables).defaultMessage(defaultMessage ?? "");
@@ -300,7 +682,7 @@ class ReactIntlUniversal {
   /**
    * Load more locales after init
    */
-  load(locales: LocaleMap): void {
+  load(locales: ReactIntlUniversalLocaleMap): void {
     merge(this.options.locales, locales);
   }
 
@@ -340,7 +722,7 @@ class ReactIntlUniversal {
     }
   }
 
-  getDescendantProp(locale: LocaleData, key: string): any {
+  getDescendantProp(locale: ReactIntlUniversalLocaleData, key: string): any {
 
     if (locale[key]) {
       return locale[key];
@@ -413,7 +795,7 @@ class ReactIntlUniversal {
     }
   }
 
-  _getSpanElementMessage(key: string, msg: string): ReactElement & ElementDefaultMessageMethods {
+  _getSpanElementMessage(key: string, msg: string): ReactElement & ReactIntlUniversalElementDefaultMessageMethods {
     const options: Record<string, unknown> = {
       dangerouslySetInnerHTML: {
         __html: msg
@@ -429,6 +811,25 @@ class ReactIntlUniversal {
       { defaultMessage: defaultMessage, d: defaultMessage },
       el
     );
+  }
+
+  _getRichSpanElementMessage(
+    key: string,
+    chunks: ReactIntlUniversalRichMessageResult,
+    variables: ReactIntlUniversalVariables | undefined,
+    keyExists: boolean
+  ): ReactIntlUniversalRichMessageResult {
+    const options: Record<string, unknown> = {};
+    if (this.options.debug) {
+      options[this.options.dataKey] = key;
+    }
+    const el = React.createElement('span', options, chunks);
+    return this._attachRichMessageHelpers([el], {
+      instance: this,
+      key,
+      variables,
+      keyExists,
+    });
   }
 }
 

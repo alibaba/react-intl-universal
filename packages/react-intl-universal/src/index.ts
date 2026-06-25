@@ -1,17 +1,24 @@
 import ReactIntlUniversal from './ReactIntlUniversal';
 
 export type {
-  ElementDefaultMessageMethods,
-  HTMLMessage,
-  IntlGetHook,
-  LocaleData,
-  LocaleMap,
+  ReactIntlUniversalFormattedMessage,
+  ReactIntlUniversalHTMLMessage,
   ReactIntlUniversalHTMLMessageDescriptor,
+  ReactIntlUniversalIntlGetHook,
+  ReactIntlUniversalIntlMessageResult,
+  ReactIntlUniversalLocaleData,
+  ReactIntlUniversalLocaleMap,
   ReactIntlUniversalMessageDescriptor,
   ReactIntlUniversalOptions,
+  ReactIntlUniversalPrimitiveMessageValue,
+  ReactIntlUniversalPrimitiveMessageVariables,
   ReactIntlUniversalResolvedOptions,
-  Variables,
-  WarningHandler,
+  ReactIntlUniversalRichMessageResult,
+  ReactIntlUniversalRichMessageValue,
+  ReactIntlUniversalRichMessageVariables,
+  ReactIntlUniversalRichTagFormatter,
+  ReactIntlUniversalVariables,
+  ReactIntlUniversalWarningHandler,
 } from './ReactIntlUniversal';
 
 export interface ReactIntlUniversalDefault extends ReactIntlUniversal {
@@ -23,8 +30,17 @@ const defaultInstance = new ReactIntlUniversal() as ReactIntlUniversalDefault;
 defaultInstance.ReactIntlUniversal = ReactIntlUniversal;
 // react pattern: https://github.com/facebook/react/blob/main/packages/react/src/React.js
 const get = defaultInstance.get.bind(defaultInstance) as ReactIntlUniversal["get"];
+/**
+ * @deprecated Use get(...) as the unified API for plain strings, HTML strings,
+ * and rich React component interpolation. getHTML remains available for legacy
+ * HTML-string rendering.
+ */
 const getHTML = defaultInstance.getHTML.bind(defaultInstance) as ReactIntlUniversal["getHTML"];
 const formatMessage = defaultInstance.formatMessage.bind(defaultInstance) as ReactIntlUniversal["formatMessage"];
+/**
+ * @deprecated Use formatMessage(...) or get(...) as the unified API. This
+ * function remains available for legacy HTML-string rendering.
+ */
 const formatHTMLMessage = defaultInstance.formatHTMLMessage.bind(defaultInstance) as ReactIntlUniversal["formatHTMLMessage"];
 const determineLocale = defaultInstance.determineLocale.bind(defaultInstance) as ReactIntlUniversal["determineLocale"];
 const changeCurrentLocale = defaultInstance.changeCurrentLocale.bind(defaultInstance) as ReactIntlUniversal["changeCurrentLocale"];

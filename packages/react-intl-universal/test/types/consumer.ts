@@ -1,7 +1,7 @@
 import React from "react";
 import intl, {
-  type RichMessageResult,
-  type RichTagFormatter,
+  type ReactIntlUniversalRichMessageResult,
+  type ReactIntlUniversalRichTagFormatter,
   ReactIntlUniversal,
   changeCurrentLocale,
   determineLocale,
@@ -46,22 +46,22 @@ const originalString: string = formatNumber("not a number");
 const primitiveGetResult: string = intl.get("HELLO", { name: "Tony" });
 const primitiveNamedGetResult: string = get("HELLO", { name: "Tony" }).d("Hello, {name}");
 
-const richFormatter: RichTagFormatter = (chunks) => React.createElement("strong", null, chunks);
-const richGetResult: RichMessageResult = intl.get("RICH", {
+const richFormatter: ReactIntlUniversalRichTagFormatter = (chunks) => React.createElement("strong", null, chunks);
+const richGetResult: ReactIntlUniversalRichMessageResult = intl.get("RICH", {
   label: "docs",
   tag: richFormatter,
 });
-const inlineRichGetResult: RichMessageResult = intl.get("RICH_INLINE", {
+const inlineRichGetResult: ReactIntlUniversalRichMessageResult = intl.get("RICH_INLINE", {
   label: "docs",
   tag: (chunks) => React.createElement("strong", null, chunks),
 });
-const richDefaultResult: RichMessageResult = intl.get("MISSING_RICH", {
+const richDefaultResult: ReactIntlUniversalRichMessageResult = intl.get("MISSING_RICH", {
   tag: richFormatter,
 }).defaultMessage("Fallback <tag>docs</tag>");
-const richDResult: RichMessageResult = get("MISSING_RICH", {
+const richDResult: ReactIntlUniversalRichMessageResult = get("MISSING_RICH", {
   tag: richFormatter,
 }).d("Fallback <tag>docs</tag>");
-const richFormatMessageResult: RichMessageResult = formatMessage(
+const richFormatMessageResult: ReactIntlUniversalRichMessageResult = formatMessage(
   { id: "RICH", defaultMessage: "Open <tag>{label}</tag>" },
   {
     label: "docs",

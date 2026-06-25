@@ -467,9 +467,15 @@ describe("String and legacy compatibility", () => {
     expect(innerIntl.get("MISSING_BOOKS", { num: 3 }).d("There are {num} books")).toBe(
       "There are 3 books"
     );
+    expect(innerIntl.get("MISSING_GREETING", { username: "Tony" }).d("Hello, {username}!")).toBe(
+      "Hello, Tony!"
+    );
     const num = 3;
     expect(innerIntl.get("MISSING_TEMPLATE", { num }).d(`There are ${num} books`)).toBe(
       "There are 3 books"
+    );
+    expect(innerIntl.get("MISSING_TEMPLATE_ICU", { username: "Tony" }).d(`Hello, {username}!`)).toBe(
+      "Hello, Tony!"
     );
   });
 
@@ -487,6 +493,46 @@ describe("String and legacy compatibility", () => {
     );
     expect(warningHandler).toHaveBeenCalledWith(
       "react-intl-universal format default message failed for key='MISSING_BROKEN'.",
+      expect.any(String)
+    );
+  });
+
+  test("literal fallback syntax without variables returns the original fallback string", () => {
+    const warningHandler = jest.fn();
+    const innerIntl = new ReactIntlUniversal();
+    innerIntl.init({
+      currentLocale: "en-US",
+      locales: { "en-US": {} },
+      warningHandler,
+    });
+
+    expect(
+      innerIntl
+        .get("MISSING_LITERAL_SCHEDULER_SYNTAX")
+        .d("Use ${bizdate} and tableName_{yyyymmdd} as scheduler placeholders")
+    ).toBe("Use ${bizdate} and tableName_{yyyymmdd} as scheduler placeholders");
+    expect(warningHandler.mock.calls).not.toContainEqual([
+      "react-intl-universal format default message failed for key='MISSING_LITERAL_SCHEDULER_SYNTAX'.",
+      expect.any(String),
+    ]);
+  });
+
+  test("literal fallback syntax with unrelated variables warns and returns the original fallback string", () => {
+    const warningHandler = jest.fn();
+    const innerIntl = new ReactIntlUniversal();
+    innerIntl.init({
+      currentLocale: "en-US",
+      locales: { "en-US": {} },
+      warningHandler,
+    });
+
+    expect(
+      innerIntl
+        .get("MISSING_LITERAL_SCHEDULER_SYNTAX_WITH_VALUES", { name: "Tony" })
+        .d("Use ${bizdate} and tableName_{yyyymmdd} as scheduler placeholders")
+    ).toBe("Use ${bizdate} and tableName_{yyyymmdd} as scheduler placeholders");
+    expect(warningHandler).toHaveBeenCalledWith(
+      "react-intl-universal format default message failed for key='MISSING_LITERAL_SCHEDULER_SYNTAX_WITH_VALUES'.",
       expect.any(String)
     );
   });

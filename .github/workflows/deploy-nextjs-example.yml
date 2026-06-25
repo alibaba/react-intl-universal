@@ -3,8 +3,8 @@ name: Deploy Next.js example to GitHub Pages
 on:
   push:
     branches:
-      - main
       - master
+      - feat/rich_message
   workflow_dispatch:
 
 permissions:

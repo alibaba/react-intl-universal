@@ -29,6 +29,9 @@ jobs:
             packages/react-intl-universal/package-lock.json
             packages/react-intl-universal/examples/nextjs-example/package-lock.json
 
+      - name: Use npm public registry
+        run: npm config set registry https://registry.npmjs.org/
+
       - name: Install package dependencies
         working-directory: packages/react-intl-universal
         run: npm ci

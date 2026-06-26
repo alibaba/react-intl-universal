@@ -62,6 +62,9 @@ test("Test extract", () => {
   expect(getOriginal(result, 'basic6')).toBe('Default message for basic6 with "123(中文)"');
   expect(getTransformed(result, 'basic6')).toBe('Default message for basic6 with "123(中文)"');
 
+  expect(getOriginal(result, 'trailing_comma1')).toBe('你好');
+  expect(getTransformed(result, 'trailing_comma1')).toBe('你好');
+
   expect(getOriginal(result, 'character1')).toBe('Expression support: ==,!=,>=,>,<=,<,&&,!,(),+,-,*,/,%');
   expect(getTransformed(result, 'character1')).toBe('Expression support: ==,!=,>=,>,<=,<,&&,!,(),+,-,*,/,%');
 
@@ -103,6 +106,9 @@ test("Test extract", () => {
 
   expect(getOriginal(result, 'newline4')).toBe('Default message for newline2');
   expect(getTransformed(result, 'newline4')).toBe('Default message for newline2');
+
+  expect(getOriginal(result, 'trailing_comma2')).toBe('Default message with trailing comma');
+  expect(getTransformed(result, 'trailing_comma2')).toBe('Default message with trailing comma');
 
   expect(getOriginal(result, 'same-same_line2')).toBe('Default message for same_line2');
   expect(getTransformed(result, 'same-same_line2')).toBe('Default message for same_line2');

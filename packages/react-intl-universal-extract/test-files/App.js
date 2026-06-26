@@ -21,6 +21,15 @@ class App extends Component {
         <div>{intl.get('basic4').d('Default message for basic(4) with 中文')}</div>
         <div>{intl.get('basic5').d('Default message for basic5 with 中文(5)')}</div>
         <div>{intl.get('basic6').d('Default message for basic6 with "123(中文)"')}</div>
+        <div>{
+          intl
+            .get("trailing_comma1")
+            .d(
+
+              '你好',
+
+            )
+        }</div>
 
         {/* New line */}
         {
@@ -40,6 +49,13 @@ class App extends Component {
           intl
             .get('newline4')
             .d('Default message for newline2')
+        }
+        {
+          intl
+            .get('trailing_comma2')
+            .d(
+              'Default message with trailing comma',
+            )
         }
 
         {/* Variable */}

@@ -24,7 +24,9 @@ body {
 }
 
 .react-intl-universal-example {
+  width: 100%;
   max-width: 1120px;
+  margin: 0 auto;
   color: #24292f;
   line-height: 1.6;
   padding-top: 30px;
@@ -36,8 +38,7 @@ body {
     left: 0;
     z-index: 10;
     border-bottom: 1px solid #d8dee4;
-    background: rgba(247, 247, 247, 0.94);
-    backdrop-filter: blur(8px);
+    background: #fff;
   }
 
   .example-header-inner {
@@ -45,8 +46,9 @@ body {
     align-items: center;
     justify-content: space-between;
     gap: 16px;
+    width: 100%;
     max-width: 1120px;
-    margin: 0;
+    margin: 0 auto;
     padding: 12px 1.5rem;
   }
 
@@ -69,6 +71,26 @@ body {
 
   .locale-option input {
     margin: 0;
+  }
+
+  .header-links {
+    display: inline-flex;
+    flex: 0 0 auto;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  .package-badge {
+    display: inline-flex;
+    align-items: center;
+    height: 20px;
+  }
+
+  .package-badge img {
+    display: block;
+    height: 20px;
   }
 
   .package-link {

@@ -1,11 +1,15 @@
 import intl from "react-intl-universal";
 import React, { Component } from "react";
+
+const Badge = ({ children }) => <span>{children}</span>;
+
 class App extends Component {
 
   render() {
     const name = 'Tony';
     const where = 'Alibaba';
     const webLink = 'https://www.npmjs.com/package/react-intl-extract';
+    const docsUrl = 'https://example.com/docs';
 
     // HTML
     return (
@@ -60,6 +64,41 @@ class App extends Component {
             name,
             where,
           }).defaultMessage(`Hello5, ${name}. Welcome to ${where}!`)
+        }
+
+        {/* Rich tag formatter with intl.get */}
+        {
+          intl
+            .get('rich_get1', {
+              name,
+              link: chunks => <a href={docsUrl}>{chunks}</a>,
+            })
+            .d('Hello, {name}. Read the <link>documentation</link>.')
+        }
+        {
+          intl
+            .get('rich_get2', {
+              count: 2,
+              badge: chunks => <Badge>{chunks}</Badge>,
+            })
+            .defaultMessage('You have {count} <badge>urgent tasks</badge>.')
+        }
+        {
+          intl
+            .get('rich_get3', {
+              name,
+              strong: chunks => <strong>{chunks}</strong>,
+              link: chunks => <a href={docsUrl}>{chunks}</a>,
+            })
+            .d('Hello, <strong>{name}</strong>. Visit <link>the guide</link>.')
+        }
+        {
+          intl
+            .get('rich_get4', {
+              name,
+              link: chunks => <a href={docsUrl}>{chunks}</a>,
+            })
+            .d(`Hello, ${name}. Read the <link>documentation</link>.`)
         }
 
         {/* more character */}

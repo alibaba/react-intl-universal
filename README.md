@@ -16,8 +16,15 @@
 - Locale data in [nested JSON format](https://github.com/alibaba/react-intl-universal/releases/tag/1.4.3) are supported.
 - [react-intl-universal-extract](https://github.com/alibaba/react-intl-universal/tree/master/packages/react-intl-universal-extract) helps you generate a locale file easily.
 
-## Live Demo
-[react-intl-universal example](https://fe-tool.com/react-intl-universal)
+## [Live Demo](https://alibaba.github.io/react-intl-universal/)
+
+Explore the live demo to see the recommended usage patterns for react-intl-universal, including plain messages, variable interpolation, and rich React component interpolation.
+
+[react-intl-universal Live Demo](https://alibaba.github.io/react-intl-universal/):
+
+<a href="https://alibaba.github.io/react-intl-universal/">
+  <img width="1200" src="https://img.alicdn.com/imgextra/i2/O1CN017uP7zd1h1tkr54P1z_!!6000000004218-2-tps-2280-1462.png" />
+</a>
 
 ## Why Another Internationalization Solution for React?
 In case of internationalizing React apps, [react-intl](https://github.com/yahoo/react-intl) is one of most popular package in industry.  [react-intl](https://github.com/yahoo/react-intl) decorate your React.Component with wrapped component which is injected internationalized message dynamically so that the locale data is able to be loaded dynamically without reloading page. The following is the example code using  [react-intl](https://github.com/yahoo/react-intl).

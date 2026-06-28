@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   stage-publish:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
 
     defaults:
       run:

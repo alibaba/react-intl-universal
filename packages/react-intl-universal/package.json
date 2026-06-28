@@ -30,8 +30,7 @@
     "clean": "rimraf coverage/ lib/ es/",
     "build": "npm run clean && rollup -c rollup.config.mjs && tsc -p tsconfig.build.json && node ./scripts/write-es-package-json.js && cp ../../README.md ./",
     "preversion": "npm run test && npm run build && npm run test:types",
-    "prepublish": "npm run build",
-    "postinstall": "node ./scripts/postinstall.js"
+    "prepublish": "npm run build"
   },
   "license": "BSD-3-Clause",
   "dependencies": {

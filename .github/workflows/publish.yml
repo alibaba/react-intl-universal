@@ -87,5 +87,5 @@ jobs:
       - name: Type test
         run: npm run test:types
 
-      - name: Stage package on npm
-        run: npm stage publish --tag "${{ steps.release.outputs.dist-tag }}"
+      - name: Publish package to npm
+        run: npm publish --tag "${{ steps.release.outputs.dist-tag }}"

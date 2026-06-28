@@ -1,0 +1,91 @@
+name: Publish react-intl-universal
+
+on:
+  push:
+    branches:
+      - beta
+      - master
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: npm-publish-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  stage-publish:
+    runs-on: ubuntu-22.04
+
+    defaults:
+      run:
+        working-directory: packages/react-intl-universal
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org/
+          cache: npm
+          cache-dependency-path: packages/react-intl-universal/package-lock.json
+
+      - name: Use npm version with trusted publishing support
+        run: |
+          npm install --global npm@latest
+          node --version
+          npm --version
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate release version
+        id: release
+        run: |
+          set -euo pipefail
+
+          PACKAGE_NAME="$(node -p "require('./package.json').name")"
+          PACKAGE_VERSION="$(node -p "require('./package.json').version")"
+          BRANCH_NAME="${GITHUB_REF_NAME}"
+
+          if [[ "${BRANCH_NAME}" == "beta" ]]; then
+            DIST_TAG="beta"
+            if [[ ! "${PACKAGE_VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+-beta\.[0-9]+$ ]]; then
+              echo "The beta branch can only publish beta versions, but package.json has ${PACKAGE_VERSION}."
+              exit 1
+            fi
+          elif [[ "${BRANCH_NAME}" == "master" ]]; then
+            DIST_TAG="latest"
+            if [[ ! "${PACKAGE_VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "The master branch can only publish stable versions, but package.json has ${PACKAGE_VERSION}."
+              exit 1
+            fi
+          else
+            echo "Unsupported release branch: ${BRANCH_NAME}"
+            exit 1
+          fi
+
+          if npm view "${PACKAGE_NAME}@${PACKAGE_VERSION}" version >/dev/null 2>&1; then
+            echo "${PACKAGE_NAME}@${PACKAGE_VERSION} already exists on npm."
+            exit 1
+          fi
+
+          echo "package-name=${PACKAGE_NAME}" >> "${GITHUB_OUTPUT}"
+          echo "package-version=${PACKAGE_VERSION}" >> "${GITHUB_OUTPUT}"
+          echo "dist-tag=${DIST_TAG}" >> "${GITHUB_OUTPUT}"
+
+      - name: Test
+        run: npm test -- --runInBand
+
+      - name: Build
+        run: npm run build
+
+      - name: Type test
+        run: npm run test:types
+
+      - name: Stage package on npm
+        run: npm stage publish --tag "${{ steps.release.outputs.dist-tag }}"

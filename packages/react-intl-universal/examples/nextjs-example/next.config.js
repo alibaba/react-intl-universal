@@ -5,8 +5,10 @@ const basePath = isGithubPages ? '/react-intl-universal' : '';
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
-  basePath,
-  assetPrefix: basePath,
+  ...(isGithubPages ? {
+    basePath,
+    assetPrefix: basePath,
+  } : {}),
   trailingSlash: true,
 }
 

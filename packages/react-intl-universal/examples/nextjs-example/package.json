@@ -1,6 +1,9 @@
 {
   "scripts": {
+    "prepare:package": "npm --prefix ../.. run build",
+    "prestart": "npm run prepare:package",
     "start": "open http://localhost:3000 && next",
+    "prebuild": "npm run prepare:package",
     "build": "next build && next export",
     "export": "next export",
     "start:prod": "next start"

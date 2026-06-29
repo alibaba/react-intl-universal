@@ -1,60 +1,51 @@
 import React from 'react';
 import intl from 'core/intl';
-import ExampleBlock from 'components/example-block';
 
 const SkillComponent: React.FC = () => {
+  const skillPath = 'https://github.com/alibaba/react-intl-universal/tree/master/skills/use-react-intl-universal';
   const skillLink = (chunks: React.ReactNode) => (
-    <a href="https://github.com/alibaba/react-intl-universal/tree/master/skills/use-react-intl-universal" target="_blank" rel="noreferrer">
+    <a href={skillPath} target="_blank" rel="noreferrer">
       {chunks}
     </a>
   );
-  const inlineCode = (chunks: React.ReactNode) => <code>{chunks}</code>;
-  const skillExampleCode = `<div>
-  {intl.get('SKILL_DOCS_EXAMPLE', {
-    username: 'Tony',
-    link: chunks => (
-      <a href="https://github.com/alibaba/react-intl-universal" target="_blank" rel="noreferrer">
-        {chunks}
-      </a>
-    ),
-  }).d('Hello, {username}. Read the <link>documentation</link>.')}
+  const installCommand = `npx skills add alibaba/react-intl-universal -y`;
+  const projectGuidance = `${intl.get('EXAMPLE_SKILL_PROJECT_GUIDANCE').d('When working on internationalization with react-intl-universal, follow the use-react-intl-universal skill guidance.')}`;
+  const agentPrompt = intl.get('EXAMPLE_SKILL_AGENT_PROMPT').d('Add a welcome message with username variable.');
+  const expectedCode = `<div>
+  {intl
+    .get('WELCOME_USER', { username })
+    .d('Welcome, {username}!')}
 </div>`;
 
   return (
     <div>
       <p className="section-note section-note-success">
         {intl.get('EXAMPLE_NOTE_SKILL', {
-          code: inlineCode,
           skill: skillLink,
-        }).d('Start an AI coding request with <code>$use-react-intl-universal</code> when adding, reviewing, or migrating i18n code. The <skill>use-react-intl-universal skill</skill> helps keep messages extractable, grammatical, and consistent across locale files.')}
+        }).d('Install <skill>use-react-intl-universal</skill> once, then add the project guidance to AGENTS.md or CLAUDE.md. After that, normal agent prompts can stay focused on product requirements.')}
       </p>
 
       <div className="example-comparison skill-comparison">
         <div className="example-panel">
-          <div className="example-label">Agent prompt</div>
-          <pre className="skill-prompt">{`Use $use-react-intl-universal.
-
-Add a localized message:
-"Hello, Tony. Read the documentation."
-
-Requirements:
-- username is a variable
-- documentation should render as a React link`}</pre>
+          <div className="example-label">Install skill</div>
+          <pre className="skill-prompt">{installCommand}</pre>
         </div>
         <div className="example-panel">
-          <div className="example-label">What the skill helps enforce</div>
-          <ul className="skill-points">
-            <li>Use <code>intl.get(...).d(...)</code> as the default API.</li>
-            <li>Keep <code>.d(...)</code> as the source for extraction.</li>
-            <li>Keep one complete sentence in the default message.</li>
-            <li>Use ICU variables like <code>{'{username}'}</code>.</li>
-            <li>Use rich tags like <code>{'<link>...</link>'}</code> for React elements.</li>
-            <li>Keep component props such as <code>href</code> in code.</li>
-          </ul>
+          <div className="example-label">Edit AGENTS.md or CLAUDE.md</div>
+          <pre className="skill-prompt">{projectGuidance}</pre>
         </div>
       </div>
 
-      <ExampleBlock code={skillExampleCode} tone="rich" />
+      <div className="example-comparison skill-agent-example">
+        <div className="example-panel">
+          <div className="example-label">Agent prompt</div>
+          <pre className="skill-prompt">{agentPrompt}</pre>
+        </div>
+        <div className="example-panel">
+          <div className="example-label">Agent writes code</div>
+          <pre className="skill-prompt">{expectedCode}</pre>
+        </div>
+      </div>
     </div>
   );
 };

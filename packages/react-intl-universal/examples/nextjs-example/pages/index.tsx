@@ -5,6 +5,8 @@ import enUS from 'locales/en-US.json';
 import zhCN from 'locales/zh-CN.json';
 import zhTW from 'locales/zh-TW.json';
 import frFr from 'locales/fr-FR.json';
+import deDE from 'locales/de-DE.json';
+import koKR from 'locales/ko-KR.json';
 import jaJP from 'locales/ja-JP.json';
 
 import BasicComponent from 'components/basic';
@@ -34,6 +36,14 @@ const LOCALES_LIST = [
     value: "fr-FR"
   },
   {
+    label: "Deutsch",
+    value: "de-DE"
+  },
+  {
+    label: "한국어",
+    value: "ko-KR"
+  },
+  {
     label: "日本語",
     value: "ja-JP"
   }
@@ -44,6 +54,8 @@ const LOCALE_DATA = {
   "zh-CN": zhCN,
   "zh-TW": zhTW,
   "fr-FR": frFr,
+  "de-DE": deDE,
+  "ko-KR": koKR,
   "ja-JP": jaJP,
 }
 

@@ -1,4 +1,5 @@
 import React from 'react'
+import intl from 'core/intl';
 import ExampleBlock from 'components/example-block';
 
 const DateComponent: React.FC<any> = () => {
@@ -7,7 +8,7 @@ const DateComponent: React.FC<any> = () => {
   const expires = new Date();
   return (
     <div>
-      <div className="title">Date and time formatting</div>
+      <div className="title">{intl.get('EXAMPLE_TITLE_DATE_TIME').d('Date and time formatting')}</div>
       <ExampleBlock code={"<div>{intl.get('SALE_START', { start }).d('Sale begins {start, date}')}</div>"} scope={{ start }} />
       <ExampleBlock code={"<div>{intl.get('SALE_END', { end }).d('Sale ends {end, date, long}')}</div>"} scope={{ end }} />
       <ExampleBlock code={"<div>{intl.get('COUPON', { expires }).d('Coupon expires at {expires, time, medium}')}</div>"} scope={{ expires }} />

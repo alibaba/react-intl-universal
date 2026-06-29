@@ -1,5 +1,5 @@
 ---
-name: react-intl-universal
+name: use-react-intl-universal
 description: Best-practice guidance for using react-intl-universal in React, TypeScript, Node, and shared frontend code. Use when writing, reviewing, migrating, or documenting i18n code that calls intl.get, intl.getHTML, intl.init, .d(defaultMessage), rich tag formatters, ICU variables, plural/select messages, or locale-pack keys.
 ---
 

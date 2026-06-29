@@ -1,4 +1,5 @@
 import React from 'react'
+import intl from 'core/intl';
 import ExampleBlock from 'components/example-block';
 
 interface BadgeProps {
@@ -12,7 +13,15 @@ const Badge: React.FC<BadgeProps> = ({ tone, children }) => (
   </span>
 );
 
+const PackageLink: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <a href="https://www.npmjs.com/package/react-intl-universal" target="_blank" rel="noreferrer">
+    {children}
+  </a>
+);
+
 const HtmlComponent: React.FC<any> = () => {
+  const packageLink = (chunks: React.ReactNode) => <PackageLink>{chunks}</PackageLink>;
+  const inlineCode = (chunks: React.ReactNode) => <code>{chunks}</code>;
   const richLinkCode = `<div>
   {intl.get('RICH_LINK', {
     // chunks is ["documentation"] here.
@@ -75,17 +84,22 @@ const HtmlComponent: React.FC<any> = () => {
 
   return (
     <div className="html-examples">
-      <div className="title">Rich React components with intl.get</div>
+      <div className="title">{intl.get('EXAMPLE_TITLE_RICH_GET').d('Rich React components with intl.get')}</div>
       <p className="section-note section-note-success">
-        Rich React components are supported in <a href="https://www.npmjs.com/package/react-intl-universal" target="_blank" rel="noreferrer">react-intl-universal</a>@2.14+. Use `get` as the unified API for plain text, HTML-like markup, and React components.
+        {intl.get('EXAMPLE_NOTE_RICH_GET', {
+          package: packageLink,
+          code: inlineCode,
+        }).d('Rich React components are supported in <package>react-intl-universal</package>@2.14+. Use <code>get</code> as the unified API for plain text, HTML-like markup, and React components.')}
       </p>
       <ExampleBlock code={richLinkCode} tone="rich" />
       <ExampleBlock code={richMultipleChunksCode} tone="rich" scope={{ Badge }} />
 
-      <div className="title">Deprecated rich text workaround with intl.getHTML</div>
+      <div className="title">{intl.get('EXAMPLE_TITLE_DEPRECATED_GETHTML').d('Deprecated rich text workaround with intl.getHTML')}</div>
       <p className="section-note section-note-warning">
-        intl.getHTML is deprecated. Use `get` as the unified API for messages. To render rich React components with `get`, upgrade to <a href="https://www.npmjs.com/package/react-intl-universal" target="_blank" rel="noreferrer">react-intl-universal</a>@2.14+.
-        The getHTML examples below split one sentence into several messages, which is harder to translate correctly.
+        {intl.get('EXAMPLE_NOTE_DEPRECATED_GETHTML', {
+          package: packageLink,
+          code: inlineCode,
+        }).d('intl.getHTML is deprecated. Use <code>get</code> as the unified API for messages. To render rich React components with <code>get</code>, upgrade to <package>react-intl-universal</package>@2.14+. The getHTML examples below split one sentence into several messages, which is harder to translate correctly.')}
       </p>
       <ExampleBlock code={legacyLinkWorkaroundCode} tone="legacy" />
       <ExampleBlock code={legacyBadgeWorkaroundCode} tone="legacy" scope={{ Badge }} />

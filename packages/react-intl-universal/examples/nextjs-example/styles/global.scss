@@ -6,7 +6,7 @@
 
 html {
   box-sizing: border-box;
-  font-size: 14px;
+  font-size: 15px;
   -ms-overflow-style: -ms-autohiding-scrollbar;
 }
 
@@ -25,9 +25,10 @@ body {
 
 .react-intl-universal-example {
   width: 100%;
-  max-width: 1120px;
+  max-width: 1000px;
   margin: 0 auto;
   color: #24292f;
+  font-size: 15px;
   line-height: 1.6;
   padding-top: 30px;
 
@@ -47,7 +48,7 @@ body {
     justify-content: space-between;
     gap: 16px;
     width: 100%;
-    max-width: 1120px;
+    max-width: 1000px;
     margin: 0 auto;
     padding: 12px 1.5rem;
   }
@@ -117,7 +118,7 @@ body {
   .title {
     margin: 18px 0 8px;
     color: #24292f;
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 700;
   }
 
@@ -125,7 +126,7 @@ body {
     margin: 0 0 10px;
     padding: 8px 10px;
     border-radius: 6px;
-    font-size: 14px;
+    font-size: 15px;
   }
 
   .section-note-warning {
@@ -164,7 +165,7 @@ body {
   .example-label {
     margin-bottom: 4px;
     color: #57606a;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 700;
     letter-spacing: 0;
   }
@@ -175,7 +176,7 @@ body {
     background: transparent !important;
     color: #24292f;
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-    font-size: 13px;
+    font-size: 14px;
     line-height: 1.5;
     white-space: pre-wrap;
     word-break: break-word;
@@ -194,14 +195,62 @@ body {
 
   .example-output {
     color: #24292f;
+    font-size: 16px;
+  }
+
+  .skill-comparison {
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 1fr);
+  }
+
+  .skill-prompt {
+    margin: 0;
+    color: #24292f;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    font-size: 14px;
+    line-height: 1.55;
+    white-space: pre-wrap;
+  }
+
+  .skill-points {
+    margin: 0;
+    padding-left: 18px;
+    color: #24292f;
     font-size: 15px;
+  }
+
+  .skill-points li + li {
+    margin-top: 5px;
+  }
+
+  .skill-points code {
+    padding: 1px 4px;
+    border-radius: 4px;
+    background: #f6f8fa;
+    color: #24292f;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    font-size: 0.92em;
+  }
+
+  .extract-comparison {
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 1fr);
+  }
+
+  .extract-code {
+    margin: 0;
+    overflow-x: auto;
+    color: #24292f;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    font-size: 14px;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    word-break: break-word;
   }
 
   .example-error {
     margin-top: 8px;
     color: #b42318;
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-    font-size: 12px;
+    font-size: 13px;
     line-height: 1.5;
     white-space: pre-wrap;
   }

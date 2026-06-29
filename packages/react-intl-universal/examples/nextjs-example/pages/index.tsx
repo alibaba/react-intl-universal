@@ -10,6 +10,8 @@ import jaJP from 'locales/ja-JP.json';
 import BasicComponent from 'components/basic';
 import PluralComponent from "components/plural";
 import HtmlComponent from "components/html";
+import SkillComponent from "components/skill";
+import ExtractComponent from "components/extract";
 import DateComponent from "components/date";
 import CurrencyComponent from "components/currency";
 import MessageNotInComponent from "components/message-not-in-component";
@@ -144,6 +146,8 @@ const ReactIntlUniversalExample: React.FC<any> = (props) => {
           <main className="example-content">
             <BasicComponent />
             <HtmlComponent />
+            <SkillComponent />
+            <ExtractComponent />
             <MessageNotInComponent />
             <PluralComponent />
             <DateComponent />

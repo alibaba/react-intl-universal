@@ -43,27 +43,56 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Validate release version
+      # Release rules:
+      # - beta branch publishes <package.json version>-beta.N with the npm "beta" dist-tag.
+      # - master branch publishes package.json version unchanged with the npm "latest" dist-tag.
+      # Keep package.json version as the stable base version, for example 2.14.0.
+      - name: Prepare release version
         id: release
         run: |
           set -euo pipefail
 
           PACKAGE_NAME="$(node -p "require('./package.json').name")"
-          PACKAGE_VERSION="$(node -p "require('./package.json').version")"
+          SOURCE_VERSION="$(node -p "require('./package.json').version")"
           BRANCH_NAME="${GITHUB_REF_NAME}"
+
+          if [[ ! "${SOURCE_VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "package.json should keep the stable base version, but it has ${SOURCE_VERSION}."
+            exit 1
+          fi
 
           if [[ "${BRANCH_NAME}" == "beta" ]]; then
             DIST_TAG="beta"
-            if [[ ! "${PACKAGE_VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+-beta\.[0-9]+$ ]]; then
-              echo "The beta branch can only publish beta versions, but package.json has ${PACKAGE_VERSION}."
+            BASE_VERSION="${SOURCE_VERSION}"
+
+            if npm view "${PACKAGE_NAME}@${BASE_VERSION}" version >/dev/null 2>&1; then
+              echo "${PACKAGE_NAME}@${BASE_VERSION} is already published as a stable version. Bump package.json before publishing a new beta."
               exit 1
             fi
+
+            PUBLISHED_VERSIONS_JSON="$(npm view "${PACKAGE_NAME}" versions --json)"
+            NEXT_BETA_NUMBER="$(
+              PUBLISHED_VERSIONS_JSON="${PUBLISHED_VERSIONS_JSON}" BASE_VERSION="${BASE_VERSION}" node <<'NODE'
+          const versions = JSON.parse(process.env.PUBLISHED_VERSIONS_JSON || '[]');
+          const baseVersion = process.env.BASE_VERSION;
+          const escapedBaseVersion = baseVersion.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const betaPattern = new RegExp(`^${escapedBaseVersion}-beta\\.(\\d+)$`);
+          let maxBetaNumber = -1;
+
+          for (const version of versions) {
+            const match = betaPattern.exec(version);
+            if (match) {
+              maxBetaNumber = Math.max(maxBetaNumber, Number(match[1]));
+            }
+          }
+
+          process.stdout.write(String(maxBetaNumber + 1));
+          NODE
+            )"
+            PACKAGE_VERSION="${BASE_VERSION}-beta.${NEXT_BETA_NUMBER}"
           elif [[ "${BRANCH_NAME}" == "master" ]]; then
             DIST_TAG="latest"
-            if [[ ! "${PACKAGE_VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-              echo "The master branch can only publish stable versions, but package.json has ${PACKAGE_VERSION}."
-              exit 1
-            fi
+            PACKAGE_VERSION="${SOURCE_VERSION}"
           else
             echo "Unsupported release branch: ${BRANCH_NAME}"
             exit 1
@@ -74,6 +103,15 @@ jobs:
             exit 1
           fi
 
+          PACKAGE_VERSION="${PACKAGE_VERSION}" node <<'NODE'
+          const fs = require('fs');
+          const packagePath = './package.json';
+          const pkg = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+          pkg.version = process.env.PACKAGE_VERSION;
+          fs.writeFileSync(packagePath, `${JSON.stringify(pkg, null, 2)}\n`);
+          NODE
+
+          echo "Prepared ${PACKAGE_NAME}@${PACKAGE_VERSION} for ${DIST_TAG} release."
           echo "package-name=${PACKAGE_NAME}" >> "${GITHUB_OUTPUT}"
           echo "package-version=${PACKAGE_VERSION}" >> "${GITHUB_OUTPUT}"
           echo "dist-tag=${DIST_TAG}" >> "${GITHUB_OUTPUT}"

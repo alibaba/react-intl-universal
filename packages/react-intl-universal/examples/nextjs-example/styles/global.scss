@@ -25,7 +25,7 @@ body {
 
 .react-intl-universal-example {
   width: 100%;
-  max-width: 1000px;
+  max-width: 1220px;
   margin: 0 auto;
   color: #24292f;
   font-size: 15px;
@@ -48,7 +48,7 @@ body {
     justify-content: space-between;
     gap: 16px;
     width: 100%;
-    max-width: 1000px;
+    max-width: 1220px;
     margin: 0 auto;
     padding: 12px 1.5rem;
   }
@@ -113,6 +113,64 @@ body {
   .github-logo {
     width: 16px;
     height: 16px;
+  }
+
+  .example-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1000px) 180px;
+    gap: 28px;
+    align-items: start;
+  }
+
+  .example-main {
+    min-width: 0;
+    max-width: 1000px;
+  }
+
+  .example-section {
+    scroll-margin-top: 72px;
+  }
+
+  .example-section + .example-section {
+    margin-top: 28px;
+    padding-top: 8px;
+    border-top: 1px solid #d8dee4;
+  }
+
+  .section-title {
+    margin: 20px 0 14px;
+    color: #24292f;
+    font-size: 26px;
+    font-weight: 750;
+    line-height: 1.25;
+  }
+
+  .example-toc {
+    position: sticky;
+    top: 72px;
+    padding: 4px 0 4px 14px;
+    border-left: 1px solid #d8dee4;
+  }
+
+  .example-toc-title {
+    margin-bottom: 6px;
+    color: #57606a;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .example-toc-link {
+    display: block;
+    padding: 6px 0;
+    color: #57606a;
+    font-size: 14px;
+    line-height: 1.35;
+    text-decoration: none;
+  }
+
+  .example-toc-link:hover {
+    color: #0969da;
+    text-decoration: underline;
   }
 
   .title {
@@ -273,6 +331,39 @@ body {
   .status-badge-green {
     border: 1px solid #6bc46d;
     color: #1a7f37;
+  }
+
+  @media (max-width: 1180px) {
+    max-width: 1000px;
+
+    .example-header-inner {
+      max-width: 1000px;
+    }
+
+    .example-layout {
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    .example-toc {
+      position: static;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 14px;
+      order: -1;
+      padding: 0 0 10px;
+      border-bottom: 1px solid #d8dee4;
+      border-left: 0;
+    }
+
+    .example-toc-title {
+      width: 100%;
+      margin-bottom: 0;
+    }
+
+    .example-toc-link {
+      padding: 0;
+    }
   }
 
   @media (max-width: 720px) {

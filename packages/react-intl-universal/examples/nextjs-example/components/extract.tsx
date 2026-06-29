@@ -41,7 +41,6 @@ const ExtractComponent: React.FC = () => {
 
   return (
     <div>
-      <div className="title">{intl.get('EXAMPLE_TITLE_EXTRACT').d('Extract default messages')}</div>
       <p className="section-note section-note-success">
         {intl.get('EXAMPLE_NOTE_EXTRACT', {
           package: packageLink,

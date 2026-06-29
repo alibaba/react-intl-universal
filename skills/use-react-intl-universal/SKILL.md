@@ -19,6 +19,7 @@ Rich React component interpolation with `intl.get` requires [react-intl-universa
 - Write `.d()` messages with ICU placeholders such as `{username}`, `{count}`, and plural/select syntax.
 - Keep a complete sentence in one message key. Do not split a sentence across several keys just to inject links, badges, or styled text.
 - Keep locale-pack messages and `.d()` messages structurally equivalent: same ICU variables and same rich tags.
+- When changing user-facing copy, update both the `.d(defaultMessage)` source message and the corresponding locale-pack message for the same key. Treat `.d()` as the source default message used by extraction tools.
 - Use simple, stable keys. Do not build keys dynamically unless the surrounding code already has a strict convention for doing so.
 - In TypeScript, let primitive-value calls infer `string`; use rich tag formatter values only when the rendered result may contain React nodes.
 

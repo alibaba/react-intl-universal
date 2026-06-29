@@ -22,7 +22,6 @@ const SkillComponent: React.FC = () => {
 
   return (
     <div>
-      <div className="title">{intl.get('EXAMPLE_TITLE_SKILL').d('Use the use-react-intl-universal skill')}</div>
       <p className="section-note section-note-success">
         {intl.get('EXAMPLE_NOTE_SKILL', {
           code: inlineCode,

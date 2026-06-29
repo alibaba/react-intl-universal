@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import intl from 'core/intl';
 import ExampleBlock from 'components/example-block';
 
@@ -20,6 +20,7 @@ const PackageLink: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 );
 
 const HtmlComponent: React.FC<any> = () => {
+  const [showAllGetHTMLExamples, setShowAllGetHTMLExamples] = useState(false);
   const packageLink = (chunks: React.ReactNode) => <PackageLink>{chunks}</PackageLink>;
   const inlineCode = (chunks: React.ReactNode) => <code>{chunks}</code>;
   const richLinkCode = `<div>
@@ -82,6 +83,16 @@ const HtmlComponent: React.FC<any> = () => {
   )}
 </div>`;
 
+  useEffect(() => {
+    const hostname = window.location.hostname;
+
+    setShowAllGetHTMLExamples(
+      hostname === 'localhost' ||
+      hostname === '127.0.0.1' ||
+      hostname === '::1'
+    );
+  }, []);
+
   return (
     <div className="html-examples">
       <div className="title">{intl.get('EXAMPLE_TITLE_RICH_GET').d('Rich React components with intl.get')}</div>
@@ -101,11 +112,17 @@ const HtmlComponent: React.FC<any> = () => {
           code: inlineCode,
         }).d('intl.getHTML is deprecated. Use <code>get</code> as the unified API for messages. To render rich React components with <code>get</code>, upgrade to <package>react-intl-universal</package>@2.14+. The getHTML examples below split one sentence into several messages, which is harder to translate correctly.')}
       </p>
-      <ExampleBlock code={legacyLinkWorkaroundCode} tone="legacy" />
+      {/* Keep the full deprecated getHTML comparison available on localhost,
+          but show only one legacy example on the public demo. */}
+      {showAllGetHTMLExamples && <ExampleBlock code={legacyLinkWorkaroundCode} tone="legacy" />}
       <ExampleBlock code={legacyBadgeWorkaroundCode} tone="legacy" scope={{ Badge }} />
-      <ExampleBlock code={htmlTipCode} tone="legacy" />
-      <ExampleBlock code={htmlTipWithVariableCode} tone="legacy" />
-      <ExampleBlock code={htmlTipWithEscapedVariableCode} tone="legacy" />
+      {showAllGetHTMLExamples && (
+        <>
+          <ExampleBlock code={htmlTipCode} tone="legacy" />
+          <ExampleBlock code={htmlTipWithVariableCode} tone="legacy" />
+          <ExampleBlock code={htmlTipWithEscapedVariableCode} tone="legacy" />
+        </>
+      )}
     </div>
   );
 }

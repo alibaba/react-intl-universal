@@ -5,11 +5,14 @@ import intl, {
   ReactIntlUniversal,
   changeCurrentLocale,
   determineLocale,
+  formatDate,
+  formatDateTime,
   formatHTMLMessage,
   formatList,
   formatMessage,
   formatNumber,
   formatParentheses,
+  formatTime,
   get,
   getColon,
   getHTML,
@@ -41,7 +44,22 @@ formatParentheses(fallbackElement);
 getColon();
 
 const formattedNumber: string | number = formatNumber(1234);
+// @ts-expect-error formatNumber intentionally keeps the original single-argument API.
+formatNumber(1234, { notation: "compact" });
 const originalString: string = formatNumber("not a number");
+const formattedDate: string = formatDate(new Date());
+// @ts-expect-error formatDate intentionally keeps the stable single-argument API.
+formatDate(new Date(), "LL");
+const formattedTimestamp: string = formatDate(Date.now());
+const originalDateString: string = formatDate("2026-01-02");
+const formattedTime: string = formatTime(new Date());
+// @ts-expect-error formatTime intentionally keeps the stable single-argument API.
+formatTime(new Date(), "LTS");
+const originalTimeString: string = formatTime("10:00");
+const formattedDateTime: string = formatDateTime(new Date());
+// @ts-expect-error formatDateTime intentionally keeps the stable single-argument API.
+formatDateTime(new Date(), "YYYY-MM-DD HH:mm:ss");
+const originalDateTimeString: string = formatDateTime("2026-01-02 10:00");
 
 const primitiveGetResult: string = intl.get("HELLO", { name: "Tony" });
 const primitiveNamedGetResult: string = get("HELLO", { name: "Tony" }).d("Hello, {name}");
@@ -81,6 +99,13 @@ void htmlFallback;
 void namedHtmlFallback;
 void formattedNumber;
 void originalString;
+void formattedDate;
+void formattedTimestamp;
+void originalDateString;
+void formattedTime;
+void originalTimeString;
+void formattedDateTime;
+void originalDateTimeString;
 void primitiveGetResult;
 void primitiveNamedGetResult;
 void inlineRichGetResult;

@@ -55,6 +55,9 @@ const getLocaleFromBrowser = defaultInstance.getLocaleFromBrowser.bind(defaultIn
 const formatList = defaultInstance.formatList.bind(defaultInstance) as ReactIntlUniversal["formatList"];
 const formatParentheses = defaultInstance.formatParentheses.bind(defaultInstance) as ReactIntlUniversal["formatParentheses"];
 const getColon = defaultInstance.getColon.bind(defaultInstance) as ReactIntlUniversal["getColon"];
+const formatDate = defaultInstance.formatDate.bind(defaultInstance) as ReactIntlUniversal["formatDate"];
+const formatTime = defaultInstance.formatTime.bind(defaultInstance) as ReactIntlUniversal["formatTime"];
+const formatDateTime = defaultInstance.formatDateTime.bind(defaultInstance) as ReactIntlUniversal["formatDateTime"];
 const formatNumber = defaultInstance.formatNumber.bind(defaultInstance) as ReactIntlUniversal["formatNumber"];
 // resolved by ECMAScript module loader
 export {
@@ -76,6 +79,9 @@ export {
   formatList,
   formatParentheses,
   getColon,
+  formatDate,
+  formatTime,
+  formatDateTime,
   formatNumber,
   defaultInstance as default
 };

@@ -7,6 +7,14 @@ const copyright = (`/*
  */
 `);
 
+const externals = [
+    'invariant',
+    'intl-messageformat',
+    'escape-html',
+    'react',
+    'lodash.merge',
+];
+
 export default {
     input: 'src/index.ts',
     output: [
@@ -22,13 +30,7 @@ export default {
             banner: copyright
         }
     ],
-    external: [
-        'invariant',
-        'intl-messageformat',
-        'escape-html',
-        'react',
-        'lodash.merge',
-    ],
+    external: externals,
     plugins: [
         typescript({
             tsconfig: './tsconfig.json',
@@ -37,4 +39,3 @@ export default {
         })
     ]
 };
-

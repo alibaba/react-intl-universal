@@ -5,8 +5,9 @@
 
 ## ✨ Features
 - Can be used not only in React component but also in Vanilla JS.
-- Simple. Only three main API and one optional helper.
-- Display numbers, currency, dates and times for different locales.
+- Simple API surface centered around `intl.get`.
+- Display locale-aware numbers.
+- Stable date/time helpers: `formatDate`, `formatTime`, and `formatDateTime` return deterministic `YYYY-MM-DD`, `HH:mm:ss`, and `YYYY-MM-DD HH:mm:ss`. This avoids native `Intl` output drift across runtimes, which has caused SSR and CI issues in [tc39/ecma402#1028](https://github.com/tc39/ecma402/issues/1028), [nodejs/node#44454](https://github.com/nodejs/node/issues/44454), [nodejs/node#46123](https://github.com/nodejs/node/issues/46123), and [formatjs/formatjs#1319](https://github.com/formatjs/formatjs/issues/1319).
 - Pluralize labels in strings.
 - Support variables in message.
 - Support [React rich text component interpolation in message](https://alibaba.github.io/react-intl-universal).
@@ -93,7 +94,7 @@ Due to the problem above, we create [react-intl-universal](https://www.npmjs.com
 
 ```js
   /**
-   * Initialize properties and load CLDR locale data according to currentLocale
+   * Initialize properties and load locale data according to currentLocale
    * @param {Object} options
    * @param {string} options.escapeHtml To escape html. Default value is true.
    * @param {string} options.currentLocale Current locale such as 'en-US'
@@ -190,6 +191,36 @@ Due to the problem above, we create [react-intl-universal](https://www.npmjs.com
   getColon()
 
   /**
+   * Formats a Date or timestamp as a stable ISO 8601 date: YYYY-MM-DD.
+   * @param {Date|number} value - The Date or timestamp to format.
+   * @returns {string} The formatted date.
+   *
+   * @example
+   * formatDate(new Date(2026, 0, 2)) => Returns "2026-01-02"
+   */
+  formatDate(value)
+
+  /**
+   * Formats a Date or timestamp as stable 24-hour time with seconds: HH:mm:ss.
+   * @param {Date|number} value - The Date or timestamp to format.
+   * @returns {string} The formatted time.
+   *
+   * @example
+   * formatTime(new Date(2026, 0, 2, 15, 30, 45)) => Returns "15:30:45"
+   */
+  formatTime(value)
+
+  /**
+   * Formats a Date or timestamp as stable ISO 8601 date plus 24-hour time: YYYY-MM-DD HH:mm:ss.
+   * @param {Date|number} value - The Date or timestamp to format.
+   * @returns {string} The formatted date and time.
+   *
+   * @example
+   * formatDateTime(new Date(2026, 0, 2, 15, 30, 45)) => Returns "2026-01-02 15:30:45"
+   */
+  formatDateTime(value)
+
+   /**
    * Formats a number according to the current locale.
    * @param {number} number - The number to format.
    * @returns {string} The formatted number.

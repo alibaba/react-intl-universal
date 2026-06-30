@@ -11,6 +11,8 @@ const dataKey = 'data-i18n-key';
 const locales = {
   "en-US": enUS,
   "zh-CN": zhCN,
+  "zh-TW": zhCN,
+  "ja-JP": enUS,
 };
 
 describe("Public API behavior", () => {
@@ -33,6 +35,9 @@ describe("Public API behavior", () => {
       "formatList",
       "formatParentheses",
       "getColon",
+      "formatDate",
+      "formatTime",
+      "formatDateTime",
       "formatNumber",
     ];
 
@@ -61,6 +66,9 @@ describe("Public API behavior", () => {
       "formatList",
       "formatParentheses",
       "getColon",
+      "formatDate",
+      "formatTime",
+      "formatDateTime",
       "formatNumber",
     ];
 
@@ -1480,18 +1488,16 @@ describe("Test for formatParentheses", () => {
 
 describe("Test for formatNumber", () => {
 
-  test("should format number correctly for en-US locale", () => {
-    intl.init({ locales, currentLocale: "en-US" });
-    expect(intl.formatNumber(1234567)).toBe("1,234,567");
-    expect(intl.formatNumber(1234.567)).toBe("1,234.567");
-    expect(intl.formatNumber(0)).toBe("0");
-  });
-
-  test("should format number correctly for zh-CN locale", () => {
-    intl.init({ locales, currentLocale: "zh-CN" });
-    expect(intl.formatNumber(1234567)).toBe("1,234,567");
-    expect(intl.formatNumber(1234.567)).toBe("1,234.567");
-    expect(intl.formatNumber(0)).toBe("0");
+  test.each([
+    ["en-US", "1,234,567", "1,234.567", "0"],
+    ["zh-CN", "1,234,567", "1,234.567", "0"],
+    ["zh-TW", "1,234,567", "1,234.567", "0"],
+    ["ja-JP", "1,234,567", "1,234.567", "0"],
+  ])("should format number correctly for %s locale", (currentLocale, expectedInteger, expectedDecimal, expectedZero) => {
+    intl.init({ locales, currentLocale });
+    expect(intl.formatNumber(1234567)).toBe(expectedInteger);
+    expect(intl.formatNumber(1234.567)).toBe(expectedDecimal);
+    expect(intl.formatNumber(0)).toBe(expectedZero);
   });
 
   test("should format number correctly for de-DE locale", () => {
@@ -1519,4 +1525,64 @@ describe("Test for formatNumber", () => {
     intl.init({ locales, currentLocale: "en-US" });
     expect(intl.formatNumber(1e15)).toBe("1,000,000,000,000,000");
   });
+
+});
+
+describe("Test for date and time formatters", () => {
+  const date = new Date(2026, 0, 2, 15, 30, 45);
+
+  test.each([
+    "en-US",
+    "zh-CN",
+    "zh-TW",
+    "ja-JP",
+  ])("formatDate should use stable ISO 8601 date when format token is omitted for %s", async (currentLocale) => {
+    await intl.init({ locales, currentLocale });
+    expect(intl.formatDate(date)).toBe("2026-01-02");
+  });
+
+  test("formatDate should format timestamp values", () => {
+    intl.init({ locales, currentLocale: "zh-CN" });
+    expect(intl.formatDate(date.getTime())).toBe("2026-01-02");
+  });
+
+  test.each([
+    "en-US",
+    "zh-CN",
+    "zh-TW",
+    "ja-JP",
+  ])("formatTime should use stable 24-hour time with seconds when format token is omitted for %s", async (currentLocale) => {
+    await intl.init({ locales, currentLocale });
+    expect(intl.formatTime(date)).toBe("15:30:45");
+  });
+
+  test("formatTime should format timestamp values", () => {
+    intl.init({ locales, currentLocale: "en-US" });
+    expect(intl.formatTime(date.getTime())).toBe("15:30:45");
+  });
+
+  test.each([
+    "en-US",
+    "zh-CN",
+    "zh-TW",
+    "ja-JP",
+  ])("formatDateTime should use stable ISO 8601 date and 24-hour time when format token is omitted for %s", async (currentLocale) => {
+    await intl.init({ locales, currentLocale });
+    expect(intl.formatDateTime(date)).toBe("2026-01-02 15:30:45");
+  });
+
+  test("formatDateTime should format timestamp values", () => {
+    intl.init({ locales, currentLocale: "de-DE" });
+    expect(intl.formatDateTime(date.getTime())).toBe("2026-01-02 15:30:45");
+  });
+
+  test("date and time formatters should return unsupported values unchanged", () => {
+    intl.init({ locales, currentLocale: "en-US" });
+    const invalidDate = new Date("invalid");
+    expect(intl.formatDate("2026-01-02")).toBe("2026-01-02");
+    expect(intl.formatTime(null)).toBeNull();
+    expect(intl.formatDateTime(undefined)).toBeUndefined();
+    expect(intl.formatDate(invalidDate)).toBe(invalidDate);
+  });
+
 });

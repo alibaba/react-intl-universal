@@ -1,6 +1,6 @@
 ---
 name: use-react-intl-universal
-description: Best-practice guidance for using react-intl-universal in React, TypeScript, Node, and shared frontend code. Use when writing, reviewing, migrating, or documenting i18n code that calls intl.get, intl.getHTML, intl.init, .d(defaultMessage), rich tag formatters, ICU variables, plural/select messages, or locale-pack keys.
+description: Best-practice guidance and helper scripts for using react-intl-universal in React, TypeScript, Node, and shared frontend code. Use when writing, reviewing, migrating, extracting, translating, or auditing i18n code that calls intl.get, intl.getHTML, intl.init, .d(defaultMessage), rich tag formatters, ICU variables, plural/select messages, or locale-pack keys.
 ---
 
 # React Intl Universal
@@ -8,138 +8,135 @@ description: Best-practice guidance for using react-intl-universal in React, Typ
 Use this skill when implementing or reviewing code that uses `react-intl-universal`.
 Prefer patterns that keep translations grammatical, extractable, type-safe, and compatible across React and non-React code.
 
+## Primary Goals
+
+- Help users ship high-quality localized interfaces that read naturally in every supported locale.
+- Keep product meaning, ICU variables, rich React components, plurals, dates, numbers, and currency behavior correct across locales.
+- Keep translated UI stable in real layouts, especially compact controls where longer copy can cause clipping, awkward wrapping, or visual regressions.
+- Keep source messages, default locale packs, and translated locale packs aligned so future i18n changes remain predictable and reviewable.
+
 ## Prerequisite
 
 Rich React component interpolation with `intl.get` requires [react-intl-universal](https://www.npmjs.com/package/react-intl-universal)@2.14.0 or later.
 
+## Main Scenarios
+
+- Add a new business message key.
+- Modify the default message for an existing key.
+- Synchronize locale files that the project already supports.
+- Keep `.d(defaultMessage)`, the default locale pack, and existing non-default locale packs consistent.
+
+## Default Workflow
+
+When adding or changing user-facing copy, start by inspecting the existing i18n setup. Open [Inspect Existing I18n Setup](references/inspect-existing-i18n-setup.md) for the detailed checks.
+
+1. Discover the project's extraction command and current locale files.
+2. Update the source `intl.get(key, values).d(defaultMessage)` first. Treat `.d(defaultMessage)` as the source default message that extraction tools should copy into the default locale.
+3. Keep translatable dynamic values as ICU placeholders, such as `{username}`, not JavaScript template interpolation.
+4. Keep React elements as rich tags, such as `<link>documentation</link>`, and keep component props in code.
+5. Run the project extraction command to regenerate the default locale file.
+6. Infer or confirm the default locale before editing translated locale files.
+7. Generate translation tasks only from the default-locale diff. The diff is the source of added and changed keys.
+8. Generate translation tasks only for existing non-default locale files unless the user explicitly asks to add a new locale.
+9. Translate non-default locales from task files. Follow [Translation Rules](references/translation-rules.md). If using subagents, assign work by locale and cap parallel subagents at 5.
+10. Review returned delta JSON before merging. Check:
+    - every changed key is covered;
+    - ICU `{variable}` contracts are preserved;
+    - rich tag `<tag>` contracts are preserved;
+    - non-default translations are not just copied from the default message unless that is intentional;
+    - compact-UI translations are not risky because they are much longer than the default message;
+    - translations are natural and match the product/business context.
+11. Merge reviewed translation delta JSON files into locale JSON files.
+12. Audit the changed keys after merge. Do not make a full-project audit the default completion condition.
+13. Run [Validation Checklist](references/validation-checklist.md), then generate a handoff focused on changed-key synchronization status: added/changed keys, target locales, delta review, merge result, changed-key audit, and any remaining UI-length or naturalness review items.
+
+Rerun the delta review whenever translation tasks are regenerated; older review reports can have outdated expected item counts.
+
+Prefer the repository's existing extraction script, such as `npm run intl:extract`. If none exists, use:
+
+```bash
+npx react-intl-universal-extract \
+  --cmd extract \
+  --source-path ./src \
+  --output-path ./src/locales/en-US.json
+```
+
+It is acceptable for the default locale file to be fully regenerated when the project treats `.d()` as the source of truth. Do not run extraction into non-default translated locale files.
+
+Do not blindly machine-translate every locale file. Use the default-locale diff to translate only new or changed keys for locales that already exist in the project.
+
 ## Core Rules
 
-- Use `intl.get(key, values).d(defaultMessage)` as the default API for application text.
-- Treat `.d(defaultMessage)` as the default locale message, not as an already-rendered fallback string.
-- Write `.d()` messages with ICU placeholders such as `{username}`, `{count}`, and plural/select syntax.
-- Keep a complete sentence in one message key. Do not split a sentence across several keys just to inject links, badges, or styled text.
-- Keep locale-pack messages and `.d()` messages structurally equivalent: same ICU variables and same rich tags.
-- When changing user-facing copy, update both the `.d(defaultMessage)` source message and the corresponding locale-pack message for the same key. Treat `.d()` as the source default message used by extraction tools.
-- Use simple, stable keys. Do not build keys dynamically unless the surrounding code already has a strict convention for doing so.
-- In TypeScript, let primitive-value calls infer `string`; use rich tag formatter values only when the rendered result may contain React nodes.
+1. Rule 1: Use `intl.get(key, values).d(defaultMessage)` as the source-of-truth text API.
+   - Rule description: Treat `.d(defaultMessage)` as the default locale message, not as an already-rendered fallback string. When user-facing copy changes, edit `.d(defaultMessage)` first, then regenerate the default locale pack from extraction.
+   - Reason: One source of truth keeps source code, default locale JSON, and translated locale JSON from drifting apart.
+   - Rule implementation: Use the repository extraction command or `react-intl-universal-extract`. If extraction is unavailable, install or configure the extraction tool before continuing; use manual default-locale edits only as an explicit user-approved temporary workaround. Run `verify-locale-export.mjs` after extraction when expected locale output matters.
 
-## Plain Strings
+2. Rule 2: Use ICU placeholders for translatable dynamic values.
+   - Rule description: Write values as `{username}`, `{count}`, and plural/select syntax in `.d()` messages. Do not use JavaScript template interpolation for values that must be translated.
+   - Reason: ICU placeholders let each locale reorder values naturally and keep the same behavior whether the message comes from `.d()` or a locale pack.
+   - Rule implementation: `audit-i18n-contract.mjs` reports JavaScript template interpolation inside `.d()`. `review-translation-deltas.mjs`, `audit-changed-locale-keys.mjs`, and `audit-locale-key.mjs` verify placeholder consistency after locale updates.
 
-Prefer this:
+3. Rule 3: Keep one user-facing sentence in one message key.
+   - Rule description: Do not split a sentence across several keys just to inject links, badges, styled text, or dynamic values. When replacing hardcoded fragments near dynamic text, pull the surrounding dynamic values into the same ICU message.
+   - Reason: Split messages prevent translators from changing word order, grammar, punctuation, and emphasis naturally.
+   - Rule implementation: This is mainly a source-review rule. Use [Message Patterns](references/message-patterns.md) for examples; use `find-hardcoded-cjk.mjs` and `create-hardcoded-cjk-fix-tasks.mjs` when the task includes hardcoded CJK cleanup.
 
-```tsx
-<div>
-  {intl.get("HELLO_USER", { username: "Tony" }).d("Hello, {username}!")}
-</div>
-```
+4. Rule 4: Use rich tags for React components and avoid new `getHTML` usage.
+   - Rule description: Use rich tag formatters such as `<link>...</link>` for inline React elements. Keep component props in code and translatable text in the message. Do not add new `intl.getHTML` usage for React UI.
+   - Reason: Rich tags preserve React component safety and let translators move the component placement inside the sentence.
+   - Rule implementation: Open [Message Patterns](references/message-patterns.md) for rich formatter and TypeScript examples. `audit-i18n-contract.mjs` reports `intl.getHTML` usage so new or high-value cases can be migrated.
 
-Avoid this when the text is intended to be translated or extracted:
+5. Rule 5: Preserve the render contract across `.d()` and locale packs.
+   - Rule description: Target locales may rewrite and reorder text naturally, but every value for the same key must preserve the same `{variables}` and `<tags>`.
+   - Reason: Missing variables or rich tags can break runtime formatting, React rendering, or translated sentence structure.
+   - Rule implementation: Use `review-translation-deltas.mjs`, `apply-translation-deltas.mjs --default-locale`, `audit-changed-locale-keys.mjs`, `audit-locale-key.mjs`, and `audit-i18n-contract.mjs` to verify ICU variables and rich tags.
 
-```tsx
-<div>
-  {intl.get("HELLO_USER", { username: "Tony" }).d(`Hello, ${username}!`)}
-</div>
-```
+6. Rule 6: Use one stable literal key for one meaning.
+   - Rule description: Use simple keys that can be extracted statically. Do not build keys dynamically unless the surrounding code already has a strict convention. When one key has multiple `.d()` defaults, first decide whether the meanings are truly the same; if they differ, search for existing sibling keys such as `_simple`, `_label`, `_title`, or `_tip` before creating a new key.
+   - Reason: Dynamic keys and conflicting defaults make extraction, translation tasks, and contract audits unreliable.
+   - Rule implementation: `audit-i18n-contract.mjs` reports conflicting `.d()` defaults for the same key. Dynamic key conventions require manual source review because static extraction cannot always prove the key set.
 
-The template-string form is evaluated by JavaScript before `react-intl-universal` sees it, so it is not a real default message with ICU variables.
-Only use a template string in `.d()` when the dynamic string is intentionally not part of the translation contract.
+7. Rule 7: Synchronize translated locale files through changed-key tasks.
+   - Rule description: After default-locale extraction, generate translation work only from the default-locale diff and only for locales the project already supports unless the user explicitly asks to add a new locale.
+   - Reason: Translating whole locale files wastes work and increases the chance of unrelated wording churn.
+   - Rule implementation: Use `create-translation-tasks.mjs --base-ref <ref>`, review results with `review-translation-deltas.mjs`, merge with `apply-translation-deltas.mjs`, then verify with `audit-changed-locale-keys.mjs`.
 
-## Rich React Components
+8. Rule 8: Translate by product meaning, with UI length in mind.
+   - Rule description: Use source code, UI placement, route/module context, validation logic, and adjacent labels to write natural target-locale copy. Keep non-default translations concise in compact UI, but do not shorten the default locale just for layout reasons.
+   - Reason: Literal translations and overly long UI labels create unnatural product copy and can break layout.
+   - Rule implementation: Open [Translation Rules](references/translation-rules.md) before translating or reviewing non-default locale text. `create-translation-tasks.mjs` and `create-translation-review-tasks.mjs` include source context and review prompts. Use `review-translation-deltas.mjs` or `audit-i18n-contract.mjs --length-warnings` to surface translations that may need UI-context review.
 
-Only use this pattern with [react-intl-universal](https://www.npmjs.com/package/react-intl-universal)@2.14+.
+## Skill Resources and Script Flow
 
-Use `intl.get` with ICU variables and rich tag formatter values in the same translated sentence:
+- `references/message-patterns.md`: open when writing or reviewing concrete `react-intl-universal` code examples.
+- `references/inspect-existing-i18n-setup.md`: open before editing an unfamiliar repository's source or locale JSON.
+- `references/translation-rules.md`: open before translating or reviewing non-default locale text.
+- `references/validation-checklist.md`: open before final handoff.
+- `references/scripts.md`: open before running helper scripts so arguments, output files, and expected evidence are clear.
+- `scripts/`: use when locale JSON files are available and deterministic discovery, translation, merge, audit, or handoff evidence is useful.
 
-```tsx
-const username = "Tony";
-const docsUrl = "https://alibaba.github.io/react-intl-universal";
+Recommended evidence flow:
 
-intl
-  .get("READ_USER_DOCS", {
-    username,
-    link: (chunks) => (
-      <a href={docsUrl} target="_blank" rel="noreferrer">
-        {chunks}
-      </a>
-    ),
-  })
-  .d("Hello, {username}. Read the <link>documentation</link>.")
-```
+1. `discover-project-i18n.mjs` before edits.
+2. `verify-locale-export.mjs` after extraction/export.
+3. `infer-default-locale.mjs` when the default locale is not obvious.
+4. `create-translation-tasks.mjs --base-ref <ref>` for non-default locale work based on the default-locale diff.
+5. `review-translation-deltas.mjs` before merging subagent or human translation results.
+6. `create-translation-review-tasks.mjs` when delta warnings exist or when a deliberate naturalness/terminology review is useful.
+7. `apply-translation-deltas.mjs` to merge reviewed translation results.
+8. `audit-changed-locale-keys.mjs` after merge to verify only the changed keys.
+9. `create-i18n-handoff.mjs` before reporting the task as done. For normal incremental work, keep the handoff focused on changed keys and translation sync status.
 
-Locale pack:
+Use full-project scripts only when the user asks for broad cleanup/migration, when preparing a release gate, or when changed-key evidence points to wider debt:
 
-```json
-{
-  "READ_USER_DOCS": "Hello, {username}. Read the <link>documentation</link>."
-}
-```
+- `audit-i18n-contract.mjs` for a full source/locale contract scan.
+- `find-hardcoded-cjk.mjs` and `create-hardcoded-cjk-fix-tasks.mjs` for hardcoded CJK cleanup.
+- `create-audit-fix-tasks.mjs` for large audit remediation queues.
 
-Guidelines:
+When editing this skill's helper scripts, run `self-test.mjs` from the script reference before relying on real-project trials.
 
-- Use `{variable}` for plain ICU values and `<tag>...</tag>` for rich React components.
-- Keep component props such as `href`, `onClick`, `tone`, and `className` in code; keep only translatable text and tag placement in messages.
-- Use rich tags such as `<link>...</link>`, `<badge>...</badge>`, and `<strong>...</strong>` in messages.
-- Pass a formatter function with the same name as each rich tag.
-- Treat `chunks` as the translated children inside that tag. It is usually a `ReactNode[]`, not a plain string.
-- Render `chunks` as children of the component unless there is a specific reason to transform them.
-- If a formatter returns multiple sibling elements, provide stable React keys.
-- Do not pass ordinary React elements through plain ICU placeholders such as `{icon}` as the public contract. Wrap translatable content in rich tags instead.
+## Message Patterns
 
-## getHTML
-
-`intl.getHTML` is deprecated. Do not add new `intl.getHTML` usage for React UI.
-Prefer `intl.get` as the unified API for plain strings, HTML-like text, and rich React component interpolation.
-
-Use `getHTML` only when maintaining legacy code that already expects an HTML string:
-
-```tsx
-const legacyHtml = intl.getHTML("LEGACY_HTML").d("<b>Legacy</b> message");
-```
-
-When migrating `getHTML`, replace string concatenation and split messages with one rich `intl.get` message:
-
-```tsx
-intl
-  .get("TERMS_NOTICE", {
-    terms: (chunks) => <a href="/terms">{chunks}</a>,
-  })
-  .d("Please read the <terms>terms</terms> before continuing.")
-```
-
-## React vs Non-React Code
-
-In shared utilities, validation messages, logs, SEO helpers, or Node code, use primitive values only:
-
-```ts
-export function getLimitMessage(limit: number) {
-  return intl.get("LIMIT_MESSAGE", { limit }).d("The limit is {limit}.");
-}
-```
-
-Use rich tag formatters only in React rendering paths, where returning React nodes is expected.
-
-## TypeScript
-
-Use the library's exported rich formatter types when a formatter is reused or when contextual typing is unclear:
-
-```tsx
-import type { ReactIntlUniversalRichTagFormatter } from "react-intl-universal";
-
-const strong: ReactIntlUniversalRichTagFormatter = (chunks) => (
-  <strong>{chunks}</strong>
-);
-```
-
-Expected typing behavior:
-
-- Primitive values should infer `string`.
-- Rich tag formatter values should infer `string | ReactNode[]`-style rendered output according to the installed library version.
-- If `chunks` becomes implicit `any`, check that the project is using a version whose generated declarations include rich formatter overloads, then refresh generated declaration files or reinstall dependencies.
-
-## Validation Checklist
-
-Before finishing changes:
-
-- Verify `.d()` uses ICU placeholders instead of JavaScript interpolation for translatable values.
-- Verify no new `getHTML` usage was introduced for React UI.
-- Verify rich formatter examples render the translated `chunks`.
+Open [Message Patterns](references/message-patterns.md) when writing or reviewing concrete code examples.
+The reference covers plain ICU values, rich React component interpolation, `getHTML` migration, shared utility code, plural messages, stable date/time helpers, number formatting, and TypeScript rich formatter types.

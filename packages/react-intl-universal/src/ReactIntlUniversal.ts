@@ -649,7 +649,7 @@ class ReactIntlUniversal {
   }
 
   /**
-   * Initialize properties and load CLDR locale data according to currentLocale
+   * Initialize properties according to currentLocale
    * @param options init options
    * @returns promise for backward compatibility
    */
@@ -665,11 +665,7 @@ class ReactIntlUniversal {
       constants.defaultFormats
     );
 
-    return new Promise((resolve) => {
-      // init() will not load external common locale data anymore.
-      // But, it still return a Promise for backward compatibility.
-      resolve();
-    });
+    return Promise.resolve();
   }
 
   /**
@@ -780,19 +776,105 @@ class ReactIntlUniversal {
     return isFullWidth ? '：' : ': ';
   }
 
+  _formatDateTimeValue(
+    value: unknown,
+    formatter: (date: Date) => string,
+    methodName: string
+  ): unknown {
+    if (!(value instanceof Date) && typeof value !== "number") {
+      return value;
+    }
+
+    if (value instanceof Date && isNaN(value.getTime())) {
+      return value;
+    }
+
+    if (typeof value === "number" && isNaN(value)) {
+      return value;
+    }
+
+    try {
+      const date = value instanceof Date ? value : new Date(value);
+      if (isNaN(date.getTime())) {
+        return value;
+      }
+      return formatter(date);
+    } catch (error) {
+      this.options.warningHandler(
+        `react-intl-universal ${methodName} failed.`,
+        error instanceof Error ? error.message : String(error)
+      );
+      return value;
+    }
+  }
+
+  _formatDateParts(date: Date): {
+    year: string;
+    month: string;
+    day: string;
+    hour: string;
+    minute: string;
+    second: string;
+  } {
+    return {
+      year: String(date.getFullYear()).padStart(4, "0"),
+      month: String(date.getMonth() + 1).padStart(2, "0"),
+      day: String(date.getDate()).padStart(2, "0"),
+      hour: String(date.getHours()).padStart(2, "0"),
+      minute: String(date.getMinutes()).padStart(2, "0"),
+      second: String(date.getSeconds()).padStart(2, "0"),
+    };
+  }
+
+  _formatStableDate(date: Date): string {
+    const parts = this._formatDateParts(date);
+    return `${parts.year}-${parts.month}-${parts.day}`;
+  }
+
+  _formatStableTime(date: Date): string {
+    const parts = this._formatDateParts(date);
+    return `${parts.hour}:${parts.minute}:${parts.second}`;
+  }
+
+  _formatStableDateTime(date: Date): string {
+    return `${this._formatStableDate(date)} ${this._formatStableTime(date)}`;
+  }
+
+  _formatNumberValue(value: unknown): unknown {
+    if (typeof value !== 'number' || isNaN(value)) {
+      return value;
+    }
+
+    try {
+      return new Intl.NumberFormat(this.options.currentLocale || undefined, {}).format(value);
+    } catch (error) {
+      console.error('Error formatting number:', error);
+      return value;
+    }
+  }
+
+  formatDate(value: Date | number): string;
+  formatDate<T>(value: T): T;
+  formatDate(value: unknown): unknown {
+    return this._formatDateTimeValue(value, this._formatStableDate.bind(this), "formatDate");
+  }
+
+  formatTime(value: Date | number): string;
+  formatTime<T>(value: T): T;
+  formatTime(value: unknown): unknown {
+    return this._formatDateTimeValue(value, this._formatStableTime.bind(this), "formatTime");
+  }
+
+  formatDateTime(value: Date | number): string;
+  formatDateTime<T>(value: T): T;
+  formatDateTime(value: unknown): unknown {
+    return this._formatDateTimeValue(value, this._formatStableDateTime.bind(this), "formatDateTime");
+  }
+
   formatNumber(number: number): string | number;
   formatNumber<T>(number: T): T;
   formatNumber(number: unknown): unknown {
-    // Return original value if not a number
-    if (typeof number !== 'number' || isNaN(number)) {
-      return number;
-    }
-    try {
-      return new Intl.NumberFormat(this.options.currentLocale || undefined, {}).format(number);
-    } catch (error) {
-      console.error('Error formatting number:', error);
-      return number;
-    }
+    return this._formatNumberValue(number);
   }
 
   _getSpanElementMessage(key: string, msg: string): ReactElement & ReactIntlUniversalElementDefaultMessageMethods {

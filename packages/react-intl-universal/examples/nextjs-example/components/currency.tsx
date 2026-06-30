@@ -3,21 +3,21 @@ import intl from 'core/intl';
 import ExampleBlock from 'components/example-block';
 import {
   renderCode,
-  renderIntlMessageFormatLink,
 } from 'components/format-doc-links';
 
 const CurrencyComponent: React.FC<any> = () => {
-  let price = 123456.78;
+  const viewCount = 1234567;
+  const score = 1234.567;
   return (
     <div>
-      <div className="title">{intl.get('EXAMPLE_TITLE_NUMBER_CURRENCY').d('Number and currency formatting')}</div>
+      <div className="title">{intl.get('EXAMPLE_TITLE_NUMBER_CURRENCY').d('Number formatting')}</div>
       <p className="section-note">
         {intl.get('EXAMPLE_NOTE_NUMBER_CURRENCY', {
           code: renderCode,
-          formatjs: renderIntlMessageFormatLink,
-        }).d('Use ICU number formatting with a currency code such as <code>USD</code>. The rendered currency symbol, grouping, and decimal separators follow the active locale. See the <formatjs>intl-messageformat docs</formatjs> for more number formatting options.')}
+        }).d('Format plain numbers with <code>intl.formatNumber</code>, then pass the formatted value into <code>intl.get</code>. Locale messages keep simple placeholders such as <code>{count}</code>.')}
       </p>
-      <ExampleBlock code={"<div>{intl.get('SALE_PRICE', { price }).d('The price is {price, number, USD}')}</div>"} scope={{ price }} />
+      <ExampleBlock code={"<div>{intl.get('VIEW_COUNT', { count: intl.formatNumber(viewCount) }).d('{count} views')}</div>"} scope={{ viewCount }} />
+      <ExampleBlock code={"<div>{intl.get('AVERAGE_SCORE', { score: intl.formatNumber(score) }).d('Average score: {score}')}</div>"} scope={{ score }} />
     </div>
   )
 }

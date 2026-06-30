@@ -19,3 +19,7 @@ export const renderFormatJsIcuSyntaxLink = createExternalLink(
 export const renderIntlMessageFormatLink = createExternalLink(
   'https://formatjs.github.io/docs/intl-messageformat/'
 );
+
+export const renderIntlNumberFormatLink = createExternalLink(
+  'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat'
+);

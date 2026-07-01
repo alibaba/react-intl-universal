@@ -1,6 +1,6 @@
 ---
 name: use-react-intl-universal
-description: Best-practice workflow for building high-quality internationalized software with react-intl-universal, react-intl-universal-extract, and this skill's rules/scripts. Use it directly for repositories that use react-intl-universal, and use its language-quality, UI-quality, and locale-synchronization principles as reference guidance for other i18n stacks.
+description: Best-practice workflow for building and inspecting high-quality internationalized software with react-intl-universal, react-intl-universal-extract, and this skill's rules/scripts. Use it directly for repositories that use react-intl-universal, and use its language-quality, UI-quality, localized-UI inspection, and locale-synchronization principles as reference guidance for other i18n stacks.
 ---
 
 # React Intl Universal
@@ -25,6 +25,7 @@ Rich React component interpolation with `intl.get` requires [react-intl-universa
 
 - Add a new business message key.
 - Modify the default message for an existing key.
+- Inspect a running localized UI from a user-provided page URL.
 - Synchronize locale files that the project already supports.
 - Keep `.d(defaultMessage)`, the default locale pack, and existing non-default locale packs consistent.
 
@@ -66,6 +67,18 @@ npx react-intl-universal-extract \
 It is acceptable for the default locale file to be fully regenerated when the project treats `.d()` as the source of truth. Do not run extraction into non-default translated locale files.
 
 Do not blindly machine-translate every locale file. Use the default-locale diff to translate only new or changed keys for locales that already exist in the project.
+
+## UI Inspection Mode
+
+When the user asks to start a UI inspection or provides a page URL for localization QA, open [UI Inspection Mode](references/ui-inspection-mode.md) and follow that workflow instead of the default source-editing workflow.
+
+At a high level:
+
+1. Open the user-provided page URL in a browser-capable tool.
+2. Explore the page and reachable interactions as thoroughly as is safe: navigation, tabs, filters, dropdowns, buttons, dialogs, tooltips, forms, and validation states.
+3. Watch for localized UI issues such as truncation, overflow, overlap, misalignment, untranslated text, raw ICU placeholders, raw rich tags, inconsistent terminology, or unnatural copy.
+4. Capture screenshots throughout the inspection.
+5. Produce an inspection report with two required parts: the full inspection process with screenshots, and the issues found with screenshots and reproduction steps.
 
 ## Core Rules
 
@@ -113,6 +126,7 @@ Do not blindly machine-translate every locale file. Use the default-locale diff 
 
 - `references/message-patterns.md`: open when writing or reviewing concrete `react-intl-universal` code examples.
 - `references/inspect-existing-i18n-setup.md`: open before editing an unfamiliar repository's source or locale JSON.
+- `references/ui-inspection-mode.md`: open when the user asks for a page-level localized UI inspection from a URL.
 - `references/translation-rules.md`: open before translating or reviewing non-default locale text.
 - `references/validation-checklist.md`: open before final handoff.
 - `references/scripts.md`: open before running helper scripts so arguments, output files, and expected evidence are clear.

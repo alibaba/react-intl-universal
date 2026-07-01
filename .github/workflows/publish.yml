@@ -15,7 +15,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  stage-publish:
+  publish:
     runs-on: ubuntu-latest
 
     defaults:
@@ -125,5 +125,10 @@ jobs:
       - name: Type test
         run: npm run test:types
 
-      - name: Publish package to npm
+      - name: Publish beta package to npm
+        if: github.ref_name == 'beta'
         run: npm publish --tag "${{ steps.release.outputs.dist-tag }}"
+
+      - name: Stage publish package to npm
+        if: github.ref_name == 'master'
+        run: npm stage publish

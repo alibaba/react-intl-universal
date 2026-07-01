@@ -28,16 +28,17 @@ See the [live demo](https://alibaba.github.io/react-intl-universal/) for runnabl
   <img width="1200" src="https://img.alicdn.com/imgextra/i2/O1CN017uP7zd1h1tkr54P1z_!!6000000004218-2-tps-2280-1462.png" />
 </a>
 
-## ⚡ New: AI Coding Skill
+## ⚡ New: Let AI Agents Ship Better Internationalized UI
 
-Pair `react-intl-universal` with `react-intl-universal-extract` and the [use-react-intl-universal skill](https://alibaba.github.io/react-intl-universal/#skill-usage) to give AI coding agents a practical i18n workflow, not just API hints.
+Use the [use-react-intl-universal skill](https://alibaba.github.io/react-intl-universal/#skill-usage) to give AI coding agents a practical i18n workflow, not just API hints.
 
 It helps agents:
 
-- write localized copy that sounds natural instead of word-for-word translated;
+- write high-quality localized copy that preserves the real product meaning, not word-for-word translations;
 - keep product terms and UI wording consistent across modules;
 - avoid broken localized UI, such as text truncation, overflow, overlap, or misalignment;
 - keep ICU variables, rich tags, default messages, and locale files aligned;
+- inspect running localized pages by URL, click through interactions, capture screenshots, and generate a process-and-findings report;
 - produce smaller, more reviewable locale changes.
 
 ## 💡 Why Another Internationalization Solution for React?

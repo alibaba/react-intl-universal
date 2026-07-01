@@ -1,19 +1,21 @@
 ---
 name: use-react-intl-universal
-description: Best-practice guidance and helper scripts for using react-intl-universal in React, TypeScript, Node, and shared frontend code. Use when writing, reviewing, migrating, extracting, translating, or auditing i18n code that calls intl.get, intl.getHTML, intl.init, .d(defaultMessage), rich tag formatters, ICU variables, plural/select messages, or locale-pack keys.
+description: Best-practice workflow for building high-quality internationalized software with react-intl-universal, react-intl-universal-extract, and this skill's rules/scripts. Use it directly for repositories that use react-intl-universal, and use its language-quality, UI-quality, and locale-synchronization principles as reference guidance for other i18n stacks.
 ---
 
 # React Intl Universal
 
-Use this skill when implementing or reviewing code that uses `react-intl-universal`.
-Prefer patterns that keep translations grammatical, extractable, type-safe, and compatible across React and non-React code.
+Use this skill as the recommended combined practice for repositories that use `react-intl-universal`: write messages with the library API, extract default messages with `react-intl-universal-extract`, and follow this skill's workflow, rules, and scripts to keep localized software high quality.
+
+If a repository does not use `react-intl-universal`, still use the general principles in this skill as reference guidance for agents: preserve language quality, keep localized UI stable, avoid fragmented messages, preserve variable/tag contracts, and keep locale updates reviewable.
 
 ## Primary Goals
 
-- Help users ship high-quality localized interfaces that read naturally in every supported locale.
-- Keep product meaning, ICU variables, rich React components, plurals, dates, numbers, and currency behavior correct across locales.
-- Keep translated UI stable in real layouts, especially compact controls where longer copy can cause clipping, awkward wrapping, or visual regressions.
-- Keep source messages, default locale packs, and translated locale packs aligned so future i18n changes remain predictable and reviewable.
+- Help users ship internationalized software that feels native, clear, and trustworthy in every supported locale.
+- Maintain high language quality: preserve product intent, user actions, and business meaning through natural target-locale wording, while keeping terminology consistent across modules and workflows.
+- Keep localized UI usable in real product layouts, with no text truncation, overflow, overlap, or misalignment, especially in compact controls, tables, forms, dialogs, validation messages, and navigation.
+- Make localization changes predictable, reviewable, and safe to evolve over time.
+- Reduce future localization cost by producing messages that are extractable, structurally consistent, and safe for translators or agents to update.
 
 ## Prerequisite
 

@@ -16,7 +16,7 @@
 - Message format is strictly implemented by [ICU standards](http://userguide.icu-project.org/formatparse/messages).
 - Locale data in nested JSON format are supported.
 - [react-intl-universal-extract](https://alibaba.github.io/react-intl-universal/#extract-usage) helps you generate a locale file easily.
-- [use-react-intl-universal skill](https://alibaba.github.io/react-intl-universal/#skill-usage) helps AI coding agents follow react-intl-universal best practices.
+- [use-react-intl-universal skill](https://alibaba.github.io/react-intl-universal/#skill-usage) helps AI coding agents produce natural translations, stable localized UI, and reviewable locale updates.
 
 ## ⚡ New in react-intl-universal@2.14+: Support Rich React Components with `intl.get`
 
@@ -30,7 +30,15 @@ See the [live demo](https://alibaba.github.io/react-intl-universal/) for runnabl
 
 ## ⚡ New: AI Coding Skill
 
-This repository includes the [use-react-intl-universal skill](https://alibaba.github.io/react-intl-universal/#skill-usage) to help AI coding agents write better i18n code with react-intl-universal.
+Pair `react-intl-universal` with `react-intl-universal-extract` and the [use-react-intl-universal skill](https://alibaba.github.io/react-intl-universal/#skill-usage) to give AI coding agents a practical i18n workflow, not just API hints.
+
+It helps agents:
+
+- write localized copy that sounds natural instead of word-for-word translated;
+- keep product terms and UI wording consistent across modules;
+- avoid broken localized UI, such as text truncation, overflow, overlap, or misalignment;
+- keep ICU variables, rich tags, default messages, and locale files aligned;
+- produce smaller, more reviewable locale changes.
 
 ## 💡 Why Another Internationalization Solution for React?
 In case of internationalizing React apps, [react-intl](https://github.com/yahoo/react-intl) is one of most popular package in industry.  [react-intl](https://github.com/yahoo/react-intl) decorate your React.Component with wrapped component which is injected internationalized message dynamically so that the locale data is able to be loaded dynamically without reloading page. The following is the example code using  [react-intl](https://github.com/yahoo/react-intl).

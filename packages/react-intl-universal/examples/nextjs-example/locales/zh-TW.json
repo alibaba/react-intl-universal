@@ -22,7 +22,7 @@
   "EXAMPLE_NOTE_NUMBER_CURRENCY": "先用 <code>intl.formatNumber</code> 格式化普通數字，再把結果傳給 <code>intl.get</code>。locale message 只保留 <code>{count}</code> 這類簡單佔位符。",
   "EXAMPLE_NOTE_RICH_GET": "<package>react-intl-universal</package>@2.14+ 以後，intl.get 不只回傳普通 string，也可以把 rich tags 渲染成真正的 React components。新程式碼建議優先用 <code>get</code>，同一套 API 覆蓋 plain text、HTML-like markup 和 React UI。",
   "EXAMPLE_NOTE_DEPRECATED_GETHTML": "intl.getHTML 已不建議用於新的 React UI。下面的 getHTML examples 展示的是舊專案常見寫法：為了插入連結或 Badge，不得不把一個完整句子拆成多個 messages 拼起來。這樣翻譯時很難依照不同語言調整語序。升級到 <package>react-intl-universal</package>@2.14+ 後，優先用 <code>get</code> 和 rich tag formatter。",
-  "EXAMPLE_NOTE_SKILL": "先安裝一次 <skill>use-react-intl-universal</skill>，然後把右側 project guidance 加到 AGENTS.md 或 CLAUDE.md。之後寫給 agent 的 prompt 只需要描述業務需求，不用每次重複 i18n 規則。",
+  "EXAMPLE_NOTE_SKILL": "使用 <skill>use-react-intl-universal</skill>，給 agent 的不只是 API 提示，而是一套可執行的 i18n 工作流。它能幫助 agent 寫出更自然的多語文案，保持模組間術語一致，減少截斷、溢出、重疊和錯位，並產出更容易 review 的 locale 變更。",
   "EXAMPLE_SKILL_PROJECT_GUIDANCE": "處理 react-intl-universal 多語言程式碼時，遵循 use-react-intl-universal skill guidance。",
   "EXAMPLE_SKILL_AGENT_PROMPT": "新增一個帶 username 變數的歡迎文案。",
   "EXAMPLE_NOTE_EXTRACT": "<package>react-intl-universal-extract</package> 會掃描原始碼裡的 <code>.d()</code> 預設文案，並寫入 locale JSON。建議把 <code>.d()</code> 當作預設語言的 source text，再把產生的語系檔交給後續翻譯流程。",

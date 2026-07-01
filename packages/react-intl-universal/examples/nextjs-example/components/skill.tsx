@@ -22,7 +22,7 @@ const SkillComponent: React.FC = () => {
       <p className="section-note section-note-success">
         {intl.get('EXAMPLE_NOTE_SKILL', {
           skill: skillLink,
-        }).d('Install <skill>use-react-intl-universal</skill> once, then add the project guidance to AGENTS.md or CLAUDE.md. After that, normal agent prompts can stay focused on product requirements.')}
+        }).d('Use the <skill>use-react-intl-universal</skill> skill to give agents a practical i18n workflow, not just API hints. It helps agents write natural localized copy, keep terminology consistent, avoid UI truncation, overflow, overlap, or misalignment, and produce locale changes that are easier to review.')}
       </p>
 
       <div className="example-comparison skill-comparison">

@@ -90,6 +90,24 @@ Localized UI quality:
 - Tables, filters, tabs, menus, and dialogs remain readable.
 - Compact UI such as placeholders, badges, sidebars, breadcrumbs, and table cells still works.
 
+## Root-Cause Classification
+
+When a finding is recorded, include a likely root-cause field. Classify the issue as one of:
+
+- frontend application issue: local page code, CSS/layout, component usage, routing, i18n usage, locale wiring, or message composition likely caused the problem;
+- backend/API issue: an API response, server-rendered data, missing localized field, malformed placeholder value, permission state, or test data likely caused the problem;
+- external dependency issue: a shared frontend component package, module federation remote, design-system package, third-party SDK, browser extension, or hosted asset likely caused the problem;
+- unknown or needs investigation: the browser evidence is not enough to assign ownership safely.
+
+Do not overclaim ownership. Use "likely" language unless the browser evidence clearly proves the cause. Add a short rationale with the evidence used, such as:
+
+- console error or stack trace;
+- network request URL, status, and relevant response shape;
+- visible component/module boundary if known;
+- whether the issue reproduces before or after data loads;
+- whether the same text renders correctly in another page state;
+- whether the defect appears inside a shared component, remote module, or third-party widget.
+
 ## Screenshot Requirements
 
 The report must include all screenshots captured during the inspection.
@@ -166,6 +184,8 @@ For each issue, include:
 - actual result;
 - screenshot link;
 - likely category: language quality, truncation, overflow, overlap, misalignment, untranslated text, raw placeholder/tag, terminology inconsistency, or interaction defect;
+- likely root cause: frontend application issue, backend/API issue, external dependency issue, or unknown/needs investigation;
+- root-cause evidence: one or two concise observations supporting the classification;
 - suggested next step.
 
 Example:
@@ -180,6 +200,8 @@ Example:
 - Actual: The translated label overlaps the chevron icon.
 - Screenshot: [004](screenshots/004-filter-overlap.png)
 - Category: overlap, compact UI length
+- Likely root cause: frontend application issue
+- Root-cause evidence: The API returned the expected translated label, and the overlap happens inside the page's local filter button layout after the text is rendered.
 - Suggested next step: Allow the button to wrap or increase the min-width for localized labels.
 ```
 

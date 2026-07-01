@@ -78,7 +78,7 @@ At a high level:
 2. Explore the page and reachable interactions as thoroughly as is safe: navigation, tabs, filters, dropdowns, buttons, dialogs, tooltips, forms, and validation states.
 3. Watch for localized UI issues such as truncation, overflow, overlap, misalignment, untranslated text, raw ICU placeholders, raw rich tags, inconsistent terminology, or unnatural copy.
 4. Capture screenshots throughout the inspection.
-5. Produce an inspection report with two required parts: the full inspection process with screenshots, and the issues found with screenshots and reproduction steps.
+5. Produce an inspection report with two required parts: the full inspection process with screenshots, and the issues found with screenshots, reproduction steps, and likely root-cause classification.
 
 ## Core Rules
 

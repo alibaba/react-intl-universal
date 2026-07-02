@@ -6,10 +6,10 @@
  *
  * review-translation-deltas.mjs handles deterministic gates such as missing
  * keys, ICU/rich-tag contract mismatches, copied defaults, unexpected CJK, and
- * length risks. This script creates the next layer: small task files for a
- * human or agent to review naturalness, terminology, and UI-fit risks with
- * source context. It does not decide whether a translation is
- * correct and it does not edit locale files.
+ * static UI-fit length warnings. This script creates the next layer: small
+ * task files for a human or agent to review naturalness, terminology, and
+ * UI-fit risks with source context. It does not decide whether a translation
+ * is correct, does not run Browser Use, and does not edit locale files.
  */
 
 import fs from "node:fs";
@@ -349,7 +349,7 @@ function createTaskMarkdown(task) {
     "- Read the source context when the key, default message, or warning is ambiguous.",
     "- Keep every ICU variable and rich tag exactly equivalent.",
     "- Preserve product and domain terminology used by this project.",
-    "- For compact UI, prefer concise natural wording; if accurate wording cannot be shortened, consider layout/CSS instead.",
+    "- For compact UI, inspect source usage and prefer concise natural wording only when meaning is preserved; if accurate wording cannot be shortened, keep it and consider general layout/CSS instead.",
   ];
 
   if (isEnglishLocale(task.locale)) {
@@ -472,13 +472,13 @@ function main() {
         itemCount: batchItems.length,
         totalLocaleItemCount: group.items.length,
         instructions: [
-          "Review meaning, terminology, naturalness, and UI fit; do not mechanically rewrite every item.",
+          "Review meaning, terminology, naturalness, and static UI fit; do not mechanically rewrite every item.",
           "Check whether the translation fits the actual product flow in this codebase instead of preserving source words literally.",
           "Treat the default message as the source of product intent, not as a sentence template the target locale must preserve.",
           "Confirm the target copy says what the user should understand in the actual feature, not dictionary equivalents of the source words.",
           "Use source context and reference translations to understand business intent.",
           "Preserve every ICU variable and rich tag exactly.",
-          "For compact UI, prefer concise natural target-language wording; if shortening harms meaning, keep accuracy and consider layout/CSS.",
+          "For compact UI, inspect source usage and prefer concise natural target-language wording only when meaning is preserved; if shortening harms meaning, keep accuracy and consider general layout/CSS.",
           ...(isEnglishLocale(group.locale) ? ENGLISH_CASING_GUIDANCE : []),
           "Return either an approved note or a delta JSON patch for the keys that need translation changes.",
         ],

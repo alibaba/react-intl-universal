@@ -1,5 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
+import { estimateDisplayWidth } from "./display-width.mjs";
+
+export { estimateDisplayWidth, stripRichTags } from "./display-width.mjs";
 
 /*
  * Purpose:
@@ -939,53 +942,6 @@ export function inferDefaultLocale(sourceMessages, localeData) {
     skippedConflictingKeys: conflicts.map((conflict) => conflict.key),
     candidates,
   };
-}
-
-export function stripRichTags(message) {
-  return String(message).replace(/<\/?\s*[a-z][\w-]*\b[^>]*>/gi, "");
-}
-
-// Estimate visual width rather than raw string length. CJK and emoji generally
-// consume more horizontal space than ASCII, so they count as width 2. The value
-// is only for warnings; it must not be used to automatically truncate text.
-export function estimateDisplayWidth(message) {
-  const text = stripRichTags(message);
-  let width = 0;
-
-  for (const char of text) {
-    const codePoint = char.codePointAt(0) ?? 0;
-
-    if (/\p{Mark}/u.test(char)) {
-      continue;
-    }
-
-    if (codePoint === 0x200d) {
-      continue;
-    }
-
-    if (
-      codePoint >= 0x1100
-      && (
-        codePoint <= 0x115f
-        || codePoint === 0x2329
-        || codePoint === 0x232a
-        || (codePoint >= 0x2e80 && codePoint <= 0xa4cf)
-        || (codePoint >= 0xac00 && codePoint <= 0xd7a3)
-        || (codePoint >= 0xf900 && codePoint <= 0xfaff)
-        || (codePoint >= 0xfe10 && codePoint <= 0xfe19)
-        || (codePoint >= 0xfe30 && codePoint <= 0xfe6f)
-        || (codePoint >= 0xff00 && codePoint <= 0xff60)
-        || (codePoint >= 0xffe0 && codePoint <= 0xffe6)
-        || (codePoint >= 0x1f300 && codePoint <= 0x1faff)
-      )
-    ) {
-      width += 2;
-    } else {
-      width += 1;
-    }
-  }
-
-  return width;
 }
 
 // Identify whether a message is likely rendered in compact UI. Key names and

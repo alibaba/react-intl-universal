@@ -14,7 +14,8 @@
  * It does not write locale files and it does not decide subjective writing
  * quality. It flags deterministic risks that agents should review: missing
  * task translations, changed contracts, untranslated copies of the default
- * message, unexpected CJK text in non-CJK locales, and layout length risks.
+ * message, unexpected CJK text in non-CJK locales, and static UI-fit length
+ * warnings.
  */
 
 import fs from "node:fs";
@@ -479,7 +480,7 @@ function reviewTranslationValues({
           locale,
           key,
           deltaPath: translated.deltaPath,
-          message: `translation may be too wide for ${lengthRisk.uiRisk} UI: ratio=${lengthRisk.ratio}`,
+          message: `static UI-fit length warning for ${lengthRisk.uiRisk} UI: estimated display-width ratio=${lengthRisk.ratio}; inspect source usage before shortening text`,
           lengthRisk,
         });
       }

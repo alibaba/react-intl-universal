@@ -25,10 +25,15 @@ Use these rules when generating, reviewing, or merging non-default locale text.
 ## UI Length and Layout
 
 - Do not modify the default locale message for length reasons.
-- For non-default translations, start with concise wording. This matters most for placeholders, buttons, tabs, menus, labels, badges, status chips, table headers, filters, and card titles.
-- For paragraphs, FAQ text, docs notes, and help text, prefer natural and accurate translation over artificial shortening.
-- For length warnings, inspect the source usage before changing text. Very short source labels in some languages can produce large width ratios even when the target text is natural and acceptable.
-- If a translation cannot be shortened without losing meaning, keep the accurate translation and consider whether nearby CSS should allow wrapping, flexible width, or responsive layout.
+- Daily development uses static UI-fit review, not Browser Use by default. Use estimated display width from `scripts/lib/display-width.mjs`, not `string.length`, as the lightweight signal.
+- If the non-default translation estimated display width is less than or equal to the default message width, treat it as low risk for daily development. This is not a browser layout guarantee.
+- If the non-default translation is wider than the default message, inspect the source usage before changing text. Review the key, source line, surrounding JSX, component props, `className`, CSS, layout container, and neighboring labels.
+- Compact UI needs closer review: placeholders, buttons, tabs, menus, table headers, badges, chips, filters, dialog titles, sidebars, breadcrumbs, labels, status text, and card titles. These examples are risk hints, not hard rules; decide from the actual source context and layout.
+- Long-form text is usually lower risk. For paragraphs, FAQ text, docs notes, help text, descriptions, and explanatory content, prefer natural and accurate translation over artificial shortening.
+- When compact UI is high risk, first try a shorter non-default translation only if it preserves business meaning, naturalness, and terminology consistency.
+- If accurate wording cannot be shortened safely, keep the accurate translation and consider a general layout fix such as wrapping, flexible width, or responsive layout.
+- Use language-specific CSS only as a last option when a general layout fix is too costly, breaks the default-locale visual design, or creates broader layout risk.
+- If static review is uncertain, record a UI-fit review item with key, locale, source usage, width comparison, and the reason for uncertainty. Do not enter UI Inspection Mode unless the user asks, provides a page URL for QA, or the task is a release/preflight quality gate.
 
 ## English Target Locale Rules
 

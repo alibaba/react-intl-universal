@@ -12,7 +12,7 @@
  * The script does not translate, merge, extract, or scan unrelated keys. It
  * checks whether changed keys are present/deleted as expected, whether ICU
  * variables and rich tags match the default message, and whether non-default
- * translations look risky for compact UI length.
+ * translations have static UI-fit length warnings for compact UI.
  */
 
 import fs from "node:fs";
@@ -295,7 +295,7 @@ function createLocaleKeyResult({ item, localeTarget, defaultLocale, baselineCont
     if (lengthRisk) {
       warnings.push({
         type: "long-translation",
-        message: "Non-default translation may be too long for compact UI. Inspect the source usage before shortening text or changing layout.",
+        message: "Static UI-fit length warning: non-default translation has greater estimated display width than the default in compact UI. Inspect the source usage before shortening text or changing layout.",
         lengthRisk,
       });
     }

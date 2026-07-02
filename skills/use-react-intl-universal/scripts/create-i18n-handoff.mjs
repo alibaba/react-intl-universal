@@ -819,8 +819,8 @@ function createNextActions({
     pushAction(
       actions,
       "P2",
-      "Review high-severity translation length tasks before claiming UI quality.",
-      "Long-translation warnings need UI-context judgment: shorten non-default locale copy when meaning is preserved, or adjust layout when accurate wording must stay longer.",
+      "Review high-severity translation length tasks before claiming static UI-fit review complete.",
+      "Long-translation warnings are static UI-fit prompts: inspect source usage, shorten non-default locale copy when meaning is preserved, or adjust layout when accurate wording must stay longer.",
       [
         `reviewItems=${lengthReviewTasks.longTranslationTaskItemCount}`,
         lengthReviewTasks.longTranslationSourceCount === null
@@ -839,7 +839,7 @@ function createNextActions({
       actions,
       "P2",
       "Generate length review tasks for high-severity translation length warnings.",
-      "The audit found compact-UI length risks, but no long-translation task manifest was provided for batch review.",
+      "The audit found static compact-UI length warnings, but no long-translation task manifest was provided for batch review.",
       [
         `highLengthWarnings=${audit.highLengthWarningCount}`,
         "run create-audit-fix-tasks.mjs --include-warnings long-translation --warning-severity high",
@@ -961,8 +961,8 @@ function createNextActions({
     pushAction(
       actions,
       "P2",
-      "Review changed-key compact UI length warnings.",
-      "Changed non-default translations may be too long for compact UI; inspect actual source usage before shortening text or changing layout.",
+      "Review changed-key static UI-fit length warnings.",
+      "Changed non-default translations have static compact-UI length warnings; inspect actual source usage before shortening text or changing layout.",
       [
         `warningKeys=${changedKeyAudit.warningKeyCount}`,
         `warnings=${formatCounts(changedKeyAudit.warningCounts)}`,
@@ -991,7 +991,7 @@ function createNextActions({
       actions,
       "P2",
       "Generate translation quality review tasks for delta warnings.",
-      "Warnings require human or agent judgment for naturalness, terminology, copied defaults, CJK, or UI fit.",
+      "Warnings require human or agent judgment for naturalness, terminology, copied defaults, CJK, or static UI fit.",
       [`warnings=${deltaReview.warningCount}`, `warningTypes=${formatCounts(deltaReview.warningCounts)}`]
     );
   }
@@ -1001,7 +1001,7 @@ function createNextActions({
       actions,
       "P2",
       "Complete translation quality review tasks before applying deltas.",
-      "The translations need subjective review for meaning, terminology, or compact UI fit.",
+      "The translations need subjective review for meaning, terminology, or static compact UI fit.",
       [
         `reviewItems=${translationReviewTasks.taskItemCount}`,
         `reasonCounts=${formatCounts(translationReviewTasks.reasonCounts)}`,
@@ -1036,6 +1036,56 @@ function createNextActions({
   ));
 }
 
+function summarizeStaticUiFitReview({
+  audit,
+  lengthReviewTasks,
+  deltaReview,
+  changedKeyAudit,
+}) {
+  const changedKeyLengthWarnings = changedKeyAudit.available
+    ? changedKeyAudit.warningCounts["long-translation"] ?? changedKeyAudit.warningCount ?? 0
+    : null;
+  const deltaLengthWarnings = deltaReview.available
+    ? deltaReview.warningCounts["length-risk"] ?? 0
+    : null;
+  const auditHighLengthWarnings = audit.available
+    ? audit.highLengthWarningCount ?? 0
+    : null;
+  const lengthReviewTaskItems = lengthReviewTasks.available
+    ? lengthReviewTasks.longTranslationTaskItemCount ?? 0
+    : null;
+  const hasAnyEvidence = changedKeyAudit.available || deltaReview.available || audit.available || lengthReviewTasks.available;
+  const warningCounts = [
+    changedKeyLengthWarnings,
+    deltaLengthWarnings,
+    auditHighLengthWarnings,
+    lengthReviewTaskItems,
+  ]
+    .filter((value) => Number.isFinite(value));
+  const hasWarnings = warningCounts.some((value) => value > 0);
+  const maxReportedWarningCount = warningCounts.length > 0
+    ? Math.max(...warningCounts)
+    : 0;
+
+  let status = "not-evaluated";
+  if (hasAnyEvidence && !hasWarnings) {
+    status = "no-warnings";
+  } else if (hasWarnings) {
+    status = "review-required";
+  }
+
+  return {
+    status,
+    method: "static estimated display-width review",
+    browserUse: "not-run-by-handoff-script",
+    changedKeyLengthWarnings,
+    deltaLengthWarnings,
+    auditHighLengthWarnings,
+    lengthReviewTaskItems,
+    maxReportedWarningCount,
+  };
+}
+
 function createHandoff(reports) {
   const discovery = summarizeDiscovery(reports.discovery);
   const exportVerify = summarizeExportVerify(reports.exportVerify);
@@ -1052,6 +1102,12 @@ function createHandoff(reports) {
   const translationReviewTasks = summarizeTranslationReviewTasks(reports.translationReviewTasks);
   const apply = summarizeApply(reports.apply);
   const changedKeyAudit = summarizeChangedKeyAudit(reports.changedKeyAudit);
+  const staticUiFitReview = summarizeStaticUiFitReview({
+    audit,
+    lengthReviewTasks,
+    deltaReview,
+    changedKeyAudit,
+  });
   const blockers = [];
   const reviewItems = [];
   const localeReadinessBlocked = hasLocaleReadinessBlocker({
@@ -1109,7 +1165,7 @@ function createHandoff(reports) {
   }
 
   if (changedKeyAudit.available && changedKeyAudit.issueCount === 0 && changedKeyAudit.warningCount > 0) {
-    reviewItems.push(`Review ${changedKeyAudit.warningCount} changed-key warning(s), especially compact UI length risks.`);
+    reviewItems.push(`Review ${changedKeyAudit.warningCount} changed-key warning(s), especially static compact UI length warnings.`);
   }
 
   if (staleDiscoveryLocales.length > 0) {
@@ -1136,9 +1192,9 @@ function createHandoff(reports) {
 
   if (audit.available && audit.highLengthWarningCount > 0) {
     if (lengthReviewTasks.available && lengthReviewTasks.longTranslationTaskItemCount > 0) {
-      reviewItems.push(`Review ${lengthReviewTasks.longTranslationTaskItemCount} generated translation length review task item(s) for compact UI.`);
+      reviewItems.push(`Review ${lengthReviewTasks.longTranslationTaskItemCount} generated static UI-fit length review task item(s) for compact UI.`);
     } else {
-      reviewItems.push(`Review ${audit.highLengthWarningCount} high-severity translation length warning(s) in compact UI.`);
+      reviewItems.push(`Review ${audit.highLengthWarningCount} high-severity static UI-fit translation length warning(s) in compact UI.`);
     }
   }
 
@@ -1202,6 +1258,7 @@ function createHandoff(reports) {
     translationReviewTasks,
     apply,
     changedKeyAudit,
+    staticUiFitReview,
   };
 }
 
@@ -1277,6 +1334,22 @@ function createMarkdown(handoff) {
       lines.push(`- ${item}`);
     }
   }
+
+  lines.push("");
+  lines.push("## Static UI-Fit Review");
+  lines.push(`- Method: ${handoff.staticUiFitReview.method}`);
+  lines.push("- Browser Use: not run by this daily handoff script because the daily development workflow uses static review. Run UI Inspection Mode only when the user asks, provides a page URL for QA, or the task is a release/preflight quality gate.");
+  if (handoff.staticUiFitReview.status === "no-warnings") {
+    lines.push("- Status: No high-risk UI length warnings found in the provided static reports.");
+  } else if (handoff.staticUiFitReview.status === "review-required") {
+    lines.push(`- Status: Remaining UI-fit review items: static length warning(s) were reported; largest provided count is ${handoff.staticUiFitReview.maxReportedWarningCount}.`);
+  } else {
+    lines.push("- Status: Not evaluated from the provided reports.");
+  }
+  lines.push(`- Changed-key length warnings: ${handoff.staticUiFitReview.changedKeyLengthWarnings ?? "-"}`);
+  lines.push(`- Delta review length warnings: ${handoff.staticUiFitReview.deltaLengthWarnings ?? "-"}`);
+  lines.push(`- Full-audit high-severity length warnings: ${handoff.staticUiFitReview.auditHighLengthWarnings ?? "-"}`);
+  lines.push(`- Generated length review task items: ${handoff.staticUiFitReview.lengthReviewTaskItems ?? "-"}`);
 
   lines.push("");
   lines.push("## Recommended Next Actions");

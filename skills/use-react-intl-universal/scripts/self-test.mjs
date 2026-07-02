@@ -16,7 +16,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { getLengthRiskWarning } from "./lib/i18n-audit.mjs";
+import { estimateDisplayWidth, getLengthRiskWarning } from "./lib/i18n-audit.mjs";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const NODE = process.execPath;
@@ -205,6 +205,26 @@ function main() {
   const keep = process.argv.includes("--keep");
 
   try {
+    const displayWidthCases = [
+      ["ASCII", "Save", 4],
+      ["CJK", "文档", 4],
+      ["mixed narrow and wide", "A文B", 4],
+      ["rich tags removed", "<link>文档</link>", 4],
+      ["ANSI escape codes removed", "\u001B[1m文\u001B[22m", 2],
+      ["combining mark stays zero-width", "e\u0301", 1],
+      ["emoji cluster", "✅", 2],
+      ["keycap cluster", "1\u20E3", 2],
+      ["Hangul jamo cluster", "\u1100\u1161", 2],
+      ["control characters ignored", "A\nB", 2],
+    ];
+
+    for (const [name, input, expected] of displayWidthCases) {
+      assert(
+        estimateDisplayWidth(input) === expected,
+        `display width should handle ${name}: expected ${expected}, got ${estimateDisplayWidth(input)}`
+      );
+    }
+
     assert(
       getLengthRiskWarning({
         key: "mv_rec_level_High",

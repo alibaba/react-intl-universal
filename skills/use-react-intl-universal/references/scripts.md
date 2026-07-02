@@ -1,7 +1,7 @@
 # Script Reference
 
 Use these scripts when the repository has locale JSON files and deterministic i18n checks are useful.
-All scripts use only Node.js standard library modules.
+All scripts use only Node.js standard library modules. The display-width helper used for daily static UI-fit risk review is bundled under `scripts/lib/display-width.mjs`; it follows the default behavior of `string-width` closely enough for lightweight localization review, but does not require installing `string-width` or any other npm package. These display-width warnings are static review prompts, not browser pixel measurements or proof that a real layout will break.
 Set `SKILL_DIR` to the absolute path of the directory that contains this skill's `SKILL.md`:
 
 ```bash
@@ -11,7 +11,7 @@ export SKILL_DIR=/absolute/path/to/use-react-intl-universal
 ## Table of Contents
 
 - [Discover Existing I18n Setup](#discover-existing-i18n-setup)
-- [Default Changed-Key Workflow](#default-changed-key-workflow)
+- [Daily Development Changed-Key Workflow](#daily-development-changed-key-workflow)
 - [Export Verification](#export-verification)
 - [Default Locale](#default-locale)
 - [Key Audit](#key-audit)
@@ -37,7 +37,7 @@ node "$SKILL_DIR/scripts/discover-project-i18n.mjs" \
 
 Use this first in unfamiliar repositories. It reports relevant `package.json` scripts, installed i18n dependencies, locale files, extraction export languages, command availability, expected-locale support in known locale provider/UI/date packages, and source files that wire locale imports or providers. For normal copy, extraction, translation, or audit work, use it to understand the existing setup.
 
-## Default Changed-Key Workflow
+## Daily Development Changed-Key Workflow
 
 For ordinary product-copy work, keep the workflow scoped to keys changed by the default-locale diff:
 
@@ -88,7 +88,7 @@ node "$SKILL_DIR/scripts/audit-changed-locale-keys.mjs" \
   --json > tmp/i18n-changed-key-audit.json
 ```
 
-This path covers adding keys and modifying default messages. It still includes translation, deterministic review, merge, and changed-key audit. It does not scan unrelated hardcoded text by default.
+This path covers adding keys and modifying default messages. It still includes translation, deterministic review, merge, changed-key audit, and static UI-fit review of changed-key length warnings. It does not scan unrelated hardcoded text or run Browser Use by default.
 
 ## Export Verification
 
@@ -151,7 +151,7 @@ node "$SKILL_DIR/scripts/create-translation-tasks.mjs" \
 ```
 
 This writes batch files such as `ja_JP.part-001.json`, `ja_JP.part-002.json`, and matching Markdown files when the work is large. Multiple delta files for the same `locale` are safe; `apply-translation-deltas.mjs` merges them into one locale JSON file. The manifest reports Markdown/JSON task file sizes and warns when batches are too large for reliable agent handoff. If `taskSize.warnings` is non-empty, rerun with the recommended smaller `--max-items-per-task` before assigning work to subagents.
-When `--source` is provided, each task item includes source file/line, source code line, compressed source-call text, nearby source context, and a `uiRisk` hint. Task items also include existing non-target locale translations when available, so translators can reuse project terminology without treating those references as the contract. Use `--sort source` for large apps so each batch stays closer to a product area and is easier for a subagent to translate consistently. The generated task instructions require meaning-first translation: inspect nearby code when needed, identify the business action/object/status, understand the product flow in the current codebase, and write natural target-locale product copy instead of word-by-word translation. For English target locales, task instructions also include casing rules for Sentence case, Title Case, proper nouns, acronyms, and all-caps usage.
+When `--source` is provided, each task item includes source file/line, source code line, compressed source-call text, nearby source context, and a `uiRisk` hint for static UI-fit review. Task items also include existing non-target locale translations when available, so translators can reuse project terminology without treating those references as the contract. Use `--sort source` for large apps so each batch stays closer to a product area and is easier for a subagent to translate consistently. The generated task instructions require meaning-first translation: inspect nearby code when needed, identify the business action/object/status, understand the product flow in the current codebase, and write natural target-locale product copy instead of word-by-word translation. For English target locales, task instructions also include casing rules for Sentence case, Title Case, proper nouns, acronyms, and all-caps usage.
 
 When the user provides extra context such as a glossary, terminology guide, style guide, product document, screenshot notes, or page URLs, pass each text file with repeatable `--context-file`. The script embeds those assets in the JSON and Markdown task files as reference evidence. Use them for terminology and writing decisions, but keep the default message contract authoritative for ICU variables, rich tags, and current product meaning. Do not expand task context by scanning unrelated project documents unless the user asks for it.
 
@@ -167,7 +167,7 @@ node "$SKILL_DIR/scripts/review-translation-deltas.mjs" \
   --json > tmp/i18n-delta-review.json
 ```
 
-Use this before merging returned translations. It checks deterministic quality risks: missing task keys, invalid delta shapes, default-locale edits, ICU/rich-tag contract mismatches, untranslated copies of the default message, unexpected CJK text in non-CJK locales, and medium/high length risks. Warnings are review prompts; issues must be fixed before merge. Rerun this report whenever translation tasks are regenerated; `create-i18n-handoff.mjs` compares the current task manifest count with `expectedItemCount` and will flag outdated delta review reports.
+Use this before merging returned translations. It checks deterministic quality risks: missing task keys, invalid delta shapes, default-locale edits, ICU/rich-tag contract mismatches, untranslated copies of the default message, unexpected CJK text in non-CJK locales, and medium/high static UI-fit length risks. Warnings are review prompts; issues must be fixed before merge. Length warnings mean the agent should inspect source usage and decide whether the translation, layout, or a review note is appropriate; they are not automatic shortening instructions. Rerun this report whenever translation tasks are regenerated; `create-i18n-handoff.mjs` compares the current task manifest count with `expectedItemCount` and will flag outdated delta review reports.
 
 ## Translation Quality Review Tasks
 
@@ -180,7 +180,7 @@ node "$SKILL_DIR/scripts/create-translation-review-tasks.mjs" \
   --json > tmp/i18n-translation-review-tasks-output.json
 ```
 
-Use this after `review-translation-deltas.mjs` when returned translations need subjective review for naturalness, terminology, business meaning, or compact UI fit. It converts deterministic review warnings plus task context into small Markdown/JSON review queues. It does not edit locale files and does not claim a translation is wrong automatically.
+Use this after `review-translation-deltas.mjs` when returned translations need subjective review for naturalness, terminology, business meaning, or static compact UI fit. It converts deterministic review warnings plus task context into small Markdown/JSON review queues. It does not edit locale files, does not run Browser Use, and does not claim a translation is wrong automatically.
 
 To review every returned translation instead of only deterministic warnings:
 
@@ -225,9 +225,9 @@ Use this after merging translation deltas. It reads the changed-key set from `cr
 - added/changed keys exist in every audited locale;
 - ICU `{variable}` contracts match the default message;
 - rich tag `<tag>` contracts match the default message;
-- non-default translations that may be too long for compact UI are reported as warnings.
+- non-default translations with static UI-fit length risk in compact UI are reported as warnings.
 
-Warnings are review prompts, not automatic edit instructions. Inspect the source usage before shortening a translation or changing CSS. If a translation cannot be shortened without losing meaning, keep the accurate translation and consider layout changes.
+Warnings are static UI-fit review prompts, not automatic edit instructions or browser layout proof. Inspect the source usage before shortening a translation or changing CSS. If a translation cannot be shortened without losing meaning, keep the accurate translation and consider general layout changes such as wrapping, flexible width, or responsive layout.
 
 ## Contract Audit
 
@@ -245,7 +245,7 @@ node "$SKILL_DIR/scripts/summarize-i18n-audit.mjs" \
 
 Use this for broad migration, release-quality checks, or explicit full-project audits. It is not the default completion condition for an ordinary changed-key task.
 
-The audit reports missing locale keys, conflicting `.d()` defaults for the same key, `{variable}` or `<tag>` contract mismatches, JavaScript template interpolation inside `.d()`, new `intl.getHTML` usage, and optional non-default translation length risk. Its message count is the number of source `intl.get(...).d(...)` contract entries scanned, not the number of keys in a locale JSON file. Use the summary to fix hard errors before advisory layout warnings. Length-warning examples include source usage when available; inspect that source before shortening text or changing CSS.
+The audit reports missing locale keys, conflicting `.d()` defaults for the same key, `{variable}` or `<tag>` contract mismatches, JavaScript template interpolation inside `.d()`, new `intl.getHTML` usage, and optional non-default translation length risk. Its message count is the number of source `intl.get(...).d(...)` contract entries scanned, not the number of keys in a locale JSON file. Use the summary to fix hard errors before advisory static UI-fit warnings. Length-warning examples include source usage when available; inspect that source before shortening text or changing CSS.
 
 If docs, demos, or code snippets contain sample `intl.get` calls, exclude them:
 
@@ -297,7 +297,7 @@ node "$SKILL_DIR/scripts/create-audit-fix-tasks.mjs" \
 
 These tasks are migration queues, not automatic rewrites. Prefer rich tag formatters with `intl.get` for React UI, keep a full sentence in one message, and leave documented legacy non-React HTML-string plumbing only when migration is not appropriate.
 
-To generate review tasks for translations that may be too long in compact UI, pass `long-translation`. Prefer starting with high-severity items:
+To generate static UI-fit review tasks for translations with compact UI length warnings, pass `long-translation`. Prefer starting with high-severity items:
 
 ```bash
 node "$SKILL_DIR/scripts/create-audit-fix-tasks.mjs" \
@@ -311,7 +311,7 @@ node "$SKILL_DIR/scripts/create-audit-fix-tasks.mjs" \
   --output tmp/i18n-length-review-tasks
 ```
 
-Long-translation tasks are review queues, not automatic edit instructions. `--warnings-only` keeps this queue separate from hard-blocker audit fix tasks. Inspect the source usage first, then either shorten the non-default translation naturally or adjust nearby layout when accurate wording cannot be shortened safely.
+Long-translation tasks are static UI-fit review queues, not automatic edit instructions. `--warnings-only` keeps this queue separate from hard-blocker audit fix tasks. Inspect the source usage first, then either shorten the non-default translation naturally or adjust nearby layout when accurate wording cannot be shortened safely.
 When generating a final handoff, pass this manifest separately with `--length-review-tasks` so UI length review is tracked apart from audit hard blockers.
 
 ## Hardcoded CJK
@@ -349,7 +349,7 @@ node "$SKILL_DIR/scripts/create-i18n-handoff.mjs" \
   --output tmp/i18n-handoff.md
 ```
 
-Use the handoff report before claiming the i18n work is complete. For normal incremental work, focus the handoff on changed-key evidence: default-locale diff task manifest, delta review, delta merge, changed-key audit, and unresolved translation quality/length review items. Full audit and hardcoded evidence should be included only when those scripts were relevant to the task. When changed-key audit evidence is present, a missing full locale audit is not treated as a default blocker.
+Use the handoff report before claiming the i18n work is complete. For normal incremental work, focus the handoff on changed-key evidence: default-locale diff task manifest, delta review, delta merge, changed-key audit, translation review status, static UI-fit review status, and unresolved review items. Full audit and hardcoded evidence should be included only when those scripts were relevant to the task. When changed-key audit evidence is present, a missing full locale audit is not treated as a default blocker. Browser Use is not part of this daily handoff evidence unless the user explicitly requested UI Inspection Mode or a release/preflight quality gate.
 
 The handoff can also make broader blockers explicit, including audit hard errors, export failures, skipped delta entries, generated fix/review task coverage, high-priority hardcoded CJK candidates, translation quality review tasks, translation length review tasks, and unresolved runtime locale recommendations from discovery/export reports. The Locale Audit section reports source `intl.get(...).d(...)` contract entries, while discovery/export locale summaries report locale JSON key counts. When hardcoded fix tasks provide ignore patterns, the handoff keeps the raw scan count but reports actionable hardcoded candidates after those ignores, so the top examples match the generated fix queue.
 

@@ -332,7 +332,7 @@ function createTaskMarkdown(task) {
     "",
     "Use the key, source location, component name, route/module name, adjacent labels, enum names, table columns, validation logic, and business domain to write natural product copy for this locale. Translate what the user should understand in the actual feature, not dictionary equivalents of the source words. If the task context is not enough, inspect the source file around the reported line before translating; do not rely on locale JSON keys alone.",
     "",
-    "When translating between any source and target locale, do not translate word by word. Use nearby code and UI context to express the same product intent naturally in the target language, even when the target wording needs different word order, phrasing, or sentence structure. Keep every ICU variable and rich tag exactly equivalent to the default message. Prefer concise wording for UI labels, placeholders, buttons, tabs, menus, badges, and table headers.",
+    "When translating between any source and target locale, do not translate word by word. Use nearby code and UI context to express the same product intent naturally in the target language, even when the target wording needs different word order, phrasing, or sentence structure. Keep every ICU variable and rich tag exactly equivalent to the default message. Prefer concise wording for UI labels, placeholders, buttons, tabs, menus, badges, and table headers when meaning and naturalness are preserved.",
     "",
     "Use reference translations only as terminology and tone hints. The default message is still the source of truth for ICU variables, rich tags, and current product meaning.",
   ];
@@ -414,7 +414,7 @@ function createTaskMarkdown(task) {
       }
     }
     if (item.lengthRisk) {
-      lines.push(`Length note: ${item.lengthRisk.severity} risk, current translation ratio ${item.lengthRisk.ratio}`);
+      lines.push(`Static UI-fit note: ${item.lengthRisk.severity} length warning, current translation display-width ratio ${item.lengthRisk.ratio}. Inspect source usage before shortening text.`);
     }
   }
 
@@ -573,7 +573,7 @@ function main() {
         tags: contract.tags,
         contractMismatch: contractDiff && hasContractDiff(contractDiff) ? contractDiff : null,
         // If an existing translation is much wider than the default message,
-        // flag it in the task so the translator starts concise. This is still
+        // flag it in the task as a static UI-fit review prompt. This is still
         // advisory; accuracy wins when the text cannot be shortened safely.
         lengthRisk: item.defaultMessage != null && typeof currentTranslation === "string"
           ? getLengthRiskWarning({
@@ -626,7 +626,7 @@ function main() {
           "Preserve product names, technical terms, and domain terms when the target locale commonly uses them in English unless the project has a clear localized convention.",
           "Do not modify the default locale message for length reasons.",
           "Keep all ICU variables and rich tags exactly equivalent to the default message.",
-          "Prefer concise wording for compact UI copy; if accurate wording must be longer, keep accuracy and let the main agent consider CSS adjustments.",
+          "Prefer concise wording for compact UI copy when meaning and naturalness are preserved; if accurate wording must be longer, keep accuracy and let the main agent consider a general layout adjustment.",
           "Return delta JSON only; do not edit locale files directly when working as a subagent.",
         ],
         items: batchItems,

@@ -7,8 +7,8 @@
  *
  * The script checks missing keys, conflicting source defaults, ICU variable
  * mismatches, rich-tag mismatches, deprecated getHTML usage, and optional
- * non-default translation length risks. It is designed as the final validation
- * step after extraction and translation delta merge.
+ * non-default static UI-fit length warnings. It is designed as the final
+ * validation step after extraction and translation delta merge.
  */
 
 import fs from "node:fs";
@@ -47,7 +47,7 @@ Options:
   --ignore LIST             Optional. Comma-separated path substrings to skip.
   --default-locale LOCALE   Optional. Default/source locale. Used by length warnings.
   --infer-default-locale    Optional. Infer default locale by comparing .d() messages with locale files.
-  --length-warnings         Optional. Warn when non-default translations are likely too long for compact UI.
+  --length-warnings         Optional. Warn when non-default translations have static UI-fit length risk in compact UI.
   --length-ratio NUMBER     Optional. Base display-width ratio for length warnings. Default: 1.35
   --strict                  Treat warnings as errors.
   --json                    Print machine-readable JSON.
@@ -320,7 +320,7 @@ function main() {
         if (lengthRisk) {
           warnings.push(createWarning(
             "long-translation",
-            `locale "${locale}" key "${key}" may be too long for compact UI: ${lengthRisk.translatedWidth}/${lengthRisk.defaultWidth} display width (${lengthRisk.ratio}x), uiRisk=${lengthRisk.uiRisk}, severity=${lengthRisk.severity}`,
+            `locale "${locale}" key "${key}" has a static UI-fit length warning for compact UI: ${lengthRisk.translatedWidth}/${lengthRisk.defaultWidth} estimated display width (${lengthRisk.ratio}x), uiRisk=${lengthRisk.uiRisk}, severity=${lengthRisk.severity}; inspect source usage before shortening text`,
             {
               key,
               locale,

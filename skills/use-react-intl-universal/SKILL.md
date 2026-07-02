@@ -29,7 +29,7 @@ Rich React component interpolation with `intl.get` requires [react-intl-universa
 - Synchronize locale files that the project already supports.
 - Keep `.d(defaultMessage)`, the default locale pack, and existing non-default locale packs consistent.
 
-## Default Workflow
+## Daily Development Workflow
 
 When adding or changing user-facing copy, start by inspecting the existing i18n setup. Open [Inspect Existing I18n Setup](references/inspect-existing-i18n-setup.md) for the detailed checks.
 
@@ -47,11 +47,12 @@ When adding or changing user-facing copy, start by inspecting the existing i18n 
     - ICU `{variable}` contracts are preserved;
     - rich tag `<tag>` contracts are preserved;
     - non-default translations are not just copied from the default message unless that is intentional;
-    - compact-UI translations are not risky because they are much longer than the default message;
+    - static UI-fit length warnings are understood as review prompts, not proof of broken layout;
     - translations are natural and match the product/business context.
-11. Merge reviewed translation delta JSON files into locale JSON files.
-12. Audit the changed keys after merge. Do not make a full-project audit the default completion condition.
-13. Run [Validation Checklist](references/validation-checklist.md), then generate a handoff focused on changed-key synchronization status: added/changed keys, target locales, delta review, merge result, changed-key audit, and any remaining UI-length or naturalness review items.
+11. Perform a daily static UI-fit review for changed keys whose non-default translation estimated display width is greater than the default message. Inspect the key, source line, JSX/source context, component props, `className`, CSS, and layout container before deciding risk. Compact UI such as buttons, tabs, menus, placeholders, table headers, badges, chips, filters, dialog titles, sidebars, and breadcrumbs needs more scrutiny; paragraph/help/docs/FAQ text is usually lower risk. Do not start Browser Use for this daily workflow unless the user asks for UI inspection or a release-quality gate.
+12. Merge reviewed translation delta JSON files into locale JSON files.
+13. Audit the changed keys after merge. Do not make a full-project audit the default completion condition.
+14. Run [Validation Checklist](references/validation-checklist.md), then generate a handoff focused on changed-key synchronization status: added/changed keys, target locales, delta review, merge result, changed-key audit, translation review, static UI-fit review status, remaining review items, and whether Browser Use was intentionally not run because this was a daily development workflow.
 
 Rerun the delta review whenever translation tasks are regenerated; older review reports can have outdated expected item counts.
 
@@ -70,7 +71,7 @@ Do not blindly machine-translate every locale file. Use the default-locale diff 
 
 ## UI Inspection Mode
 
-When the user asks to start a UI inspection or provides a page URL for localization QA, open [UI Inspection Mode](references/ui-inspection-mode.md) and follow that workflow instead of the default source-editing workflow.
+When the user asks to start a UI inspection or provides a page URL for localization QA, open [UI Inspection Mode](references/ui-inspection-mode.md) and follow that workflow instead of the daily development workflow.
 
 ## Core Rules
 
@@ -110,9 +111,9 @@ When the user asks to start a UI inspection or provides a page URL for localizat
    - Rule implementation: Use `create-translation-tasks.mjs --base-ref <ref>`, review results with `review-translation-deltas.mjs`, merge with `apply-translation-deltas.mjs`, then verify with `audit-changed-locale-keys.mjs`.
 
 8. Rule 8: Translate by product meaning, with UI length in mind.
-   - Rule description: Use source code, UI placement, route/module context, validation logic, and adjacent labels to write natural target-locale copy. Keep non-default translations concise in compact UI, but do not shorten the default locale just for layout reasons.
+   - Rule description: Use source code, UI placement, route/module context, validation logic, and adjacent labels to write natural target-locale copy. Estimate UI length with display width, not `string.length`. Keep non-default translations concise in compact UI, but do not shorten the default locale just for layout reasons.
    - Reason: Literal translations and overly long UI labels create unnatural product copy and can break layout.
-   - Rule implementation: Open [Translation Rules](references/translation-rules.md) before translating or reviewing non-default locale text. `create-translation-tasks.mjs` and `create-translation-review-tasks.mjs` include source context and review prompts. Use `review-translation-deltas.mjs` or `audit-i18n-contract.mjs --length-warnings` to surface translations that may need UI-context review.
+   - Rule implementation: Open [Translation Rules](references/translation-rules.md) before translating or reviewing non-default locale text. `create-translation-tasks.mjs` and `create-translation-review-tasks.mjs` include source context and review prompts. Use `review-translation-deltas.mjs`, `audit-changed-locale-keys.mjs`, or `audit-i18n-contract.mjs --length-warnings` to surface static UI-fit risks. A target display width less than or equal to the default width is usually low risk. When the target is wider, inspect source usage and layout context. For high-risk compact UI, first shorten the non-default translation only if meaning, naturalness, and terminology remain intact; otherwise prefer general wrapping/flexible-width/responsive layout fixes. Use language-specific CSS only as a last resort. If risk is uncertain, record a review item instead of starting Browser Use; use Browser Use only when the user requests UI inspection, provides a page URL for QA, or the task is a release/preflight quality gate.
 
 ## Skill Resources and Script Flow
 

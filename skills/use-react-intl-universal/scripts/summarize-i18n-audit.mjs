@@ -147,7 +147,7 @@ function createSummary(report, maxPerType) {
       "Fix locale-contract-mismatch and missing-locale-key before translating new content.",
       "Migrate new or high-value getHTML usage to rich tag formatters with intl.get.",
       "Replace JavaScript template strings in .d() with ICU placeholders when the dynamic value is translatable.",
-      "Review only high severity long-translation warnings in compact UI first; do not mechanically shorten every paragraph.",
+      "Review only high severity static UI-fit long-translation warnings in compact UI first; do not mechanically shorten every paragraph.",
     ],
   };
 }

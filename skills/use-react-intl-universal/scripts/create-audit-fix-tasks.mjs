@@ -9,7 +9,7 @@
  * the next actionable layer: grouped tasks for conflicting source defaults,
  * missing locale keys, locale contract mismatches, and optionally selected
  * advisory warnings such as JavaScript template interpolation inside .d(),
- * deprecated getHTML usage, or translations that are risky for compact UI.
+ * deprecated getHTML usage, or translations with static UI-fit risk in compact UI.
  * Agents can then work on one task file at a time instead of reading a large
  * audit JSON by hand.
  */
@@ -669,9 +669,9 @@ function getInstructions(type) {
       ];
     case "long-translation":
       return [
-        "A translated locale message may be too long for compact UI.",
-        "Inspect the reported source usage before changing text. The warning is a review queue, not proof that the translation is wrong.",
-        "For buttons, labels, tabs, placeholders, table headers, badges, and status chips, prefer concise natural target-language wording when meaning is preserved.",
+        "A translated locale message has a static UI-fit length warning for compact UI.",
+        "Inspect the reported source usage before changing text. The warning is a review queue, not proof that the translation is wrong or the browser layout is broken.",
+        "For buttons, labels, tabs, placeholders, table headers, badges, and status chips, prefer concise natural target-language wording only when meaning is preserved.",
         "For paragraphs, help text, documentation, or messages in flexible containers, keep accurate natural wording unless the actual UI overflows.",
         "If wording cannot be shortened without losing meaning, consider whether nearby CSS should allow wrapping, flexible width, or responsive layout.",
         "Do not change the default locale just to satisfy a length ratio.",

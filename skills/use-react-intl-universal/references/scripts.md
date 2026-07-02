@@ -208,7 +208,7 @@ When `--default-locale` is provided, the merge validates each translation before
 
 - String translations must preserve every ICU variable and rich tag.
 - New string translations must point to a key that still exists in the default locale.
-- By default, no locale file is written if any delta entry is skipped. Use `--allow-partial` only when intentionally writing valid entries while keeping a non-zero exit for skipped entries.
+- By default, no locale file is written if any delta entry is skipped. Use `--allow-partial` only when writing valid entries while keeping a non-zero exit for skipped entries is acceptable.
 
 ## Changed-Key Audit
 
@@ -247,7 +247,7 @@ Use this for broad migration, release-quality checks, or explicit full-project a
 
 The audit reports missing locale keys, conflicting `.d()` defaults for the same key, `{variable}` or `<tag>` contract mismatches, JavaScript template interpolation inside `.d()`, new `intl.getHTML` usage, and optional non-default translation length risk. Its message count is the number of source `intl.get(...).d(...)` contract entries scanned, not the number of keys in a locale JSON file. Use the summary to fix hard errors before advisory layout warnings. Length-warning examples include source usage when available; inspect that source before shortening text or changing CSS.
 
-If docs, demos, or code snippets intentionally contain sample `intl.get` calls, exclude them:
+If docs, demos, or code snippets contain sample `intl.get` calls, exclude them:
 
 ```bash
 node "$SKILL_DIR/scripts/audit-i18n-contract.mjs" \

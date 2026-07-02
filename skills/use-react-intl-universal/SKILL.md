@@ -3,7 +3,7 @@ name: use-react-intl-universal
 description: Best-practice workflow for building and inspecting high-quality internationalized software with react-intl-universal, react-intl-universal-extract, and this skill's rules/scripts. Use it directly for repositories that use react-intl-universal, and use its language-quality, UI-quality, localized-UI inspection, and locale-synchronization principles as reference guidance for other i18n stacks.
 ---
 
-# React Intl Universal
+# use-react-intl-universal
 
 Use this skill as the recommended combined practice for repositories that use `react-intl-universal`: write messages with the library API, extract default messages with `react-intl-universal-extract`, and follow this skill's workflow, rules, and scripts to keep localized software high quality.
 
@@ -75,9 +75,9 @@ When the user asks to start a UI inspection or provides a page URL for localizat
 ## Core Rules
 
 1. Rule 1: Use `intl.get(key, values).d(defaultMessage)` as the source-of-truth text API.
-   - Rule description: Treat `.d(defaultMessage)` as the default locale message, not as an already-rendered fallback string. When user-facing copy changes, edit `.d(defaultMessage)` first, then regenerate the default locale pack from extraction.
+   - Rule description: Treat `.d(defaultMessage)` as the default locale message. When user-facing copy changes, edit `.d(defaultMessage)` first, then regenerate the default locale pack from extraction.
    - Reason: One source of truth keeps source code, default locale JSON, and translated locale JSON from drifting apart.
-   - Rule implementation: Use the repository extraction command or `react-intl-universal-extract`. If extraction is unavailable, install or configure the extraction tool before continuing; use manual default-locale edits only as an explicit user-approved temporary workaround. Run `verify-locale-export.mjs` after extraction when expected locale output matters.
+   - Rule implementation: Use the repository extraction command or `react-intl-universal-extract`. If extraction is unavailable, install or configure the extraction tool before continuing; edit the default locale file manually only with explicit user approval. Run `verify-locale-export.mjs` after extraction when expected locale output matters.
 
 2. Rule 2: Use ICU placeholders for translatable dynamic values.
    - Rule description: Write values as `{username}`, `{count}`, and plural/select syntax in `.d()` messages. Do not use JavaScript template interpolation for values that must be translated.
@@ -119,6 +119,7 @@ When the user asks to start a UI inspection or provides a page URL for localizat
 - `references/message-patterns.md`: open when writing or reviewing concrete `react-intl-universal` code examples.
 - `references/inspect-existing-i18n-setup.md`: open before editing an unfamiliar repository's source or locale JSON.
 - `references/ui-inspection-mode.md`: open when the user asks for a page-level localized UI inspection from a URL.
+- `references/ui-inspection-report-types.ts`: TypeScript contract for the machine-readable `report.json` written by UI inspection mode.
 - `references/translation-rules.md`: open before translating or reviewing non-default locale text.
 - `references/validation-checklist.md`: open before final handoff.
 - `references/scripts.md`: open before running helper scripts so arguments, output files, and expected evidence are clear.
@@ -147,4 +148,4 @@ When editing this skill's helper scripts, run `self-test.mjs` from the script re
 ## Message Patterns
 
 Open [Message Patterns](references/message-patterns.md) when writing or reviewing concrete code examples.
-The reference covers plain ICU values, rich React component interpolation, `getHTML` migration, shared utility code, plural messages, stable date/time helpers, number formatting, and TypeScript rich formatter types.
+The reference covers plain ICU values, rich React component interpolation, `getHTML` migration, shared utility code, plural messages, date/time helpers, number formatting, and TypeScript rich formatter types.

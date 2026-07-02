@@ -4,10 +4,10 @@
  * Purpose:
  * Find likely hardcoded CJK user-facing text in source files.
  *
- * The script is intentionally conservative and dependency-free. It does not
- * try to fully parse TypeScript or JSX. Instead, it scans source lines, skips
- * obvious comments and locale packs by default, and classifies each CJK hit so
- * agents can prioritize raw JSX text and raw strings while ignoring valid
+ * The script is conservative and dependency-free. It does not try to fully
+ * parse TypeScript or JSX. Instead, it scans source lines, skips obvious
+ * comments and locale packs by default, and classifies each CJK hit so agents
+ * can prioritize raw JSX text and raw strings while ignoring valid
  * intl.get(...).d(defaultMessage) source text.
  */
 

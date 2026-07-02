@@ -95,7 +95,7 @@ function getGuidance(kind) {
     case "ui-prop-string":
       return "Move the UI prop text into intl.get(KEY).d(DEFAULT_MESSAGE). Keep the prop value concise because this is likely compact UI.";
     case "raw-string":
-      return "If the string is user-facing, move it to intl.get(KEY).d(DEFAULT_MESSAGE). If it is a log, test fixture, API payload, or non-UI constant, document why it is intentionally left as-is.";
+      return "If the string is user-facing, move it to intl.get(KEY).d(DEFAULT_MESSAGE). If it is a log, test fixture, API payload, or non-UI constant, document why it should remain in source.";
     default:
       return "Review whether this CJK text is user-facing. Convert to intl.get(KEY).d(DEFAULT_MESSAGE) when it is visible to users.";
   }
@@ -158,7 +158,7 @@ function createTaskMarkdown(task) {
     "- If the CJK text is only a fragment next to dynamic text, include the neighboring dynamic values in the same ICU message so other locales can reorder the phrase.",
     "- For translated locales, write natural target-locale product copy from the complete message intent, not a word-by-word rendering of the CJK source text.",
     "- Do not modify default-locale wording just to shorten it; shorten only translated locale text when needed.",
-    "- If an item is not user-facing, record why it is intentionally left unchanged.",
+    "- If an item is not user-facing, record why it should remain in source.",
     "",
     "Items:",
   ];

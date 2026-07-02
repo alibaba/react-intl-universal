@@ -33,7 +33,7 @@ Avoid this when the text is intended to be translated or extracted:
 ```
 
 The template-string form is evaluated by JavaScript before `react-intl-universal` sees it, so it is not a real default message with ICU variables.
-Only use a template string in `.d()` when the dynamic string is intentionally not part of the translation contract.
+Do not use template strings for user-facing `.d()` messages. Use ICU placeholders such as `{username}` instead.
 
 ## Dynamic Fragments
 
@@ -132,7 +132,7 @@ Keep all plural branches in one message so each locale can choose natural gramma
 ## Date and Time Formatting
 
 Use `intl.formatDate`, `intl.formatTime`, or `intl.formatDateTime` before passing date/time values into `intl.get`.
-These helpers intentionally use stable one-argument defaults instead of native `Intl` date/time output:
+Default formats:
 
 - `intl.formatDate(date)` returns `YYYY-MM-DD`.
 - `intl.formatTime(date)` returns `HH:mm:ss`.

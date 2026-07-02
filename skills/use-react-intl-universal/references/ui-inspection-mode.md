@@ -47,9 +47,10 @@ When unsure, capture the state before the risky action and record the untested a
 2. Create the inspection folder inside that ignored location when possible, for example `tmp/i18n-ui-inspection-YYYYMMDD-HHMMSS/`.
 3. If no ignored temporary location is obvious, create `tmp/i18n-ui-inspection-YYYYMMDD-HHMMSS/` and mention in the handoff that the path may need to be added to `.gitignore`.
 4. Create a `screenshots/` subfolder inside the inspection folder.
-5. Open the user-provided page URL and capture an initial full-page or viewport screenshot.
-6. Record the environment in the report: URL, locale, browser/tool, viewport size, account/role if known, and inspection time.
-7. Enumerate visible interactive elements:
+5. Create `inspection-log.md` immediately. This is the raw task log and should be updated while inspecting, fixing, and re-inspecting.
+6. Open the user-provided page URL and capture an initial full-page or viewport screenshot.
+7. Record the environment in `inspection-log.md`: URL, locale, browser/tool, viewport size, account/role if known, and inspection time.
+8. Enumerate visible interactive elements:
    - navigation links;
    - tabs;
    - buttons;
@@ -60,11 +61,13 @@ When unsure, capture the state before the risky action and record the untested a
    - tooltips and hover states;
    - forms and validation states;
    - modals, drawers, popovers, notifications, and confirmation dialogs.
-8. Interact with each safe element or representative group of repeated elements.
-9. After each meaningful state change, capture a screenshot and record what was clicked or typed.
-10. Handle popups and dialogs by checking their localized text, layout, primary/secondary buttons, close/cancel behavior, and validation messages.
-11. If an interaction opens another route, inspect that route if it remains within the user's requested scope.
-12. Keep going until the reachable page area has been covered, a blocker is reached, or the user-provided time/scope limit is exhausted.
+9. Interact with each safe element or representative group of repeated elements.
+10. After each meaningful state change, capture a screenshot and append the action, observed state, screenshot path, and notes to `inspection-log.md`.
+11. When a finding is discovered, append the full finding detail, likely root cause, fix recommendation, and acceptance criteria to `inspection-log.md`.
+12. If the task includes fixing issues, append each attempted fix and re-inspection result to `inspection-log.md`, including before/after screenshot paths.
+13. Handle popups and dialogs by checking their localized text, layout, primary/secondary buttons, close/cancel behavior, and validation messages.
+14. If an interaction opens another route, inspect that route if it remains within the user's requested scope.
+15. Keep going until the reachable page area has been covered, a blocker is reached, or the user-provided time/scope limit is exhausted.
 
 For repeated controls, sample enough instances to cover different text lengths and states. Do not spend time clicking identical repeated buttons that render the same UI unless their row data changes the text or layout risk.
 
@@ -104,7 +107,9 @@ For each finding:
 4. Classify the likely root cause and record evidence.
 5. Choose a recommended owner.
 6. Write the fix recommendation and why that fix should be tried first.
-7. Write acceptance criteria that can prove the fix worked.
+7. Assign fix confidence: high, medium, or low.
+8. Record whether human attention is needed, especially when the fix may have compatibility risk, shared-component side effects, route-family impact, locale-specific risk, or product-copy uncertainty.
+9. Write acceptance criteria that can prove the fix worked.
 
 ### Severity
 
@@ -202,7 +207,7 @@ Write observable retest steps for every finding. Include the same URL, locale, v
 
 ## Screenshot Requirements
 
-The report must include all screenshots captured during the inspection.
+The inspection artifacts must include all screenshots captured during the inspection.
 Use stable, numbered filenames such as:
 
 ```text
@@ -212,7 +217,7 @@ screenshots/003-dialog-validation.png
 screenshots/004-issue-overflow-filter-label.png
 ```
 
-Every screenshot should have a short caption in the report explaining:
+Every screenshot should have a short caption in `inspection-log.md` and `report.html` explaining:
 
 - what page or state it shows;
 - what action produced it;
@@ -220,51 +225,79 @@ Every screenshot should have a short caption in the report explaining:
 
 When an issue is found, capture the smallest screenshot that clearly shows the problem. If context matters, also include a wider screenshot.
 
-## Report Structure
+## Inspection Artifacts
 
-Write the report to the inspection folder. Prefer a folder under the repository's ignored temporary-output location found from `.gitignore`.
+Write all inspection artifacts to the inspection folder. Prefer a folder under the repository's ignored temporary-output location found from `.gitignore`.
 For example:
 
 ```text
-tmp/i18n-ui-inspection-YYYYMMDD-HHMMSS/report.md
+tmp/i18n-ui-inspection-YYYYMMDD-HHMMSS/inspection-log.md
+tmp/i18n-ui-inspection-YYYYMMDD-HHMMSS/report.json
+tmp/i18n-ui-inspection-YYYYMMDD-HHMMSS/report.html
+tmp/i18n-ui-inspection-YYYYMMDD-HHMMSS/screenshots/
 ```
 
-The report must contain these sections.
+Write these files:
 
-### Summary
+- `inspection-log.md`: raw chronological task log. Update this while inspecting, fixing, and re-inspecting.
+- `report.json`: machine-readable summary statistics and finding metadata. Generate it from `inspection-log.md`, findings, and screenshots.
+- `report.html`: polished human-readable final report. Generate it after inspection and any in-scope fixing/re-inspection are complete.
 
-Include:
+## Inspection Task Log
 
-- inspected URL or routes;
-- target locale;
-- browser/tool and viewport;
-- account/role if relevant;
-- total interactions covered;
-- total screenshots;
-- number of issues by severity;
-- blockers or untested areas.
+`inspection-log.md` is the raw source of truth for the run. It should be useful even before the final reports are generated.
 
-### Part 1: Inspection Process
+Update it during the task with:
 
-List the full inspection path in chronological order.
-Each row or bullet should include:
+- environment: inspected URL/routes, locale, browser/tool, viewport, account/role if relevant, and inspection start time;
+- chronological actions: what was opened, clicked, typed, hovered, or closed;
+- observed state after each meaningful action;
+- screenshot path for each meaningful state;
+- blockers, skipped risky actions, and untested areas;
+- finding details as soon as an issue is discovered;
+- root-cause reasoning and evidence;
+- fix recommendation, fix confidence, human-attention reason, and acceptance criteria;
+- fix attempts, code or configuration areas touched when known, re-inspection result, and after-fix screenshots when fixing is in scope.
 
-- step number;
-- action taken;
-- observed state;
-- screenshot link;
-- notes or coverage limitation if any.
+The log does not need polished prose. Do not delete failed fix attempts or earlier observations when they explain the final recommendation.
 
-Example:
+## Final Report Generation
 
-```md
-| Step | Action | Observed State | Screenshot |
-| --- | --- | --- | --- |
-| 1 | Opened `/settings?locale=de-DE` | Page loaded in German. Header, sidebar, and form were visible. | [001](screenshots/001-initial-page.png) |
-| 2 | Opened the status dropdown | Options were translated and no overflow was visible. | [002](screenshots/002-status-dropdown.png) |
-```
+Generate `report.json` and `report.html` after the inspection and any in-scope fixing/re-inspection are complete.
 
-### Part 2: Findings
+### `report.json`
+
+`report.json` is for statistics, dashboards, CI summaries, and follow-up automation. It should not introduce facts that are absent from `inspection-log.md` or screenshots. The root object must use the `I18nUiInspectionReportJson` interface from [UI Inspection Report Types](ui-inspection-report-types.ts).
+
+### `report.html`
+
+`report.html` is the human-readable final report. It should be easier to read than raw Markdown and should make screenshot evidence visible without forcing the reader to open many files.
+
+Include these sections:
+
+1. Summary dashboard:
+   - inspected URL/routes, locales, viewports, browser/tool, and account/role if relevant;
+   - total interactions and screenshots;
+   - issue totals by severity, status, and fix confidence;
+   - human-attention items, with medium confidence shown in yellow and low confidence shown in red;
+   - blockers and untested areas.
+2. Findings:
+   - one card or section per finding;
+   - severity, status, fix confidence, category, translation quality category, likely root cause, recommended owner, and affected state;
+   - render fix confidence as a colored badge: high = green, medium = yellow, low = red;
+   - reproduction steps, expected result, actual result, fix recommendation, fix priority/rationale, human-attention note, and acceptance criteria;
+   - before/after screenshot comparison when fix evidence exists. Use a two-column layout where the left column shows the issue screenshot and the right column shows the verified-fix screenshot.
+3. Inspection timeline:
+   - concise chronological table derived from `inspection-log.md`;
+   - action, observed state, notes, and screenshot link.
+4. Appendix:
+   - all screenshot captions and paths;
+   - blockers, skipped risky actions, and untested areas;
+   - external dependency or backend/API ownership notes when relevant.
+
+If no issues are found, still generate `report.html`, include process screenshots, and state that no visible localized UI issues were found in the covered scope.
+
+## Finding Details
 
 For each issue, include:
 
@@ -282,38 +315,50 @@ For each issue, include:
 - recommended owner: current repository, backend/API, shared component package, module federation remote, third-party vendor, or unknown;
 - fix recommendation: the concrete change to try first, or the owner/investigation path if it is not fixable in the current repository;
 - fix priority/rationale: why this recommendation comes before other options, such as shortening a translation before changing CSS.
+- fix confidence: high, medium, or low;
+- human attention: whether human review is needed, why, and any side-effect or compatibility risk;
 - acceptance criteria: the exact retest steps or observable conditions that confirm the issue is fixed.
+
+Use these lifecycle statuses for the matching `report.json` finding:
+
+- `open`: the issue is still present and has not been fixed.
+- `fixed`: a fix was made, but the exact UI state has not been re-inspected yet.
+- `verifiedFixed`: the fix was re-inspected and confirmed with replacement screenshot evidence.
+- `deferred`: the issue is real, but the team postponed it.
+- `wontFix`: the issue is real, but the team does not plan to fix it.
 
 Example:
 
-```md
+```text
 #### I18N-001 [High] Filter button text overlaps the icon
 
-- URL/state: `/orders`, advanced filter drawer open
+- URL/state: `https://example.com/orders`, advanced filter drawer open
 - Locale/viewport: German, 1280x800
 - Steps: Open page, click "Advanced filters", select "Delivery status".
 - Expected: Button label and icon remain separated.
 - Actual: The translated label overlaps the chevron icon.
 - Screenshot: [004](screenshots/004-filter-overlap.png)
-- Category: overlap, compact UI length
+- Category: overlap
 - Translation quality category: N/A
 - Likely root cause: frontend application issue
 - Root-cause evidence: The API returned the expected translated label, and the overlap happens inside the page's local filter button layout after the text is rendered.
 - Recommended owner: current repository
 - Fix recommendation: First review whether the German label can be shortened naturally without losing meaning. If not, allow the button label to wrap or increase the button min-width with a shared responsive rule.
 - Fix priority/rationale: Text refinement is lower risk for compact UI when the wording is unnecessarily long; use a general layout fix next because this button may receive long labels in multiple locales.
-- Acceptance criteria: Reopen `/orders` at 1280x800 in German, open the advanced filter drawer, select "Delivery status", and confirm the button label and chevron no longer overlap. Capture a replacement screenshot.
+- Fix confidence: medium
+- Human attention: Review the shared filter button usage before treating this as fully safe, because a min-width or wrapping change could affect compact table filters in other routes.
+- Acceptance criteria: Reopen `https://example.com/orders` at 1280x800 in German, open the advanced filter drawer, select "Delivery status", and confirm the button label and chevron no longer overlap. Capture a replacement screenshot.
 ```
-
-If no issues are found, still provide the process screenshots and state that no visible localized UI issues were found in the covered scope.
 
 ## Final Handoff
 
 When reporting back to the user, include:
 
-- the report path;
+- the `inspection-log.md` path;
+- the `report.json` path;
+- the `report.html` path;
 - the screenshot folder path;
 - a short issue summary;
 - any blockers or untested risky actions.
 
-Do not paste every screenshot into the chat unless the user asks. The durable report should be the complete source of evidence.
+Do not paste every screenshot into the chat unless the user asks. The durable artifacts should be the complete source of evidence.

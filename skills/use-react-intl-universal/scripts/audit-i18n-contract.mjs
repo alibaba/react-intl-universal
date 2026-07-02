@@ -193,9 +193,9 @@ function main() {
 
   const sourceMessages = [];
 
-  // Source scanning is intentionally separate from locale scanning. The script
-  // must also record getHTML usages even though getHTML messages are not part
-  // of the rich React component contract enforced below.
+  // Source scanning stays separate from locale scanning because this script must
+  // also record getHTML usages even though getHTML messages are not part of the
+  // rich React component contract enforced below.
   for (const filePath of sourceFiles) {
     const text = fs.readFileSync(filePath, "utf8");
     sourceMessages.push(...extractIntlMessagesFromSource(text, filePath));

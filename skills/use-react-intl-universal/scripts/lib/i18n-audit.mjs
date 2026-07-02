@@ -5,9 +5,9 @@ import path from "node:path";
  * Purpose:
  * Shared helper library for the use-react-intl-universal skill scripts.
  *
- * This file intentionally uses only Node.js standard library modules so the
- * skill can run inside arbitrary application repositories without installing
- * extra dependencies. The helpers cover:
+ * This file uses only Node.js standard library modules so the skill can run
+ * inside arbitrary application repositories without installing extra
+ * dependencies. The helpers cover:
  * - CLI argument parsing and file discovery
  * - locale JSON reading with key line-number lookup
  * - intl.get(...).d(...) source scanning
@@ -617,10 +617,10 @@ export function summarizeSourceCall(text, maxLength = 260) {
   return `${summary.slice(0, maxLength - 1)}…`;
 }
 
-// The source scanner is intentionally lightweight, so it can match intl calls
-// inside commented-out JSX or JavaScript. This state machine marks those calls
-// as likely comments instead of dropping them; callers can then warn humans
-// without silently hiding locale keys that may still exist in generated packs.
+// The source scanner is lightweight, so it can match intl calls inside
+// commented-out JSX or JavaScript. This state machine marks those calls as
+// likely comments instead of dropping them; callers can then warn humans without
+// silently hiding locale keys that may still exist in generated packs.
 function isLikelyCommentedMatch(text, index) {
   let inLineComment = false;
   let inBlockComment = false;
@@ -843,8 +843,8 @@ export function getUniqueSourceDefaults(sourceMessages) {
 }
 
 // Infer default locale by comparing source .d() messages with each locale file.
-// This is intentionally a confidence score, not a hard guarantee. The best
-// candidate must have enough exact/default matches and must not be ambiguous.
+// This is a confidence score, not a hard guarantee. The best candidate must
+// have enough exact/default matches and must not be ambiguous.
 export function inferDefaultLocale(sourceMessages, localeData) {
   const { unique, conflicts } = getUniqueSourceDefaults(sourceMessages);
   const sourceDefaults = unique.filter((message) => message.api === "get" || message.api === "getHTML");

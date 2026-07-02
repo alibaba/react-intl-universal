@@ -7,8 +7,8 @@
  *
  * The script compares source .d(defaultMessage) strings with locale JSON
  * values. The locale with the highest exact/normalized match score is reported
- * as the likely default locale. The result is intentionally not cached; callers
- * should use the current repository state each time.
+ * as the likely default locale. Callers should run this against the current
+ * repository state instead of reusing stale cached results.
  */
 
 import fs from "node:fs";

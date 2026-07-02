@@ -10,7 +10,7 @@
 - Stable date/time helpers: `formatDate`, `formatTime`, and `formatDateTime` return deterministic `YYYY-MM-DD`, `HH:mm:ss`, and `YYYY-MM-DD HH:mm:ss`. This avoids native `Intl` output drift across runtimes, which has caused SSR and CI issues in [tc39/ecma402#1028](https://github.com/tc39/ecma402/issues/1028), [nodejs/node#44454](https://github.com/nodejs/node/issues/44454), [nodejs/node#46123](https://github.com/nodejs/node/issues/46123), and [formatjs/formatjs#1319](https://github.com/formatjs/formatjs/issues/1319).
 - Pluralize labels in strings.
 - Support variables in message.
-- Support [React rich text component interpolation in message](https://alibaba.github.io/react-intl-universal).
+- Support [React rich text component interpolation in message](https://alibaba.github.io/react-intl-universal#intl-usage).
 - Support for 150+ languages.
 - Runs in the browser and Node.js.
 - Message format is strictly implemented by [ICU standards](http://userguide.icu-project.org/formatparse/messages).
@@ -22,9 +22,9 @@
 
 Upgrade to react-intl-universal@2.14+ to use `intl.get(...)` as the recommended unified API for plain text, ICU variables, and rich React components.
 
-See the [live demo](https://alibaba.github.io/react-intl-universal/) for runnable examples. You can keep one complete sentence in the locale message, while React code controls the actual component, props, and event handlers:
+See the [live demo](https://alibaba.github.io/react-intl-universal/#intl-usage) for runnable examples. You can keep one complete sentence in the locale message, while React code controls the actual component, props, and event handlers:
 
-<a href="https://alibaba.github.io/react-intl-universal/">
+<a href="https://alibaba.github.io/react-intl-universal/#intl-usage">
   <img width="1200" src="https://img.alicdn.com/imgextra/i2/O1CN017uP7zd1h1tkr54P1z_!!6000000004218-2-tps-2280-1462.png" />
 </a>
 
@@ -32,12 +32,17 @@ See the [live demo](https://alibaba.github.io/react-intl-universal/) for runnabl
 
 Use the [use-react-intl-universal skill](https://alibaba.github.io/react-intl-universal/#skill-usage) to give AI coding agents a practical i18n workflow, not just API hints.
 
+<a href="https://alibaba.github.io/react-intl-universal/#skill-usage">
+  <img width="1200" alt="use-react-intl-universal Agent Skill workflow" src="https://github.com/user-attachments/assets/eca7a070-6f74-411f-8cde-689c03124a1d" />
+</a>
+
 It helps agents:
 
 - write high-quality localized copy that preserves the real product meaning, not word-for-word translations;
 - keep product terms and UI wording consistent across modules;
 - avoid broken localized UI, such as text truncation, overflow, overlap, or misalignment;
 - keep ICU variables, rich tags, default messages, and locale files aligned;
+- review translation quality with [Multidimensional Quality Metrics (MQM)](https://www.w3.org/community/mqmcg), one of the most professional and comprehensive translation quality assessment frameworks widely recognized in the localization industry;
 - inspect running localized pages by URL, click through interactions, capture screenshots, and generate a process-and-findings report;
 - produce smaller, more reviewable locale changes.
 

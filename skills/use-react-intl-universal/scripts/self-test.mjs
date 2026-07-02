@@ -255,6 +255,13 @@ function main() {
     assert(exportReport.status === "failed", "export verification should fail");
     assert(exportReport.issues.some((issue) => issue.type === "missing-locale-file" && issue.locale === "ja_JP"), "export report should mention missing ja_JP");
     writeJson(path.join(root, "tmp", "export-verify.json"), exportReport);
+    writeText(path.join(root, "tmp", "translation-context.md"), [
+      "# Product terminology",
+      "",
+      "- Workspace: keep this product term in English.",
+      "- Greeting copy should sound friendly but concise.",
+      "",
+    ].join("\n"));
 
     const translationTaskResult = runScript(root, "create-translation-tasks.mjs", [
       "--source", "src",
@@ -263,6 +270,7 @@ function main() {
       "--target-locales", "ja_JP",
       "--output", "tmp/tasks",
       "--sort", "source",
+      "--context-file", "tmp/translation-context.md",
       "--task-size-warning-bytes", "1000",
       "--task-size-target-bytes", "700",
       "--json",
@@ -271,6 +279,8 @@ function main() {
     assert(translationTaskManifest.sortMode === "source", "translation task manifest should record source sorting");
     assert(translationTaskManifest.referenceTranslationItemCount > 0, "translation task manifest should count items with reference translations");
     assert(translationTaskManifest.referenceTranslationLocales.includes("zh_CN"), "translation task manifest should list reference translation locales");
+    assert(translationTaskManifest.contextAssetCount === 1, "translation task manifest should count user-provided context assets");
+    assert(translationTaskManifest.contextAssets[0].path.endsWith("tmp/translation-context.md"), "translation task manifest should list context asset metadata");
     assert(translationTaskManifest.commentedSourceItemCount > 0, "translation task manifest should count likely commented source items");
     assert(translationTaskManifest.taskItemCount > 0, "translation task manifest should record total task item count");
     assert(translationTaskManifest.taskSize?.largeMarkdownTaskCount > 0, "translation task manifest should warn when task files are too large");
@@ -286,12 +296,16 @@ function main() {
     assert(taskMarkdown.includes("different word order, phrasing, or sentence structure"), "translation task should allow natural target-locale structure");
     assert(taskMarkdown.includes("Reference translations:"), "translation task markdown should include existing non-target locale references");
     assert(taskMarkdown.includes("Use reference translations only as terminology and tone hints"), "translation task should explain how reference translations may be used");
+    assert(taskMarkdown.includes("Additional user-provided context assets"), "translation task markdown should include user-provided context assets");
+    assert(taskMarkdown.includes("Workspace: keep this product term in English"), "translation task markdown should include context asset contents");
     assert(taskMarkdown.includes("inspect the source file around the reported line"), "translation task should ask translators to inspect source context when ambiguous");
     assert(taskMarkdown.includes("native product writer"), "translation task should require natural product-copy wording");
     assert(taskMarkdown.includes("Source call:") && taskMarkdown.includes("HELLO_USER"), "translation task should include a compressed source call for multiline intl.get chains");
     assert(taskMarkdown.includes("Source context:") && taskMarkdown.includes("const username"), "translation task should include nearby source context for business meaning");
     assert(taskMarkdown.includes("appears to be inside a comment"), "translation task markdown should flag likely commented source calls");
     const translationTask = readJson(path.join(root, "tmp", "tasks", "ja_JP.json"));
+    assert(translationTask.contextAssets?.[0]?.content?.includes("Product terminology"), "translation task JSON should include context asset contents");
+    assert(translationTask.instructions.some((instruction) => instruction.includes("Use contextAssets as user-provided glossary")), "translation task JSON instructions should explain context assets");
     const helloTaskItem = translationTask.items.find((item) => item.key === "HELLO_USER");
     assert(helloTaskItem?.referenceTranslations?.some((item) => item.locale === "zh_CN" && item.value.includes("你好")), "translation task JSON should include existing non-target locale reference translations");
     assert(helloTaskItem?.source?.contextSnippet?.includes("const username"), "translation task JSON should include nearby source context");

@@ -42,6 +42,7 @@ import {
 
 const DEFAULT_TASK_SIZE_WARNING_BYTES = 300_000;
 const DEFAULT_TASK_SIZE_TARGET_BYTES = 200_000;
+const MAX_CONTEXT_ASSET_CHARS = 20_000;
 const ENGLISH_CASING_GUIDANCE = [
   "For English target locales, follow professional casing rules:",
   "- Use Sentence case for sentences, descriptions, validation messages, placeholders, tooltips, empty states, and most inline UI copy.",
@@ -70,6 +71,7 @@ Options:
   --sort key|source          Optional. Task item order. Default: key.
   --extensions LIST          Optional. Comma-separated source extensions. Default: .js,.jsx,.ts,.tsx
   --ignore LIST              Optional. Comma-separated path substrings to skip.
+  --context-file PATH        Optional. User-provided glossary, style guide, product note, screenshot note, or page-context file to include in Markdown tasks. Repeatable.
   --task-size-warning-bytes N Optional. Warn when a Markdown task file is larger than N bytes. Default: ${DEFAULT_TASK_SIZE_WARNING_BYTES}.
   --task-size-target-bytes N Optional. Target Markdown task size used for recommended max-items-per-task. Default: ${DEFAULT_TASK_SIZE_TARGET_BYTES}.
   --json                     Print machine-readable manifest JSON.
@@ -93,6 +95,31 @@ function readJsonFromGit(ref, filePath) {
   } catch {
     return null;
   }
+}
+
+// User-provided context assets are optional but useful for terminology and
+// product-writing decisions. Keep each file bounded so generated task files
+// remain small enough for agent handoff.
+function loadContextAssets(rawValue) {
+  if (!rawValue) {
+    return [];
+  }
+
+  const values = Array.isArray(rawValue) ? rawValue : [rawValue];
+
+  return values.map((value) => {
+    const filePath = resolveFromCwd(String(value));
+    const text = fs.readFileSync(filePath, "utf8");
+    const truncated = text.length > MAX_CONTEXT_ASSET_CHARS;
+
+    return {
+      path: relativePath(filePath),
+      byteLength: Buffer.byteLength(text, "utf8"),
+      truncated,
+      maxChars: MAX_CONTEXT_ASSET_CHARS,
+      content: truncated ? text.slice(0, MAX_CONTEXT_ASSET_CHARS) : text,
+    };
+  });
 }
 
 // Build the minimum work set. Only keys whose default-locale message is new,
@@ -310,6 +337,25 @@ function createTaskMarkdown(task) {
     "Use reference translations only as terminology and tone hints. The default message is still the source of truth for ICU variables, rich tags, and current product meaning.",
   ];
 
+  if (task.contextAssets.length > 0) {
+    lines.push(
+      "",
+      "Additional user-provided context assets:",
+      "",
+      "Use these assets as glossary, style-guide, product-documentation, screenshot, or page-context evidence when they are relevant to a key. They help terminology and wording decisions, but they do not override the default message contract for ICU variables and rich tags.",
+    );
+    for (const asset of task.contextAssets) {
+      lines.push(
+        "",
+        `### ${asset.path}${asset.truncated ? ` (truncated to ${asset.maxChars} characters)` : ""}`,
+        "",
+        "```text",
+        asset.content,
+        "```",
+      );
+    }
+  }
+
   if (isEnglishLocale(task.locale)) {
     lines.push("", ...ENGLISH_CASING_GUIDANCE);
   }
@@ -400,6 +446,14 @@ function main() {
   const sortMode = String(args.sort ?? "key");
   if (!["key", "source"].includes(sortMode)) {
     console.error("--sort must be \"key\" or \"source\".");
+    process.exitCode = 2;
+    return;
+  }
+  let contextAssets = [];
+  try {
+    contextAssets = loadContextAssets(args["context-file"]);
+  } catch (error) {
+    console.error(`Failed to read --context-file: ${error.message}`);
     process.exitCode = 2;
     return;
   }
@@ -551,6 +605,7 @@ function main() {
         batchCount,
         maxItemsPerTask: maxItemsPerTask > 0 ? maxItemsPerTask : null,
         sortMode,
+        contextAssets,
         itemCount: batchItems.length,
         totalLocaleItemCount: sortedItems.length,
         instructions: [
@@ -564,6 +619,9 @@ function main() {
           "Avoid stiff literal translations; do not force the source language's word order, sentence shape, or punctuation into the target language.",
           "The result should read like product copy written by a native speaker for the target locale.",
           "Use referenceTranslations as terminology and tone hints only; the default message remains the source of truth for ICU variables, rich tags, and current product meaning.",
+          ...(contextAssets.length > 0 ? [
+            "Use contextAssets as user-provided glossary, style-guide, product-documentation, screenshot, or page-context evidence when relevant to a key. Do not let those assets override ICU variables, rich tags, or the current default message meaning.",
+          ] : []),
           ...(isEnglishLocale(target.locale) ? ENGLISH_CASING_GUIDANCE : []),
           "Preserve product names, technical terms, and domain terms when the target locale commonly uses them in English unless the project has a clear localized convention.",
           "Do not modify the default locale message for length reasons.",
@@ -609,6 +667,13 @@ function main() {
     inference,
     referenceTranslationItemCount,
     referenceTranslationLocales: [...referenceTranslationLocales].sort((a, b) => a.localeCompare(b)),
+    contextAssetCount: contextAssets.length,
+    contextAssets: contextAssets.map((asset) => ({
+      path: asset.path,
+      byteLength: asset.byteLength,
+      truncated: asset.truncated,
+      maxChars: asset.maxChars,
+    })),
     commentedSourceItemCount,
     taskSize,
     taskFiles,

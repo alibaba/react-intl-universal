@@ -110,12 +110,12 @@ const ReactIntlUniversalExample: React.FC<any> = (props) => {
   const renderExampleContent = () => {
     const sectionNavItems = [
       {
-        id: "intl-usage",
-        label: intl.get("EXAMPLE_SECTION_INTL").d("Unified i18n with react-intl-universal"),
-      },
-      {
         id: "skill-usage",
         label: intl.get("EXAMPLE_SECTION_SKILL").d("Agent Skill for Internationalization"),
+      },
+      {
+        id: "intl-usage",
+        label: intl.get("EXAMPLE_SECTION_INTL").d("Unified i18n with react-intl-universal"),
       },
       {
         id: "extract-usage",
@@ -172,19 +172,19 @@ const ReactIntlUniversalExample: React.FC<any> = (props) => {
 
         <div className="example-layout">
           <main className="example-main">
-            <section className="example-section" id="intl-usage">
+            <section className="example-section" id="skill-usage">
               <h2 className="section-title">{getSectionTitle(0)}</h2>
+              <SkillComponent />
+            </section>
+
+            <section className="example-section" id="intl-usage">
+              <h2 className="section-title">{getSectionTitle(1)}</h2>
               <BasicComponent />
               <HtmlComponent />
               <MessageNotInComponent />
               <PluralComponent />
               <DateComponent />
               <CurrencyComponent />
-            </section>
-
-            <section className="example-section" id="skill-usage">
-              <h2 className="section-title">{getSectionTitle(1)}</h2>
-              <SkillComponent />
             </section>
 
             <section className="example-section" id="extract-usage">

@@ -268,6 +268,42 @@ body {
     grid-template-columns: minmax(0, 0.85fr) minmax(260px, 1.15fr);
   }
 
+  .skill-workflow-image-link {
+    display: block;
+    margin: 12px 0 16px;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .skill-workflow-image {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 1px solid #d8dee4;
+    border-radius: 8px;
+    box-shadow: 0 8px 22px rgba(31, 35, 40, 0.08);
+  }
+
+  .skill-benefits {
+    margin: 0 0 16px;
+    padding: 12px 14px;
+    border: 1px solid #d8dee4;
+    border-radius: 6px;
+    background: #fff;
+  }
+
+  .skill-benefits ul {
+    margin: 6px 0 0;
+    padding-left: 20px;
+  }
+
+  .skill-benefits li {
+    margin: 4px 0;
+    color: #24292f;
+    font-size: 15px;
+    line-height: 1.55;
+  }
+
   .skill-prompt {
     margin: 0;
     color: #24292f;

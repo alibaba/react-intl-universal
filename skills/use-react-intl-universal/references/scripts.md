@@ -129,6 +129,7 @@ node "$SKILL_DIR/scripts/create-translation-tasks.mjs" \
   --source src \
   --locales src/locales \
   --default-locale en-US \
+  --context-file docs/glossary.md \
   --base-ref origin/master \
   --output tmp/i18n-translation-tasks
 ```
@@ -151,6 +152,8 @@ node "$SKILL_DIR/scripts/create-translation-tasks.mjs" \
 
 This writes batch files such as `ja_JP.part-001.json`, `ja_JP.part-002.json`, and matching Markdown files when the work is large. Multiple delta files for the same `locale` are safe; `apply-translation-deltas.mjs` merges them into one locale JSON file. The manifest reports Markdown/JSON task file sizes and warns when batches are too large for reliable agent handoff. If `taskSize.warnings` is non-empty, rerun with the recommended smaller `--max-items-per-task` before assigning work to subagents.
 When `--source` is provided, each task item includes source file/line, source code line, compressed source-call text, nearby source context, and a `uiRisk` hint. Task items also include existing non-target locale translations when available, so translators can reuse project terminology without treating those references as the contract. Use `--sort source` for large apps so each batch stays closer to a product area and is easier for a subagent to translate consistently. The generated task instructions require meaning-first translation: inspect nearby code when needed, identify the business action/object/status, understand the product flow in the current codebase, and write natural target-locale product copy instead of word-by-word translation. For English target locales, task instructions also include casing rules for Sentence case, Title Case, proper nouns, acronyms, and all-caps usage.
+
+When the user provides extra context such as a glossary, terminology guide, style guide, product document, screenshot notes, or page URLs, pass each text file with repeatable `--context-file`. The script embeds those assets in the JSON and Markdown task files as reference evidence. Use them for terminology and writing decisions, but keep the default message contract authoritative for ICU variables, rich tags, and current product meaning. Do not expand task context by scanning unrelated project documents unless the user asks for it.
 
 ## Translation Delta Review
 

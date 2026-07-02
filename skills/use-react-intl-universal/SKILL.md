@@ -41,7 +41,7 @@ When adding or changing user-facing copy, start by inspecting the existing i18n 
 6. Infer or confirm the default locale before editing translated locale files.
 7. Generate translation tasks only from the default-locale diff. The diff is the source of added and changed keys.
 8. Generate translation tasks only for existing non-default locale files unless the user explicitly asks to add a new locale.
-9. Translate non-default locales from task files. Follow [Translation Rules](references/translation-rules.md). If using subagents, assign work by locale and cap parallel subagents at 5.
+9. Translate non-default locales from task files. Follow [Translation Rules](references/translation-rules.md). If the user provides glossary, style-guide, product-documentation, screenshot notes, page URLs, or other context assets, include them in the translation tasks. If using subagents, assign work by locale and cap parallel subagents at 5.
 10. Review returned delta JSON before merging. Check:
     - every changed key is covered;
     - ICU `{variable}` contracts are preserved;
@@ -71,14 +71,6 @@ Do not blindly machine-translate every locale file. Use the default-locale diff 
 ## UI Inspection Mode
 
 When the user asks to start a UI inspection or provides a page URL for localization QA, open [UI Inspection Mode](references/ui-inspection-mode.md) and follow that workflow instead of the default source-editing workflow.
-
-At a high level:
-
-1. Open the user-provided page URL in a browser-capable tool.
-2. Explore the page and reachable interactions as thoroughly as is safe: navigation, tabs, filters, dropdowns, buttons, dialogs, tooltips, forms, and validation states.
-3. Watch for localized UI issues such as truncation, overflow, overlap, misalignment, untranslated text, raw ICU placeholders, raw rich tags, inconsistent terminology, or unnatural copy.
-4. Capture screenshots throughout the inspection.
-5. Produce an inspection report with two required parts: the full inspection process with screenshots, and the issues found with screenshots, reproduction steps, and likely root-cause classification.
 
 ## Core Rules
 
@@ -137,7 +129,7 @@ Recommended evidence flow:
 1. `discover-project-i18n.mjs` before edits.
 2. `verify-locale-export.mjs` after extraction/export.
 3. `infer-default-locale.mjs` when the default locale is not obvious.
-4. `create-translation-tasks.mjs --base-ref <ref>` for non-default locale work based on the default-locale diff.
+4. `create-translation-tasks.mjs --base-ref <ref>` for non-default locale work based on the default-locale diff. Add user-provided glossary or product-context files with `--context-file`.
 5. `review-translation-deltas.mjs` before merging subagent or human translation results.
 6. `create-translation-review-tasks.mjs` when delta warnings exist or when a deliberate naturalness/terminology review is useful.
 7. `apply-translation-deltas.mjs` to merge reviewed translation results.

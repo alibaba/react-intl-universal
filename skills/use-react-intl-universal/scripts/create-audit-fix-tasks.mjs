@@ -672,8 +672,9 @@ function getInstructions(type) {
         "A translated locale message has a static UI-fit length warning for compact UI.",
         "Inspect the reported source usage before changing text. The warning is a review queue, not proof that the translation is wrong or the browser layout is broken.",
         "For buttons, labels, tabs, placeholders, table headers, badges, and status chips, prefer concise natural target-language wording only when meaning is preserved.",
+        "For tabs, segmented controls, button groups, chip groups, pagination, filter groups, and table action groups, verify component visual integrity; no-overflow metrics alone do not prove joined borders, radius, active state, or icon/text/arrow relationships remain correct.",
         "For paragraphs, help text, documentation, or messages in flexible containers, keep accurate natural wording unless the actual UI overflows.",
-        "If wording cannot be shortened without losing meaning, consider whether nearby CSS should allow wrapping, flexible width, or responsive layout.",
+        "If wording cannot be shortened without losing meaning, consider whether nearby CSS should preserve grouped-control boundaries, use explicit grid/vertical styles, allow the whole group to move, or use responsive layout.",
         "Do not change the default locale just to satisfy a length ratio.",
       ];
     default:
@@ -729,6 +730,9 @@ function createTaskMarkdown(task) {
     }
     if (item.lengthRisk) {
       lines.push(`Length risk: severity=${item.lengthRisk.severity}, uiRisk=${item.lengthRisk.uiRisk}, ratio=${item.lengthRisk.ratio}, defaultWidth=${item.lengthRisk.defaultWidth}, translatedWidth=${item.lengthRisk.translatedWidth}`);
+      if (item.lengthRisk.visualIntegrityRisk) {
+        lines.push(`Component visual-integrity risk: ${item.lengthRisk.visualIntegrityRisk.message}`);
+      }
       lines.push(`Default message: ${JSON.stringify(item.defaultMessage)}`);
       lines.push(`Current ${item.locale} translation: ${JSON.stringify(item.translatedMessage)}`);
     }

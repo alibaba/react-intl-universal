@@ -16,7 +16,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { estimateDisplayWidth, getLengthRiskWarning } from "./lib/i18n-audit.mjs";
+import { detectGroupedControlVisualIntegrityRisk, estimateDisplayWidth, getLengthRiskWarning } from "./lib/i18n-audit.mjs";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const NODE = process.execPath;
@@ -244,6 +244,11 @@ function main() {
       },
     });
     assert(longEnumRisk?.severity === "high", "length risk should still report verbose compact enum translations");
+    const groupedControlRisk = detectGroupedControlVisualIntegrityRisk({
+      lineText: "<div className=\"business-health-segment segment-wrap\">",
+      contextSnippet: "<button>All tags</button><button>Custom tag</button><button>System tag</button> flex-wrap: wrap; border-right: 0; &:first-child { border-radius: 4px 0 0 4px; } &:last-child { border-radius: 0 4px 4px 0; }",
+    });
+    assert(groupedControlRisk?.type === "wrapped-grouped-control", "grouped control visual-integrity risk should be detected");
 
     const discoveryResult = runScript(root, "discover-project-i18n.mjs", [
       "--source", "src",

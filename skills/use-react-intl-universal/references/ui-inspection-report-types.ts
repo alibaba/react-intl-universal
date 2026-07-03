@@ -23,6 +23,16 @@
  *       "url": "https://example.com/orders"
  *     }
  *   ],
+ *   "coverageEvidence": [
+ *     {
+ *       "label": "Orders list",
+ *       "url": "https://example.com/orders",
+ *       "action": "Opened the page from left navigation",
+ *       "status": "covered",
+ *       "screenshotRef": "screenshots/001-orders-list.png",
+ *       "caption": "Orders list page after initial load"
+ *     }
+ *   ],
  *   "summary": {
  *     "coverage": {
  *       "urlCount": 1
@@ -111,6 +121,32 @@ export type I18nUiInspectionFindingStatus =
 export type I18nUiInspectionFixConfidence = "high" | "medium" | "low";
 
 /**
+ * Primary visible issue category. Use `component visual integrity` when a
+ * compact control remains readable and has no overflow, but the component no
+ * longer looks like one coherent control because grouped items wrap, borders
+ * break, radius is applied to the wrong items, active state detaches, or
+ * icon/text/arrow relationships are visually broken.
+ */
+export type I18nUiInspectionIssueCategory =
+  | "language quality"
+  | "truncation"
+  | "overflow"
+  | "overlap"
+  | "misalignment"
+  | "component visual integrity"
+  | "untranslated text"
+  | "raw placeholder/tag"
+  | "terminology inconsistency"
+  | "interaction defect";
+
+export type I18nUiInspectionTranslationQualityCategory =
+  | "Accuracy"
+  | "Fluency"
+  | "Terminology"
+  | "Locale convention"
+  | "N/A";
+
+/**
  * Overall result of the inspection run, not a per-finding fix status.
  *
  * - completed: requested scope was inspected and no issues were found.
@@ -123,6 +159,17 @@ export type I18nUiInspectionRunStatus =
   | "completedWithIssues"
   | "partial"
   | "blocked";
+
+/**
+ * Coverage status for a requested route, menu item, tab, feature entry, or
+ * representative detail state.
+ */
+export type I18nUiInspectionCoverageStatus =
+  | "covered"
+  | "blocked"
+  | "skipped-risky"
+  | "external-out-of-scope"
+  | "not-reached";
 
 /**
  * Complete count map for findings grouped by severity.
@@ -144,6 +191,48 @@ export interface I18nUiInspectionTarget {
    * Full page URL covered by the inspection.
    */
   url: string;
+}
+
+export interface I18nUiInspectionCoverageEvidence {
+  /**
+   * Reader-facing scope label, such as a menu item, route name, tab label, or
+   * detail state.
+   */
+  label: string;
+
+  /**
+   * Full URL, route, or state identifier when available.
+   */
+  url?: string;
+
+  /**
+   * Action that produced this evidence, such as opening a menu item, clicking a
+   * row detail link, selecting a tab, or skipping a risky action.
+   */
+  action: string;
+
+  /**
+   * Whether this scope item was covered, blocked, skipped as risky, external to
+   * the requested scope, or not reached.
+   */
+  status: I18nUiInspectionCoverageStatus;
+
+  /**
+   * Screenshot path for covered items. Blocked, skipped, external, or not-reached
+   * items may omit this only when no screenshot could be captured.
+   */
+  screenshotRef?: string;
+
+  /**
+   * Short caption explaining what the screenshot or status proves.
+   */
+  caption: string;
+
+  /**
+   * Optional note for blockers, skipped actions, external links, or unusual
+   * states.
+   */
+  notes?: string;
 }
 
 export interface I18nUiInspectionCoverageSummary {
@@ -276,6 +365,23 @@ export interface I18nUiInspectionFinding {
   title: string;
 
   /**
+   * Primary visible issue category. Older reports may omit this field.
+   */
+  category?: I18nUiInspectionIssueCategory;
+
+  /**
+   * Optional subtype for `component visual integrity`, such as
+   * "grouped-control wrapping/broken border".
+   */
+  componentVisualIntegritySubtype?: string;
+
+  /**
+   * Optional wording-quality category. Use "N/A" for pure layout or component
+   * visual-integrity findings.
+   */
+  translationQualityCategory?: I18nUiInspectionTranslationQualityCategory;
+
+  /**
    * Screenshot IDs or paths showing the issue. Before-fix issue screenshots
    * should appear here.
    */
@@ -334,6 +440,13 @@ export interface I18nUiInspectionReportJson {
    * Every page URL covered by this run.
    */
   targets: I18nUiInspectionTarget[];
+
+  /**
+   * Audit trail proving requested scope coverage. Broad route, left-navigation,
+   * or full-product inspections should include one entry per requested route,
+   * menu item, tab, feature entry, and representative detail state.
+   */
+  coverageEvidence?: I18nUiInspectionCoverageEvidence[];
 
   /**
    * Aggregated counts derived from the inspection log, targets, and findings.

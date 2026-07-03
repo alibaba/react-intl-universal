@@ -349,7 +349,7 @@ function createTaskMarkdown(task) {
     "- Read the source context when the key, default message, or warning is ambiguous.",
     "- Keep every ICU variable and rich tag exactly equivalent.",
     "- Preserve product and domain terminology used by this project.",
-    "- For compact UI, inspect source usage and prefer concise natural wording only when meaning is preserved; if accurate wording cannot be shortened, keep it and consider general layout/CSS instead.",
+    "- For compact UI, inspect source usage and prefer concise natural wording only when meaning is preserved; if accurate wording cannot be shortened, keep it and consider general layout/CSS instead. For grouped controls such as tabs, segmented controls, button groups, chip groups, pagination, or table actions, absence of overflow is not enough: check or flag component visual integrity.",
   ];
 
   if (isEnglishLocale(task.locale)) {
@@ -478,7 +478,7 @@ function main() {
           "Confirm the target copy says what the user should understand in the actual feature, not dictionary equivalents of the source words.",
           "Use source context and reference translations to understand business intent.",
           "Preserve every ICU variable and rich tag exactly.",
-          "For compact UI, inspect source usage and prefer concise natural target-language wording only when meaning is preserved; if shortening harms meaning, keep accuracy and consider general layout/CSS.",
+          "For compact UI, inspect source usage and prefer concise natural target-language wording only when meaning is preserved; if shortening harms meaning, keep accuracy and consider general layout/CSS. For grouped controls, check or flag component visual integrity rather than relying only on no-overflow metrics.",
           ...(isEnglishLocale(group.locale) ? ENGLISH_CASING_GUIDANCE : []),
           "Return either an approved note or a delta JSON patch for the keys that need translation changes.",
         ],

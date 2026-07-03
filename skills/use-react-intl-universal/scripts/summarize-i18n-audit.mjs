@@ -101,6 +101,7 @@ function createExample(type, item) {
       uiRisk: item.lengthRisk.uiRisk,
       ratio: item.lengthRisk.ratio,
       extraWidth: item.lengthRisk.extraWidth,
+      visualIntegrityRisk: item.lengthRisk.visualIntegrityRisk ?? null,
       defaultMessage: item.lengthRisk.defaultMessage,
       translatedMessage: item.lengthRisk.translatedMessage,
     };

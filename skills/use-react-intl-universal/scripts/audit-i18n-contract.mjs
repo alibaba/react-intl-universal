@@ -318,9 +318,12 @@ function main() {
         });
 
         if (lengthRisk) {
+          const visualIntegritySuffix = lengthRisk.visualIntegrityRisk
+            ? `; ${lengthRisk.visualIntegrityRisk.message}`
+            : "";
           warnings.push(createWarning(
             "long-translation",
-            `locale "${locale}" key "${key}" has a static UI-fit length warning for compact UI: ${lengthRisk.translatedWidth}/${lengthRisk.defaultWidth} estimated display width (${lengthRisk.ratio}x), uiRisk=${lengthRisk.uiRisk}, severity=${lengthRisk.severity}; inspect source usage before shortening text`,
+            `locale "${locale}" key "${key}" has a static UI-fit length warning for compact UI: ${lengthRisk.translatedWidth}/${lengthRisk.defaultWidth} estimated display width (${lengthRisk.ratio}x), uiRisk=${lengthRisk.uiRisk}, severity=${lengthRisk.severity}; inspect source usage before shortening text; no-overflow metrics alone do not prove component visual integrity${visualIntegritySuffix}`,
             {
               key,
               locale,

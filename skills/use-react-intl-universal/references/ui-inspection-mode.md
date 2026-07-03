@@ -11,6 +11,7 @@ Use browser interaction to discover localized UI issues that static source or lo
 - text overflow;
 - overlapping text or controls;
 - visual misalignment caused by translated copy length;
+- component visual integrity failures in compact grouped controls, such as segmented controls, tabs, button groups, chip groups, badges, pagination, filter groups, or table action groups that visually break when labels wrap;
 - untranslated or hardcoded source-language text;
 - raw ICU placeholders such as `{username}`;
 - raw rich tags such as `<link>...</link>`;
@@ -54,6 +55,7 @@ When unsure, capture the state before the risky action and record the untested a
    - navigation links;
    - tabs;
    - buttons;
+   - segmented controls, button groups, chip groups, badges, and pagination;
    - dropdowns and selects;
    - filters and search inputs;
    - table row actions;
@@ -61,15 +63,20 @@ When unsure, capture the state before the risky action and record the untested a
    - tooltips and hover states;
    - forms and validation states;
    - modals, drawers, popovers, notifications, and confirmation dialogs.
-9. Interact with each safe element or representative group of repeated elements.
-10. After each meaningful state change, capture a screenshot and append the action, observed state, screenshot path, and notes to `inspection-log.md`.
-11. When a finding is discovered, append the full finding detail, likely root cause, fix recommendation, and acceptance criteria to `inspection-log.md`.
-12. If the task includes fixing issues, append each attempted fix and re-inspection result to `inspection-log.md`, including before/after screenshot paths.
-13. Handle popups and dialogs by checking their localized text, layout, primary/secondary buttons, close/cancel behavior, and validation messages.
-14. If an interaction opens another route, inspect that route if it remains within the user's requested scope.
-15. Keep going until the reachable page area has been covered, a blocker is reached, or the user-provided time/scope limit is exhausted.
+9. For broad page or navigation inspections, create a coverage record for every requested route, menu item, tab, or feature entry before or while inspecting it. The record must include the label, URL/route when known, intended action, coverage status, screenshot path once captured, and notes for blocked or skipped actions.
+10. Interact with each safe element or representative group of repeated elements.
+11. After each meaningful state change, capture a screenshot and append the action, observed state, screenshot path, and notes to `inspection-log.md`.
+12. For every requested route, menu item, tab, or feature entry that is considered covered, capture at least one page/state screenshot. If it has an in-scope detail page, modal, drawer, tab, or representative row action, capture a second screenshot for that detail state when the action is safe.
+13. Do not mark a scope item as covered only because a URL was listed in text. It needs screenshot evidence, or it must be marked `blocked`, `skipped-risky`, `external-out-of-scope`, or `not-reached` with a reason.
+14. When a finding is discovered, append the full finding detail, likely root cause, fix recommendation, and acceptance criteria to `inspection-log.md`.
+15. If the task includes fixing issues, append each attempted fix and re-inspection result to `inspection-log.md`, including before/after screenshot paths.
+16. Handle popups and dialogs by checking their localized text, layout, primary/secondary buttons, close/cancel behavior, and validation messages.
+17. If an interaction opens another route, inspect that route if it remains within the user's requested scope.
+18. Keep going until the reachable page area has been covered, a blocker is reached, or the user-provided time/scope limit is exhausted.
 
 For repeated controls, sample enough instances to cover different text lengths and states. Do not spend time clicking identical repeated buttons that render the same UI unless their row data changes the text or layout risk.
+
+Do not rely only on DOM overflow metrics such as `scrollWidth > clientWidth`, bounding boxes, or obvious text truncation. These are useful signals, but they do not prove UI-fit. Also inspect screenshots for whether compact components still look like complete components.
 
 ## What to Check
 
@@ -92,6 +99,13 @@ Localized UI quality:
 - Buttons and form controls still have enough padding.
 - Tables, filters, tabs, menus, and dialogs remain readable.
 - Compact UI such as placeholders, badges, sidebars, breadcrumbs, and table cells still works.
+- Component visual integrity is preserved. For tabs, segmented controls, button groups, filter groups, chip groups, badges, pagination, and table action groups, verify that wrapping does not split one visual group into broken pieces:
+  - borders remain continuous where the design expects a joined control;
+  - border radius appears only on the outer boundary of the whole control or is reset correctly for a deliberate vertical layout;
+  - active/selected state remains visually clear;
+  - icons, text, arrows, counters, and dropdown chevrons remain associated with their control;
+  - same-group items are not incorrectly split into isolated rows or visually detached buttons;
+  - spacing and alignment still communicate one group rather than unrelated controls.
 
 ## Finding Triage Workflow
 
@@ -129,14 +143,17 @@ Choose the category that best explains what the user can see or experience:
 - overflow;
 - overlap;
 - misalignment;
+- component visual integrity;
 - untranslated text;
 - raw placeholder/tag;
 - terminology inconsistency;
 - interaction defect.
 
+Use `component visual integrity` when a control is technically readable and not overflowing, but no longer looks or behaves as one coherent component. Common subtypes include grouped-control wrapping, broken joined borders, incorrect first/last-item radius after wrapping, detached active states, and icon/text/arrow separation. If a reporting system cannot accept a new category, use `misalignment` and set the subtype or finding title to `grouped-control wrapping/broken border`.
+
 ### Translation Quality Category
 
-This field is optional. Fill it only when the primary issue is about wording quality, such as `language quality` or `terminology inconsistency`. Write `N/A` or omit it for pure layout issues such as truncation, overflow, overlap, or misalignment.
+This field is optional. Fill it only when the primary issue is about wording quality, such as `language quality` or `terminology inconsistency`. Write `N/A` or omit it for pure layout issues such as truncation, overflow, overlap, misalignment, or component visual integrity.
 
 Choose one lightweight MQM-inspired category:
 
@@ -185,12 +202,19 @@ Do not overclaim ownership. Use "likely" language unless the browser evidence cl
 
 Every finding must include a fix recommendation. If the issue appears fixable in the current repository, choose the smallest change that preserves both language quality and UI quality.
 
-For UI layout issues such as truncation, overflow, overlap, or misalignment:
+For UI layout issues such as truncation, overflow, overlap, misalignment, or component visual integrity:
 
 1. Prefer improving the target-locale wording first when the translation is unnecessarily long, literal, or awkward.
 2. If shorter natural wording would lose important meaning, adjust the UI style or layout.
 3. Prefer general layout fixes that work across locales. Avoid language-specific CSS when a robust shared layout fix is reasonable.
 4. Use language-specific styles only when a general fix is too costly, would make the default locale look worse, or would create broader layout risk.
+
+For segmented controls, tabs, button groups, chip groups, pagination, and table action groups:
+
+1. Do not treat free wrapping inside a joined visual group as safe merely because there is no overflow.
+2. Prefer keeping same-group items on one row, allowing the whole group to move to a new row, or using an explicit grid that preserves group boundaries.
+3. If the group must become multi-line, implement a deliberate vertical or multi-row grouped-control style with correct borders, radius, active states, and separators for every position.
+4. If space remains constrained, consider increasing the container width, shortening natural target-locale labels without losing meaning, or replacing the group with a select/dropdown.
 
 For translation quality issues:
 
@@ -217,31 +241,52 @@ screenshots/003-dialog-validation.png
 screenshots/004-issue-overflow-filter-label.png
 ```
 
-Every screenshot should have a short caption in `inspection-log.md` and `report.html` explaining:
+Every screenshot should have a short caption in `inspection-log.md` while inspecting. When the final report is generated, include the same caption context in `report.html`:
 
 - what page or state it shows;
 - what action produced it;
 - whether it is normal coverage evidence or issue evidence.
+
+For broad route, menu, or full-product inspections, maintain a screenshot manifest in `inspection-log.md` as a table or compact list. Each row should map one coverage item to its screenshot evidence:
+
+- scope label, such as a menu item, tab, route, or detail state;
+- URL/route or page state;
+- action taken;
+- screenshot path;
+- status: `covered`, `blocked`, `skipped-risky`, `external-out-of-scope`, or `not-reached`;
+- short note.
+
+The final `report.html` must reproduce this coverage evidence. Do not only show issue screenshots or a few "important" screenshots when the user asked for a broad inspection; the reader must be able to audit which pages were actually opened.
 
 When an issue is found, capture the smallest screenshot that clearly shows the problem. If context matters, also include a wider screenshot.
 
 ## Inspection Artifacts
 
 Write all inspection artifacts to the inspection folder. Prefer a folder under the repository's ignored temporary-output location found from `.gitignore`.
-For example:
+The final folder shape is:
 
 ```text
 tmp/i18n-ui-inspection-YYYYMMDD-HHMMSS/inspection-log.md
+tmp/i18n-ui-inspection-YYYYMMDD-HHMMSS/screenshots/
 tmp/i18n-ui-inspection-YYYYMMDD-HHMMSS/report.json
 tmp/i18n-ui-inspection-YYYYMMDD-HHMMSS/report.html
-tmp/i18n-ui-inspection-YYYYMMDD-HHMMSS/screenshots/
 ```
 
-Write these files:
+At the start and during the middle of inspection, only the first two entries should exist.
+
+During active inspection, create and maintain only these artifacts:
 
 - `inspection-log.md`: raw chronological task log. Update this while inspecting, fixing, and re-inspecting.
-- `report.json`: machine-readable summary statistics and finding metadata. Generate it from `inspection-log.md`, findings, and screenshots.
-- `report.html`: polished human-readable final report. Generate it after inspection and any in-scope fixing/re-inspection are complete.
+- `screenshots/`: all screenshots captured during inspection, fixing, and re-inspection.
+
+Do not create `report.json` or `report.html` while inspection is still in progress. These files are final-report artifacts, not live working notes.
+
+Generate `report.json` and `report.html` only after one of these completion conditions is met:
+
+- the requested inspection scope has been covered;
+- all in-scope fixes and re-inspection have been completed;
+- inspection is blocked and cannot meaningfully continue;
+- the user explicitly asks to stop and generate the final report.
 
 ## Inspection Task Log
 
@@ -263,11 +308,20 @@ The log does not need polished prose. Do not delete failed fix attempts or earli
 
 ## Final Report Generation
 
-Generate `report.json` and `report.html` after the inspection and any in-scope fixing/re-inspection are complete.
+Generate `report.json` and `report.html` only after an inspection completion condition is met. Do not generate them at the start of UI Inspection Mode or while browser exploration, fixing, or re-inspection is still active.
+
+Completion conditions are:
+
+- the requested inspection scope has been covered;
+- all in-scope fixes and re-inspection have been completed;
+- inspection is blocked and cannot meaningfully continue;
+- the user explicitly asks to stop and generate the final report.
 
 ### `report.json`
 
 `report.json` is for statistics, dashboards, CI summaries, and follow-up automation. It should not introduce facts that are absent from `inspection-log.md` or screenshots. The root object must use the `I18nUiInspectionReportJson` interface from [UI Inspection Report Types](ui-inspection-report-types.ts).
+
+When a finding is about component visual integrity, set `category` to `component visual integrity` and include a concise subtype when useful, such as `grouped-control wrapping/broken border`. If a legacy consumer cannot handle that category, mirror the subtype in the finding title or human-readable notes while keeping the visible issue clear in `report.html`.
 
 ### `report.html`
 
@@ -279,6 +333,7 @@ Include these sections:
    - inspected URL/routes, locales, viewports, browser/tool, and account/role if relevant;
    - total interactions and screenshots;
    - issue totals by severity, status, and fix confidence;
+   - coverage status for text overflow/truncation, layout overflow, alignment, and component visual integrity;
    - human-attention items, with medium confidence shown in yellow and low confidence shown in red;
    - blockers and untested areas.
 2. Findings:
@@ -287,15 +342,25 @@ Include these sections:
    - render fix confidence as a colored badge: high = green, medium = yellow, low = red;
    - reproduction steps, expected result, actual result, fix recommendation, fix priority/rationale, human-attention note, and acceptance criteria;
    - before/after screenshot comparison when fix evidence exists. Use a two-column layout where the left column shows the issue screenshot and the right column shows the verified-fix screenshot.
-3. Inspection timeline:
+3. Coverage evidence matrix:
+   - one row per requested route, menu item, tab, feature entry, or representative detail state;
+   - label, URL/route/state, action taken, status, screenshot thumbnail or link, and notes;
+   - blocked, skipped risky, external, and not-reached items must be visible in the same matrix, not hidden in prose;
+   - for full left-navigation or full-product inspections, this matrix is mandatory and is the primary proof that the agent actually visited the requested areas.
+4. Inspection timeline:
    - concise chronological table derived from `inspection-log.md`;
    - action, observed state, notes, and screenshot link.
-4. Appendix:
-   - all screenshot captions and paths;
+5. Screenshot appendix:
+   - all screenshot captions and paths, including normal coverage screenshots, detail-state screenshots, issue screenshots, and fix/re-inspection screenshots;
+   - render screenshots as clickable thumbnails or a gallery when the count is manageable;
+   - if the report uses collapsed sections for many screenshots, the default visible text must still list every screenshot filename and caption.
+6. Appendix:
    - blockers, skipped risky actions, and untested areas;
    - external dependency or backend/API ownership notes when relevant.
 
-If no issues are found, still generate `report.html`, include process screenshots, and state that no visible localized UI issues were found in the covered scope.
+The final report must not make the user open the screenshots folder just to know whether the requested scope was covered. If every screenshot is saved on disk but the HTML report omits the complete coverage matrix or screenshot appendix, the report is incomplete.
+
+If no issues are found, still generate `report.html`, include process screenshots for all covered scope items, and state what was actually verified. Do not write only "No visible overflow found" as the final result. Distinguish at least text overflow/truncation, layout overflow, alignment, and component visual integrity. If the run only checked overflow metrics or screenshots for obvious truncation, state that component visual integrity was not fully verified.
 
 ## Finding Details
 
@@ -308,7 +373,8 @@ For each issue, include:
 - expected result;
 - actual result;
 - screenshot link;
-- likely category: language quality, truncation, overflow, overlap, misalignment, untranslated text, raw placeholder/tag, terminology inconsistency, or interaction defect;
+- likely category: language quality, truncation, overflow, overlap, misalignment, component visual integrity, untranslated text, raw placeholder/tag, terminology inconsistency, or interaction defect;
+- component visual integrity subtype when relevant, such as `grouped-control wrapping/broken border`;
 - translation quality category: Accuracy, Fluency, Terminology, Locale convention, or N/A for pure layout issues;
 - likely root cause: frontend application issue, backend/API issue, external dependency issue, or unknown/needs investigation;
 - root-cause evidence: one or two concise observations supporting the classification;
@@ -348,6 +414,26 @@ Example:
 - Fix confidence: medium
 - Human attention: Review the shared filter button usage before treating this as fully safe, because a min-width or wrapping change could affect compact table filters in other routes.
 - Acceptance criteria: Reopen `https://example.com/orders` at 1280x800 in German, open the advanced filter drawer, select "Delivery status", and confirm the button label and chevron no longer overlap. Capture a replacement screenshot.
+
+#### I18N-002 [Medium] Segmented control wraps into broken visual fragments
+
+- URL/state: `https://example.com/assets`, filter toolbar visible
+- Locale/viewport: English, 1280x800
+- Steps: Open the page and inspect the tag-type segmented control.
+- Expected: The grouped control remains visually joined, with continuous borders, radius only on the whole control's outer corners, and a clear selected state.
+- Actual: The third segment wraps to a second line. Text is readable and no DOM overflow is reported, but the border/radius rules make the wrapped item look like an isolated button.
+- Screenshot: [005](screenshots/005-segmented-control-wrap.png)
+- Category: component visual integrity
+- Component visual integrity subtype: grouped-control wrapping/broken border
+- Translation quality category: N/A
+- Likely root cause: frontend application issue
+- Root-cause evidence: The control uses a wrapping flex row with joined-border styling intended for a single horizontal row.
+- Recommended owner: current repository
+- Fix recommendation: Prevent free wrapping inside the visual group, allow the whole group to move to a new row, use an explicit grid, or implement a deliberate vertical segmented-control style with corrected per-position borders/radius. If space remains constrained, consider a select/dropdown.
+- Fix priority/rationale: This is a component-integrity issue, not a translation-quality issue; shortening text is optional only if it preserves meaning and product terminology.
+- Fix confidence: medium
+- Human attention: Review neighboring toolbar breakpoints because the fix may affect compact filter layouts.
+- Acceptance criteria: Reopen the same URL/locale/viewport and confirm the segmented control is either one coherent horizontal group or a deliberate vertical/grouped layout, with no broken borders or detached active states. Capture a replacement screenshot.
 ```
 
 ## Final Handoff

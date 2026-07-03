@@ -293,9 +293,12 @@ function createLocaleKeyResult({ item, localeTarget, defaultLocale, baselineCont
     });
 
     if (lengthRisk) {
+      const visualIntegritySuffix = lengthRisk.visualIntegrityRisk
+        ? ` ${lengthRisk.visualIntegrityRisk.message}`
+        : "";
       warnings.push({
         type: "long-translation",
-        message: "Static UI-fit length warning: non-default translation has greater estimated display width than the default in compact UI. Inspect the source usage before shortening text or changing layout.",
+        message: `Static UI-fit length warning: non-default translation has greater estimated display width than the default in compact UI. Inspect the source usage before shortening text or changing layout; no-overflow metrics alone do not prove component visual integrity.${visualIntegritySuffix}`,
         lengthRisk,
       });
     }

@@ -980,9 +980,39 @@ export function classifyUiCopyRisk(key, sourceMessage = {}) {
   return "medium";
 }
 
+export function detectGroupedControlVisualIntegrityRisk(sourceMessage = {}) {
+  const context = [
+    sourceMessage.lineText,
+    sourceMessage.callText,
+    sourceMessage.contextSnippet,
+  ].filter(Boolean).join(" ").toLowerCase();
+
+  if (!context) {
+    return null;
+  }
+
+  const hasGroupedControl = /\b(segment|segmented|button[-_ ]?group|btn[-_ ]?group|tab(?:[-_ ]?(?:group|list))?|chip[-_ ]?group|badge[-_ ]?group|pagination|pager|table[-_ ]?action|filter[-_ ]?group)\b/.test(context);
+  const hasChildControl = /(<button\b|\bbutton\b|\btab\b|\bchip\b|\bbadge\b|\bmenuitem\b|\boption\b)/.test(context);
+  const hasWrapOrSizing = /(flex-wrap|wrap|inline-flex|display\s*:\s*flex|display\s*:\s*inline-flex|min-width|white-space|nowrap)/.test(context);
+  const hasJoinedBorderStyling = /(border-right\s*:\s*0|border-left\s*:\s*0|border-radius|first-child|last-child|:first-child|:last-child)/.test(context);
+
+  if (hasGroupedControl && hasChildControl && (hasWrapOrSizing || hasJoinedBorderStyling)) {
+    return {
+      type: "wrapped-grouped-control",
+      severity: hasWrapOrSizing && hasJoinedBorderStyling ? "high" : "medium",
+      message: "Wrapped grouped-control visual integrity risk: verify screenshots for continuous borders, outer-only radius, clear active state, no isolated row fragments, and stable icon/text/arrow relationships.",
+    };
+  }
+
+  return null;
+}
+
 // Return a warning descriptor when a non-default translation is much wider than
 // the default text. The warning is advisory: the agent should either shorten
 // the translation or, when accuracy requires length, consider CSS/layout fixes.
+// When source context suggests a wrapped grouped control, the warning also
+// carries a component visual-integrity review prompt. Static display width does
+// not prove grouped controls remain visually intact.
 export function getLengthRiskWarning({
   key,
   locale,
@@ -1005,6 +1035,7 @@ export function getLengthRiskWarning({
   const extraWidth = translatedWidth - defaultWidth;
   const ratio = translatedWidth / defaultWidth;
   const uiRisk = classifyUiCopyRisk(key, sourceMessage);
+  const visualIntegrityRisk = detectGroupedControlVisualIntegrityRisk(sourceMessage);
 
   // Very short default labels can make natural target-locale labels look risky
   // by ratio alone. Ignore translations that are still short in absolute
@@ -1050,6 +1081,7 @@ export function getLengthRiskWarning({
     defaultWidth,
     translatedWidth,
     extraWidth,
+    visualIntegrityRisk,
     defaultMessage,
     translatedMessage,
   };

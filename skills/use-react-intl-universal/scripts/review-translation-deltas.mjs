@@ -474,13 +474,16 @@ function reviewTranslationValues({
         sourceMessage: sourceMessageByKey.get(key),
       });
       if (lengthRisk && lengthRisk.severity !== "low") {
+        const visualIntegritySuffix = lengthRisk.visualIntegrityRisk
+          ? `; ${lengthRisk.visualIntegrityRisk.message}`
+          : "";
         warnings.push({
           type: "length-risk",
           severity: lengthRisk.severity,
           locale,
           key,
           deltaPath: translated.deltaPath,
-          message: `static UI-fit length warning for ${lengthRisk.uiRisk} UI: estimated display-width ratio=${lengthRisk.ratio}; inspect source usage before shortening text`,
+          message: `static UI-fit length warning for ${lengthRisk.uiRisk} UI: estimated display-width ratio=${lengthRisk.ratio}; inspect source usage before shortening text; no-overflow metrics alone do not prove component visual integrity${visualIntegritySuffix}`,
           lengthRisk,
         });
       }

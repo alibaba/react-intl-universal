@@ -820,7 +820,7 @@ function createNextActions({
       actions,
       "P2",
       "Review high-severity translation length tasks before claiming static UI-fit review complete.",
-      "Long-translation warnings are static UI-fit prompts: inspect source usage, shorten non-default locale copy when meaning is preserved, or adjust layout when accurate wording must stay longer.",
+      "Long-translation warnings are static UI-fit prompts: inspect source usage, shorten non-default locale copy when meaning is preserved, or adjust layout when accurate wording must stay longer. For grouped controls, also check component visual integrity; no-overflow metrics alone are not enough.",
       [
         `reviewItems=${lengthReviewTasks.longTranslationTaskItemCount}`,
         lengthReviewTasks.longTranslationSourceCount === null
@@ -962,7 +962,7 @@ function createNextActions({
       actions,
       "P2",
       "Review changed-key static UI-fit length warnings.",
-      "Changed non-default translations have static compact-UI length warnings; inspect actual source usage before shortening text or changing layout.",
+      "Changed non-default translations have static compact-UI length warnings; inspect actual source usage before shortening text or changing layout, and check grouped-control visual integrity when wrapping or joined-border styling is involved.",
       [
         `warningKeys=${changedKeyAudit.warningKeyCount}`,
         `warnings=${formatCounts(changedKeyAudit.warningCounts)}`,
@@ -1076,7 +1076,7 @@ function summarizeStaticUiFitReview({
 
   return {
     status,
-    method: "static estimated display-width review",
+    method: "static estimated display-width review for length-risk prompts; component visual integrity requires source/screenshot review when grouped controls may wrap",
     browserUse: "not-run-by-handoff-script",
     changedKeyLengthWarnings,
     deltaLengthWarnings,
@@ -1341,10 +1341,13 @@ function createMarkdown(handoff) {
   lines.push("- Browser Use: not run by this daily handoff script because the daily development workflow uses static review. Run UI Inspection Mode only when the user asks, provides a page URL for QA, or the task is a release/preflight quality gate.");
   if (handoff.staticUiFitReview.status === "no-warnings") {
     lines.push("- Status: No high-risk UI length warnings found in the provided static reports.");
+    lines.push("- Coverage note: this does not prove text overflow/truncation, layout overflow, alignment, or component visual integrity in a browser. For tabs, segmented controls, button groups, chip groups, pagination, filter groups, and table action groups, verify screenshots or record a visual-integrity review item when wrapping or joined-border styling is involved.");
   } else if (handoff.staticUiFitReview.status === "review-required") {
     lines.push(`- Status: Remaining UI-fit review items: static length warning(s) were reported; largest provided count is ${handoff.staticUiFitReview.maxReportedWarningCount}.`);
+    lines.push("- Coverage note: review length warnings separately from component visual-integrity risks such as wrapped grouped controls with broken borders, radius, active state, or icon/text/arrow relationships.");
   } else {
     lines.push("- Status: Not evaluated from the provided reports.");
+    lines.push("- Coverage note: static UI-fit, text overflow/truncation, layout overflow, alignment, and component visual integrity were not proven by this handoff.");
   }
   lines.push(`- Changed-key length warnings: ${handoff.staticUiFitReview.changedKeyLengthWarnings ?? "-"}`);
   lines.push(`- Delta review length warnings: ${handoff.staticUiFitReview.deltaLengthWarnings ?? "-"}`);

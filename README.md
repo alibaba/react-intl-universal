@@ -33,7 +33,7 @@ See the [live demo](https://alibaba.github.io/react-intl-universal/#intl-usage) 
 Use the [use-react-intl-universal skill](https://alibaba.github.io/react-intl-universal/#skill-usage) to give AI coding agents a practical i18n workflow, not just API hints.
 
 <a href="https://alibaba.github.io/react-intl-universal/#skill-usage">
-  <img width="1200" alt="use-react-intl-universal Agent Skill workflow" src="https://github.com/user-attachments/assets/eca7a070-6f74-411f-8cde-689c03124a1d" />
+  <img width="1200" alt="use-react-intl-universal Agent Skill workflow" src="https://img.alicdn.com/imgextra/i1/O1CN01bMmYFt21ZbDPDQxJT_!!6000000006999-2-tps-1536-1024.png" />
 </a>
 
 It helps agents:

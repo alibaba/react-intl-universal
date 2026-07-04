@@ -4,7 +4,7 @@ import intl from 'core/intl';
 const SkillComponent: React.FC = () => {
   const skillPath = 'https://github.com/alibaba/react-intl-universal/tree/master/skills/use-react-intl-universal';
   const mqmPath = 'https://www.w3.org/community/mqmcg';
-  const workflowImageUrl = 'https://github.com/user-attachments/assets/eca7a070-6f74-411f-8cde-689c03124a1d';
+  const workflowImageUrl = 'https://img.alicdn.com/imgextra/i1/O1CN01bMmYFt21ZbDPDQxJT_!!6000000006999-2-tps-1536-1024.png';
   const skillLink = (chunks: React.ReactNode) => (
     <a href={skillPath} target="_blank" rel="noreferrer">
       {chunks}

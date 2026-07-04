@@ -48,7 +48,8 @@ When adding or changing user-facing copy, start by inspecting the existing i18n 
     - rich tag `<tag>` contracts are preserved;
     - non-default translations are not just copied from the default message unless that is intentional;
     - static UI-fit length warnings are understood as review prompts, not proof of broken layout;
-    - translations are natural and match the product/business context.
+    - translations are natural and match the product/business context;
+    - English target locales follow the English casing rules in [Translation Rules](references/translation-rules.md), including Sentence case, Title Case, proper names, acronyms, and all-caps limits.
 11. Perform a daily static UI-fit review for changed keys whose non-default translation estimated display width is greater than the default message, and for grouped compact controls that may visually break when labels wrap. Inspect the key, source line, JSX/source context, component props, `className`, CSS, and layout container before deciding risk. Compact UI such as buttons, tabs, menus, placeholders, table headers, badges, chips, filters, dialog titles, sidebars, and breadcrumbs needs more scrutiny; paragraph/help/docs/FAQ text is usually lower risk. If a segmented control, tab group, button group, chip group, badge group, pagination, table action group, or filter group uses `display:flex`/`inline-flex`, `flex-wrap: wrap`, child buttons/tabs/chips, and border/radius rules such as `border-right: 0` or `:first-child`/`:last-child`, record a wrapped grouped-control visual-integrity review item. Do not start Browser Use for this daily workflow unless the user asks for UI inspection or a release-quality gate.
 12. Merge reviewed translation delta JSON files into locale JSON files.
 13. Audit the changed keys after merge. Do not make a full-project audit the default completion condition.
@@ -72,6 +73,7 @@ Do not blindly machine-translate every locale file. Use the default-locale diff 
 ## UI Inspection Mode
 
 When the user asks to start a UI inspection or provides a page URL for localization QA, open [UI Inspection Mode](references/ui-inspection-mode.md) and follow that workflow instead of the daily development workflow.
+For broad, full-navigation, release-quality, or high-confidence inspections, use the independent screenshot visual-review pass when subagents are available: write reviewer Markdown into the inspection folder, then have the main agent triage every reviewer observation before fixing or generating the final report.
 
 ## Core Rules
 
@@ -120,7 +122,7 @@ When the user asks to start a UI inspection or provides a page URL for localizat
 - `references/message-patterns.md`: open when writing or reviewing concrete `react-intl-universal` code examples.
 - `references/inspect-existing-i18n-setup.md`: open before editing an unfamiliar repository's source or locale JSON.
 - `references/ui-inspection-mode.md`: open when the user asks for a page-level localized UI inspection from a URL.
-- `references/ui-inspection-report-types.ts`: TypeScript contract for the machine-readable `report.json` written by UI inspection mode.
+- `references/ui-inspection-report-types.ts`: TypeScript contract for the machine-readable `report.json` written by UI inspection mode, including screenshot annotations and independent visual-review report tracking.
 - `references/translation-rules.md`: open before translating or reviewing non-default locale text.
 - `references/validation-checklist.md`: open before final handoff.
 - `references/scripts.md`: open before running helper scripts so arguments, output files, and expected evidence are clear.

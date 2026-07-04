@@ -44,11 +44,12 @@ const DEFAULT_TASK_SIZE_WARNING_BYTES = 300_000;
 const DEFAULT_TASK_SIZE_TARGET_BYTES = 200_000;
 const MAX_CONTEXT_ASSET_CHARS = 20_000;
 const ENGLISH_CASING_GUIDANCE = [
-  "For English target locales, follow professional casing rules:",
-  "- Use Sentence case for sentences, descriptions, validation messages, placeholders, tooltips, empty states, and most inline UI copy.",
-  "- Use Title Case for page titles, modal titles, section/card titles, and other title-like UI when the surrounding product UI uses title style. Capitalize major words; keep a/an/the, coordinating conjunctions, and prepositions of four letters or fewer lowercase unless they are the first or last word.",
-  "- Preserve product names, feature names, brand terms, acronyms, countries, languages, weekdays, months, and the pronoun I in their proper casing.",
-  "- Avoid all-caps except for established acronyms such as API, SQL, product-defined labels, OK, or an explicit design-system convention.",
+  "For English target locales, apply explicit casing rules:",
+  "- Identify the intended style from UI role and nearby product convention: Sentence case, Title Case, or rare all-caps.",
+  "- Use Sentence case for sentences, descriptions, validation messages, placeholders, tooltips, empty states, table-cell copy, and most inline UI copy.",
+  "- Use Title Case for page titles, modal titles, section/card titles, tab titles, and other title-like UI when the surrounding product UI uses title style. Capitalize major words; keep a/an/the, coordinating conjunctions, and prepositions of four letters or fewer lowercase unless they are the first or last word.",
+  "- Preserve proper casing for product names, feature names, brand terms, people, places, countries, nationalities, languages, weekdays, months, organizations, acronyms/initialisms, and the pronoun I. Seasons are usually lowercase unless part of a proper name.",
+  "- Avoid all-caps except for established acronyms such as API or SQL, product-defined labels, OK, official all-caps proper names, or an explicit design-system convention. Do not use all-caps for emphasis.",
 ];
 
 function isEnglishLocale(locale) {

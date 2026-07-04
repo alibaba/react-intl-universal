@@ -15,6 +15,7 @@
  *   "schemaVersion": "1.0",
  *   "startedAt": "2026-07-02T10:00:00+08:00",
  *   "inspectionStatus": "completedWithIssues",
+ *   "reportDisplayLanguage": "zh-CN",
  *   "inspectionLogPath": "tmp/i18n-ui-inspection-20260702-100000/inspection-log.md",
  *   "reportHtmlPath": "tmp/i18n-ui-inspection-20260702-100000/report.html",
  *   "screenshotDirectory": "tmp/i18n-ui-inspection-20260702-100000/screenshots",
@@ -31,6 +32,31 @@
  *       "status": "covered",
  *       "screenshotRef": "screenshots/001-orders-list.png",
  *       "caption": "Orders list page after initial load"
+ *     }
+ *   ],
+ *   "screenshotAnnotations": [
+ *     {
+ *       "screenshotRef": "screenshots/002-filter-overlap-before.png",
+ *       "boxes": [
+ *         {
+ *           "x": 61.5,
+ *           "y": 24.0,
+ *           "width": 18.0,
+ *           "height": 7.5,
+ *           "label": "overlapping filter button"
+ *         }
+ *       ]
+ *     }
+ *   ],
+ *   "visualReviewReports": [
+ *     {
+ *       "reportPath": "visual-reviews/001-orders-list.md",
+ *       "scopeLabel": "Orders list",
+ *       "screenshotRefs": ["screenshots/001-orders-list.png"],
+ *       "result": "issuesFound",
+ *       "triageStatus": "accepted",
+ *       "findingIds": ["I18N-001"],
+ *       "notes": "Reviewer finding VR-001 was accepted and converted to I18N-001."
  *     }
  *   ],
  *   "summary": {
@@ -172,6 +198,34 @@ export type I18nUiInspectionCoverageStatus =
   | "not-reached";
 
 /**
+ * Independent screenshot-review result written by a visual-review subagent.
+ */
+export type I18nUiInspectionVisualReviewResult =
+  | "noIssues"
+  | "issuesFound"
+  | "uncertain";
+
+/**
+ * Main-agent triage status for an independent visual-review report.
+ *
+ * - accepted: at least one reviewer observation became a final finding.
+ * - partiallyAccepted: some observations became findings and some were dismissed
+ *   or deferred.
+ * - dismissed: reviewer observations were reviewed but not accepted as final
+ *   findings.
+ * - needsFollowUp: the report still requires Browser Use, source review, product
+ *   context, or human review.
+ * - noIssues: reviewer reported no visible issues and the main agent accepted
+ *   that result.
+ */
+export type I18nUiInspectionVisualReviewTriageStatus =
+  | "accepted"
+  | "partiallyAccepted"
+  | "dismissed"
+  | "needsFollowUp"
+  | "noIssues";
+
+/**
  * Complete count map for findings grouped by severity.
  */
 export type I18nUiInspectionSeverityCounts = Record<I18nUiInspectionSeverity, number>;
@@ -231,6 +285,91 @@ export interface I18nUiInspectionCoverageEvidence {
   /**
    * Optional note for blockers, skipped actions, external links, or unusual
    * states.
+   */
+  notes?: string;
+}
+
+export interface I18nUiInspectionScreenshotAnnotationBox {
+  /**
+   * Left position as a percentage of the original screenshot width.
+   */
+  x: number;
+
+  /**
+   * Top position as a percentage of the original screenshot height.
+   */
+  y: number;
+
+  /**
+   * Box width as a percentage of the original screenshot width.
+   */
+  width: number;
+
+  /**
+   * Box height as a percentage of the original screenshot height.
+   */
+  height: number;
+
+  /**
+   * Short visible label for the red-box annotation, such as "truncated label",
+   * "broken border", "wrong unit", or "untranslated text".
+   */
+  label?: string;
+}
+
+export interface I18nUiInspectionScreenshotAnnotation {
+  /**
+   * Screenshot ID or path that this annotation belongs to. This should match a
+   * screenshot path used by coverage evidence, finding evidence, fix evidence,
+   * or the screenshot appendix.
+   */
+  screenshotRef: string;
+
+  /**
+   * One or more red-box regions to render over this screenshot. Coordinates are
+   * screenshot-relative percentages so `report.html` can reuse them in
+   * thumbnails, finding cards, and enlarged lightbox previews.
+   */
+  boxes: I18nUiInspectionScreenshotAnnotationBox[];
+}
+
+export interface I18nUiInspectionVisualReviewReport {
+  /**
+   * Markdown report path under `visual-reviews/`, preferably relative to the
+   * inspection folder or repository root.
+   */
+  reportPath: string;
+
+  /**
+   * Reader-facing scope label, such as a route, menu item, module, tab, or
+   * detail state.
+   */
+  scopeLabel?: string;
+
+  /**
+   * Screenshot IDs or paths reviewed by the independent visual reviewer.
+   */
+  screenshotRefs: string[];
+
+  /**
+   * Raw reviewer result from the Markdown report.
+   */
+  result: I18nUiInspectionVisualReviewResult;
+
+  /**
+   * Main-agent triage result after reading the reviewer Markdown report.
+   */
+  triageStatus: I18nUiInspectionVisualReviewTriageStatus;
+
+  /**
+   * Final finding IDs created from reviewer observations, when any were
+   * accepted.
+   */
+  findingIds?: string[];
+
+  /**
+   * Short notes for dismissed observations, uncertainty, missing subagent
+   * capability, or follow-up needed.
    */
   notes?: string;
 }
@@ -383,7 +522,9 @@ export interface I18nUiInspectionFinding {
 
   /**
    * Screenshot IDs or paths showing the issue. Before-fix issue screenshots
-   * should appear here.
+   * should appear here. In `report.html`, these must be rendered as visible
+   * finding screenshot cards, not only as text links. When the problem location
+   * is hard to see, add matching entries to `screenshotAnnotations`.
    */
   screenshotRefs: string[];
 
@@ -396,7 +537,10 @@ export interface I18nUiInspectionFinding {
 
   /**
    * Evidence that a fix was attempted or verified, present only when the finding
-   * moved beyond `open`.
+   * moved beyond `open`. When both `screenshotRefs` and
+   * `fixEvidence.verificationScreenshotRefs` exist, `report.html` should render
+   * them as a two-column before/after comparison: issue screenshot on the left,
+   * verified-fix screenshot on the right.
    */
   fixEvidence?: I18nUiInspectionFixEvidence;
 }
@@ -417,6 +561,13 @@ export interface I18nUiInspectionReportJson {
    * fix status.
    */
   inspectionStatus: I18nUiInspectionRunStatus;
+
+  /**
+   * Display language used for the human-readable `report.html`, such as
+   * `zh-CN` or `en-US`. This follows the current conversation language by
+   * default and may differ from the inspected UI target locale.
+   */
+  reportDisplayLanguage?: string;
 
   /**
    * Path to the raw chronological inspection log. Prefer a path relative to the
@@ -447,6 +598,22 @@ export interface I18nUiInspectionReportJson {
    * menu item, tab, feature entry, and representative detail state.
    */
   coverageEvidence?: I18nUiInspectionCoverageEvidence[];
+
+  /**
+   * Optional red-box annotations for screenshots where the issue or verified fix
+   * is hard to locate. `report.html` should render these as HTML/CSS overlays in
+   * image cards/thumbnails and in the enlarged preview while keeping the
+   * original screenshot files unchanged.
+   */
+  screenshotAnnotations?: I18nUiInspectionScreenshotAnnotation[];
+
+  /**
+   * Independent screenshot-review Markdown reports and the main agent's triage
+   * result for each report. Broad/full-product inspections should populate this
+   * when subagents are available; otherwise explain the limitation in
+   * `inspection-log.md` and `report.html`.
+   */
+  visualReviewReports?: I18nUiInspectionVisualReviewReport[];
 
   /**
    * Aggregated counts derived from the inspection log, targets, and findings.

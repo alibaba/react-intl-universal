@@ -51,10 +51,13 @@ jobs:
         run: |
           npm run build
           touch out/.nojekyll
+          test -d out
+          find out -maxdepth 2 -type f | head -50
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v5
         with:
+          name: github-pages
           path: packages/react-intl-universal/examples/nextjs-example/out
 
   deploy:
@@ -68,3 +71,5 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          artifact_name: github-pages

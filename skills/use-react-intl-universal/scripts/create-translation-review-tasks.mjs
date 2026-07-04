@@ -26,7 +26,7 @@ import {
 
 const SEVERITY_ORDER = { error: 0, high: 1, medium: 2, low: 3 };
 const ENGLISH_CASING_GUIDANCE = [
-  "- For English target locales, verify professional casing: Sentence case for sentences and inline UI copy; Title Case for page/modal/section/card titles when the surrounding UI uses title style; preserve product names, feature names, acronyms, countries, languages, weekdays, months, and I; avoid all-caps except for established acronyms, OK, product-defined labels, or explicit design-system conventions.",
+  "- For English target locales, verify casing by UI role and surrounding product convention: Sentence case for sentences, descriptions, validation messages, placeholders, tooltips, empty states, table-cell copy, and most inline UI copy; Title Case for page/modal/section/card/tab titles when the surrounding UI uses title style; preserve proper casing for product names, feature names, brand terms, people, places, countries, nationalities, languages, weekdays, months, organizations, acronyms/initialisms, and the pronoun I; avoid all-caps except for established acronyms, OK, product-defined labels, official all-caps proper names, or explicit design-system conventions.",
 ];
 
 function isEnglishLocale(locale) {

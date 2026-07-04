@@ -42,10 +42,42 @@ Use these rules when generating, reviewing, or merging non-default locale text.
 
 Use these rules only when the target locale is English:
 
-- Use Sentence case for sentences, descriptions, validation messages, placeholders, tooltips, empty states, and most inline UI copy.
-- Use Title Case for page titles, modal titles, section/card titles, and other title-like UI when the surrounding product UI uses title style. Capitalize major words; keep `a`, `an`, `the`, coordinating conjunctions, and prepositions of four letters or fewer lowercase unless they are the first or last word.
-- Preserve product names, feature names, brand terms, acronyms, countries, languages, weekdays, months, and the pronoun `I` in their proper casing.
-- Avoid all-caps except for established acronyms such as `API`, `SQL`, product-defined labels, `OK`, or an explicit design-system convention.
+### English Casing
+
+Use three casing styles deliberately:
+
+- `Sentence case`: capitalize the first word and proper nouns only.
+- `Title Case`: capitalize major words in title-like UI.
+- `All-caps`: capitalize every letter only for established acronyms, approved labels, or explicit design-system conventions.
+
+Default to the casing pattern used by the surrounding product UI. If local context is ambiguous, prefer Sentence case for ordinary UI copy and Title Case for true titles.
+
+Use Sentence case for:
+
+- sentences, descriptions, help text, validation messages, tooltips, empty states, placeholders, table-cell copy, and most inline UI copy;
+- button and action labels when the surrounding design system uses sentence-style buttons;
+- direct quotes according to normal English grammar: capitalize the first word of a quoted full sentence, but do not force unrelated surrounding words into title case.
+
+Use Title Case for page titles, modal titles, section titles, card titles, tab titles, and other title-like UI when the surrounding product UI uses title style.
+
+Title Case rules:
+
+- Capitalize major words: nouns, verbs including `is` and `be`, adjectives, adverbs, and pronouns.
+- Keep articles `a`, `an`, and `the` lowercase unless they are the first or last word.
+- Keep coordinating conjunctions `and`, `but`, `or`, `nor`, `yet`, and `so` lowercase unless they are the first or last word.
+- Keep prepositions of four letters or fewer lowercase, such as `on`, `to`, `in`, `up`, `down`, `of`, and `for`, unless they are the first or last word.
+- Preserve product-specific casing for product names, feature names, brand terms, UI labels, and domain terms even when they do not follow generic title rules.
+
+Preserve proper casing for:
+
+- product names, feature names, brand terms, and technical domain terms;
+- person names, place names, countries, nationalities, and languages;
+- weekdays and months. Seasons are usually lowercase unless part of a proper name;
+- organizations and institutions;
+- acronyms and initialisms such as `API`, `SQL`, `USA`, and `ECS`;
+- the pronoun `I`, which is always uppercase.
+
+Avoid all-caps except for established acronyms such as `API` or `SQL`, product-defined labels, `OK`, magazine/newspaper names or other proper names that are officially all-caps, or an explicit design-system convention. Do not use all-caps for emphasis in normal UI copy.
 
 ## Delta JSON Shape
 

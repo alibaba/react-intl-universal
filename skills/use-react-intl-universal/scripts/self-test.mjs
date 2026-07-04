@@ -346,8 +346,9 @@ function main() {
       "--json",
     ]);
     const englishTaskMarkdown = fs.readFileSync(path.join(root, "tmp", "tasks-en", "en_US.md"), "utf8");
-    assert(englishTaskMarkdown.includes("For English target locales, follow professional casing rules"), "English translation tasks should include casing guidance");
-    assert(englishTaskMarkdown.includes("Title Case") && englishTaskMarkdown.includes("Sentence case"), "English translation task guidance should distinguish Title Case and Sentence case");
+    assert(englishTaskMarkdown.includes("For English target locales, apply explicit casing rules"), "English translation tasks should include casing guidance");
+    assert(englishTaskMarkdown.includes("Title Case") && englishTaskMarkdown.includes("Sentence case") && englishTaskMarkdown.includes("all-caps"), "English translation task guidance should distinguish Title Case, Sentence case, and all-caps");
+    assert(englishTaskMarkdown.includes("pronoun I"), "English translation task guidance should preserve the pronoun I");
     const englishTask = readJson(path.join(root, "tmp", "tasks-en", "en_US.json"));
     assert(englishTask.instructions.some((instruction) => instruction.includes("For English target locales")), "English task JSON instructions should include casing guidance");
     const englishReviewKey = englishTask.items[0].key;
@@ -374,7 +375,7 @@ function main() {
       "--json",
     ]);
     const englishReviewMarkdown = fs.readFileSync(path.join(root, "tmp", "translation-review-en", "en_US.md"), "utf8");
-    assert(englishReviewMarkdown.includes("verify professional casing"), "English translation review tasks should include casing review guidance");
+    assert(englishReviewMarkdown.includes("verify casing by UI role"), "English translation review tasks should include casing review guidance");
 
     const changedKeyAuditResult = runScript(root, "audit-changed-locale-keys.mjs", [
       "--tasks", "tmp/tasks/manifest.json",

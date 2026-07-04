@@ -2,7 +2,7 @@ import React from 'react';
 import intl from 'core/intl';
 
 const SkillComponent: React.FC = () => {
-  const skillPath = 'https://github.com/alibaba/react-intl-universal/tree/master/skills/use-react-intl-universal';
+  const skillPath = 'https://github.com/alibaba/react-intl-universal/tree/master/skills/use-react-intl-universal/SKILL.md';
   const mqmPath = 'https://www.w3.org/community/mqmcg';
   const workflowImageUrl = 'https://img.alicdn.com/imgextra/i1/O1CN01bMmYFt21ZbDPDQxJT_!!6000000006999-2-tps-1536-1024.png';
   const skillLink = (chunks: React.ReactNode) => (

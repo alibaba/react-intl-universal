@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - master
-      - feat/rich_message # TODO for test 
   workflow_dispatch:
 
 permissions:

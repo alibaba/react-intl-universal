@@ -121,9 +121,23 @@ interface AstElement {
   options?: Record<string, { value?: AstElement[] }>;
 }
 
-// get("missing") returns an empty string for backward compatibility. Store the
-// key and variables briefly so the chained empty-string .d(...) call can format
-// the fallback message with the same ICU/rich-text rules.
+// Historically, missing-key fallbacks did not format ICU variables or rich tag
+// formatters. This context adds that support for immediate chained usage:
+//   intl.get("FIRST", { name: "Alice" }).d("Hello {name}")
+//
+// get("missing") must keep returning the primitive empty string "" instead of
+// an object wrapper. This keeps existing callers safe when they render the
+// result directly, compare it with "", or rely on its falsy value. Primitive
+// strings cannot store their own key/variables, so this module
+// keeps a short-lived context only for the immediate chained .d(...) call above.
+//
+// Delayed .d(...) calls are not supported. A later missing-key get(...) can
+// overwrite this shared context before the earlier .d(...) reads it:
+//   const first = intl.get("FIRST", { name: "Alice" });
+//   const second = intl.get("SECOND", { name: "Bob" });
+//
+//   first.d("Hello {name}"); // Returns "Hello Bob"
+//   second.d("Hi {name}");   // Returns "Hi {name}"
 let missingMessageContext: MissingMessageContext | null = null;
 
 function setMissingMessageContext(context: MissingMessageContext): void {

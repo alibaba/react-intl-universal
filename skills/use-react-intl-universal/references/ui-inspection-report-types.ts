@@ -238,6 +238,43 @@ export type I18nUiInspectionI18nRelevance =
   | "i18n-blocking"
   | "non-i18n";
 
+/**
+ * Source-origin classification for text that appears in an unexpected language
+ * on a target-locale page.
+ *
+ * - frontend-source: visible text was found in frontend source, such as raw JSX
+ *   text, UI prop strings, local menu/action definitions, validation copy, or
+ *   local enum maps.
+ * - frontend-locale-fallback: visible text comes from default messages or a
+ *   default locale pack because the target locale is missing or falling back.
+ * - api-system-copy: backend/API appears to return product-owned display text,
+ *   such as status labels, validation messages, empty states, templates, hints,
+ *   warnings, or policy text.
+ * - api-user-created-data: backend/API appears to return user-created or
+ *   customer-owned data, such as file names, project names, tags, titles,
+ *   descriptions, comments, notes, resource names, or custom field values.
+ * - external-module: text appears to come from a shared component package,
+ *   module federation remote, third-party widget, or platform-delivered
+ *   configuration.
+ * - unknown: available evidence is insufficient; use
+ *   `needs-product-confirmation` when this affects a visible issue.
+ */
+export type I18nUiInspectionUnexpectedLanguageOrigin =
+  | "frontend-source"
+  | "frontend-locale-fallback"
+  | "api-system-copy"
+  | "api-user-created-data"
+  | "external-module"
+  | "unknown";
+
+/**
+ * Whether an unexpected-language value appears to be user-created data.
+ */
+export type I18nUiInspectionUserCreatedDataAssessment =
+  | "likely"
+  | "unlikely"
+  | "unknown";
+
 export type I18nUiInspectionTranslationQualityCategory =
   | "Accuracy"
   | "Fluency"
@@ -617,9 +654,99 @@ export interface I18nUiInspectionHumanAttention {
   suggestedAction?: string;
 }
 
+export interface I18nUiInspectionSourceSearchMatch {
+  /**
+   * Repository-relative file path when available.
+   */
+  filePath: string;
+
+  /**
+   * 1-based line number when available.
+   */
+  line?: number;
+
+  /**
+   * Why this match matters, such as "raw JSX text", "button label prop",
+   * "menu definition", or "default locale fallback".
+   */
+  reason: string;
+}
+
+export interface I18nUiInspectionSourceSearchEvidence {
+  /**
+   * Exact and partial terms searched in frontend source.
+   */
+  searchedTerms: string[];
+
+  /**
+   * Whether source search found a relevant frontend/default-locale match.
+   */
+  matched: boolean;
+
+  /**
+   * Relevant matches. Omit or leave empty when no match was found.
+   */
+  matches?: I18nUiInspectionSourceSearchMatch[];
+
+  /**
+   * Notes about normalization, partial searches, ignored test/mock/log matches,
+   * or search limitations.
+   */
+  notes?: string;
+}
+
+export interface I18nUiInspectionUnexpectedLanguageEvidence {
+  /**
+   * Visible text that appeared in the unexpected language.
+   */
+  observedText: string;
+
+  /**
+   * Expected UI locale, such as "en-US".
+   */
+  expectedLocale: string;
+
+  /**
+   * Detected unexpected language when known, such as "zh-CN".
+   */
+  detectedLanguage?: string;
+
+  /**
+   * Source-origin classification for this text.
+   */
+  origin: I18nUiInspectionUnexpectedLanguageOrigin;
+
+  /**
+   * Frontend source/default-locale search evidence. Required by process for
+   * button, menu, tab, navigation, toolbar action, dropdown action, and form
+   * command labels before assigning backend ownership.
+   */
+  sourceSearch?: I18nUiInspectionSourceSearchEvidence;
+
+  /**
+   * Runtime evidence, such as "appeared after /api/files loaded; response field
+   * name=name". Keep this concise and avoid sensitive payload values.
+   */
+  runtimeEvidence?: string;
+
+  /**
+   * Agent assessment of whether the value is user-created/customer-owned data.
+   */
+  userCreatedDataAssessment?: I18nUiInspectionUserCreatedDataAssessment;
+
+  /**
+   * Short rationale connecting source search, runtime evidence, and business
+   * context to the recommended owner/classification.
+   */
+  ownershipRationale: string;
+}
+
 export interface I18nUiInspectionFinding {
   /**
-   * Stable finding ID, such as "I18N-001".
+   * Stable finding ID. Use normal "I18N-001" style IDs only for
+   * `i18n-related` findings. Blockers and non-i18n observations should use
+   * visibly separate IDs or sections in `report.html` so they are not mistaken
+   * for localization defects.
    */
   id: string;
 
@@ -670,7 +797,9 @@ export interface I18nUiInspectionFinding {
    * Whether this finding belongs to the i18n/localized UI-fit scope, only
    * blocks i18n coverage, or is a non-i18n observation. New reports should set
    * this explicitly so `report.html` can keep non-i18n issues from dominating
-   * the i18n finding list.
+   * the i18n finding list. Do not set `i18n-related` for business logic,
+   * backend/domain data, permissions, routing, calculation, workflow-state, or
+   * generic product defects unless there is direct localization evidence.
    */
   i18nRelevance?: I18nUiInspectionI18nRelevance;
 
@@ -686,6 +815,15 @@ export interface I18nUiInspectionFinding {
    * treated as a normal localization defect.
    */
   outOfScopeReason?: string;
+
+  /**
+   * Required for findings or observations where the primary evidence is text
+   * appearing in an unexpected language for the target locale. Normal
+   * `I18N-xxx` findings should use this to prove frontend source/fallback
+   * ownership or clear system-copy localization evidence. User-created data and
+   * unknown ownership should be kept separate from normal i18n findings.
+   */
+  unexpectedLanguageEvidence?: I18nUiInspectionUnexpectedLanguageEvidence;
 
   /**
    * Optional user feedback captured or initialized by `report.html`'s finding

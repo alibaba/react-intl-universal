@@ -281,9 +281,28 @@ UI Inspection Mode is focused on internationalization and localized UI-fit. Befo
 - `i18n-blocking`: not proven to be caused by i18n, but it blocks inspection coverage, such as a blank route, login blocker, permission blocker, failing remote module, or API/runtime failure.
 - `non-i18n`: visibly unrelated to localization, such as generic product logic, backend data failure, non-localized performance issue, or a layout bug that reproduces independent of language.
 
-Only `i18n-related` findings should drive localization fixes by default. `i18n-blocking` issues may appear in the report as blockers with diagnostics. `non-i18n` observations should be summarized as out-of-scope notes and should not dominate the report or fix plan.
+Only `i18n-related` findings should receive normal `I18N-xxx` finding IDs and drive localization fixes by default. `i18n-blocking` issues may appear in the report as blockers with diagnostics, but they must be visually separate from normal findings and must not be counted as fixed i18n issues. `non-i18n` observations should be summarized as out-of-scope notes and should not dominate the report or fix plan.
 
-If an observation is not i18n-related, keep the finding title and status explicit, for example `non-i18n observation` or `i18n coverage blocker`, and fill an out-of-scope reason. This prevents the report from treating every product defect as localization debt.
+Do not promote business-logic, backend-data, permission, routing, calculation, workflow-state, or generic product defects to normal `I18N-xxx` findings unless there is direct evidence that the issue is caused or exposed by localization. A raw key, ID, enum value, or internal-looking token is not automatically an i18n bug: first determine whether it is frontend product copy under locale ownership or business/API metadata. If it is backend/domain data or expected product behavior, classify it as `non-i18n` or `needs-product-confirmation` and do not fix it as part of UI Inspection Mode unless the user explicitly asks.
+
+If an observation is not i18n-related, keep the title and status explicit, for example `non-i18n observation`, `needs product confirmation`, or `i18n coverage blocker`, and fill an out-of-scope reason. This prevents the report from treating every product defect as localization debt.
+
+### Unexpected Language Origin Triage
+
+When a target-locale page shows text in an unexpected language, such as Chinese text in an English UI, do not classify it only from the visible text. First determine whether the text is frontend product copy, locale fallback, backend/API product copy, user-created data, external module metadata, or unknown.
+
+For each unexpected-language observation:
+
+1. Capture the UI evidence: screenshot, URL or route, viewport, target locale, interaction state, visible text, nearby labels, and component context. When browser tooling exposes it safely, record the DOM text or stable selector around the observed text.
+2. Search frontend source first. Use `rg` for the exact text, then distinctive substrings, punctuation-normalized variants, and nearby label text when the exact search fails. Record the searched terms, whether they matched, and matching file/line references.
+3. If the text appears in raw JSX text, UI prop strings, local menu definitions, button labels, form labels, table column titles, empty states, validation messages, local enum maps, or other user-facing source strings, classify it as a frontend application issue. This is `i18n-related` and may receive a normal `I18N-xxx` ID.
+4. If the text appears in `.d(defaultMessage)` or the default locale pack, but the target locale shows fallback or a missing key, classify it as a frontend locale/fallback issue. This is `i18n-related` and may receive a normal `I18N-xxx` ID.
+5. Treat command and navigation labels as frontend-leaning by default. Buttons, menus, tabs, navigation items, toolbar actions, dropdown action labels, and form submit/cancel labels are usually frontend-owned product copy. Only classify these as backend/API-owned when there is concrete evidence that the UI renders server-provided menu configuration, API action configuration, remote module metadata, or platform-delivered configuration.
+6. If source search does not find the text, inspect runtime origin. Check whether the text appears only after data loading, and inspect network/API responses when browser tooling exposes them safely. Record endpoint/path, status, relevant field names, and a short response-shape summary. Do not copy sensitive payloads.
+7. Distinguish user-created data from system product copy. File names, project names, resource names, uploaded asset names, imported record values, custom tags, comments, notes, titles, descriptions, and values that map to create/edit form fields are usually user-created data and should normally be `non-i18n`. System action labels, validation messages, error messages, empty states, product-defined enum labels, backend templates, hints, warnings, policy text, table headers, and filter labels are usually product copy.
+8. If API data is likely user-created data, classify it as `non-i18n` and record the out-of-scope reason. If API data is likely system product copy, classify it as a likely backend/API localization issue. If evidence is insufficient, set status to `needs-product-confirmation`, set recommended owner to `backend/API` or `unknown`, set fix verification to `low`, and require human attention.
+
+Normal `I18N-xxx` findings for unexpected-language text must include direct localization evidence: frontend source/fallback evidence, or clear evidence that system product copy is being rendered in the wrong language. User-created data and uncertain ownership should stay out of the normal i18n finding list.
 
 ### Severity
 
@@ -381,6 +400,8 @@ Do not overclaim ownership. Use "likely" language unless the browser evidence cl
 - whether the issue reproduces before or after data loads;
 - whether the same text renders correctly in another page state;
 - whether the defect appears inside a shared component, remote module, or third-party widget.
+
+For unexpected-language findings, include the source-origin rationale explicitly. Button, menu, tab, navigation, toolbar action, dropdown action, and form command labels should remain frontend-owned unless source search plus runtime evidence proves they are server-provided or remote-module metadata. API values that look like user-created names or custom fields should not be assigned to localization owners without evidence that the product expects those values to be localized.
 
 ### Fix Recommendation
 
@@ -650,6 +671,14 @@ console.log(`checked ${count} executable script(s)`);
 NODE
 ```
 
+This smoke test is a final-report gate, not an optional diagnostic:
+
+- Do not hand off `report.html` if this command fails.
+- Do not replace this with string-presence checks such as checking whether `copyFeedback`, `modalStack`, or `addEventListener` appears in the HTML; those checks do not prove the script parses.
+- Save the exact successful output, such as `checked 1 executable script(s)`, in `inspection-log.md`.
+- Include the same result in the final `report.html` validation/status area so the reader can see that executable report JavaScript was actually parsed.
+- If browser policy or environment restrictions prevent opening `report.html`, this syntax smoke test is still required. State the browser limitation separately instead of treating it as a reason to skip the script parse check.
+
 The final report must not make the user open the screenshots folder just to know whether the requested scope was covered. If every screenshot is saved on disk but the HTML report omits the complete coverage matrix or screenshot appendix, the report is incomplete.
 
 If no issues are found, still generate `report.html`, include process screenshots for all covered scope items, and state what was actually verified. Do not write only "No visible overflow found" as the final result. Distinguish at least text overflow/truncation, layout overflow, alignment, and component visual integrity. If the run only checked overflow metrics or screenshots for obvious truncation, state that component visual integrity was not fully verified.
@@ -671,6 +700,7 @@ For each issue, include:
 - screenshot link;
 - i18n relevance: `i18n-related`, `i18n-blocking`, or `non-i18n`;
 - out-of-scope reason when the issue is non-i18n or only blocks i18n coverage;
+- unexpected-language origin evidence when relevant: observed text, expected locale, detected unexpected language, source search terms/results, runtime origin evidence, user-created-data assessment, and ownership rationale;
 - visual review evidence when relevant, such as `visual-reviews/003-business-health-analysis.md` and reviewer finding ID `VR-001`;
 - likely category: language quality, truncation, overflow, overlap, misalignment, component visual integrity, text wrapping / word-break, form label visual integrity, untranslated text, raw placeholder/tag, terminology inconsistency, interaction defect, page load / blank screen, or non-i18n observation;
 - component visual integrity subtype when relevant, such as `grouped-control wrapping/broken border`;

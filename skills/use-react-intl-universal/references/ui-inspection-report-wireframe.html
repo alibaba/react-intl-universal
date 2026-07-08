@@ -905,6 +905,52 @@
           <section><h4>Acceptance criteria</h4><p>Open any inspected page in the target locale and confirm the header separator renders correctly.</p></section>
         </div>
       </article>
+
+      <article class="finding-card" id="I18N-004">
+        <header class="finding-head">
+          <div>
+            <h3>I18N-004 Toolbar action remains Chinese in English</h3>
+            <p class="muted">Category: untranslated text / unexpected language origin</p>
+          </div>
+          <div class="badge-row">
+            <span class="badge medium">severity: medium</span>
+            <span class="badge open">status: open</span>
+            <span class="badge risk-low">risk: low</span>
+            <span class="badge verification-medium">verification: medium</span>
+          </div>
+        </header>
+        <dl class="finding-meta">
+          <div><dt>State</dt><dd><code>#/rules</code>, toolbar, English locale</dd></div>
+          <div><dt>i18n relevance</dt><dd>i18n-related</dd></div>
+          <div><dt>Owner</dt><dd>current repository</dd></div>
+          <div><dt>Expected</dt><dd>Toolbar actions use English product copy.</dd></div>
+          <div><dt>Actual</dt><dd>The action label shows <code>保存</code>.</dd></div>
+          <div><dt>Acceptance</dt><dd>Source search or locale diff proves the label is localized, then re-inspect the same toolbar.</dd></div>
+        </dl>
+        <div class="shot-grid">
+          <div class="shot-grid-row">
+            <div><h4>Issue evidence</h4><figure class="annotated-shot"><a class="annotated-stage" id="shot-open-004" href="#shot-open-004" data-preview-stage="shot-open-004"><div class="mock-shot"><div class="mock-sidebar"></div><div class="mock-content"><div class="mock-row medium"></div><div class="mock-row"></div><div class="mock-table"><div class="mock-cell"></div><div class="mock-cell"></div><div class="mock-cell"></div></div></div></div><span class="redbox" style="left:62%;top:16%;width:14%;height:8%"><em>Chinese action label</em></span></a><figcaption>English toolbar shows a Chinese action label.</figcaption></figure></div>
+            <div><h4>Follow-up status</h4><div class="callout"><p>The report should include a replacement screenshot after the label is localized or the source/fallback issue is fixed.</p></div></div>
+          </div>
+        </div>
+        <section class="fix-diff" aria-label="Unexpected language origin evidence">
+          <h4>Unexpected language origin evidence</h4>
+          <div class="table-wrap">
+            <table>
+              <tbody>
+                <tr><th>Observed text</th><td><code>保存</code> in an English UI</td></tr>
+                <tr><th>Source search</th><td>Searched <code>保存</code> and nearby action labels. Matched <code>src/pages/rules/actions.tsx:42</code> as a local button label.</td></tr>
+                <tr><th>Origin</th><td><code>frontend-source</code>; command/action labels are frontend-leaning unless runtime evidence proves server-provided configuration.</td></tr>
+                <tr><th>Ownership rationale</th><td>The label is a local toolbar action, not row data or an API-returned user-created value, so it is counted as normal i18n debt.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+        <div class="finding-body">
+          <section><h4>Recommendation</h4><p>Replace the hardcoded label with the repository's normal message API or repair the missing target-locale key, depending on the source-search result.</p></section>
+          <section><h4>Human attention</h4><p>No backend ownership should be assigned unless runtime evidence shows this action label is server-provided or remote-module metadata.</p></section>
+        </div>
+      </article>
     </section>
 
     <section class="panel" aria-labelledby="coverage-title">
@@ -964,7 +1010,11 @@
         </div>
         <div class="callout">
           <h3>Non-i18n observations</h3>
-          <p>Example: a stale data count or backend error that is visibly unrelated to translation should be summarized here, not mixed into normal i18n findings.</p>
+          <p>Example: a Chinese file name returned as a row value in an English UI may be user-created data. Record the source search and API field evidence here instead of mixing it into normal i18n findings.</p>
+        </div>
+        <div class="callout">
+          <h3>Needs product confirmation</h3>
+          <p>Example: an API-returned Chinese status label may be backend-owned system copy, but if the field ownership is unclear, mark it as needs product confirmation with source-search and runtime-origin evidence.</p>
         </div>
       </div>
     </section>
@@ -1172,6 +1222,37 @@
         findingModalContent.innerHTML = "";
       }
 
+      function isPreviewOpen() {
+        return lightbox.classList.contains("open");
+      }
+
+      function isFindingModalOpen() {
+        return findingModal.classList.contains("open");
+      }
+
+      function closeTopmostModal(event) {
+        // Modal stack rule: if an image preview is opened from a finding detail
+        // modal, Escape closes only the image preview and keeps the finding
+        // detail modal open for continued review.
+        if (isPreviewOpen()) {
+          if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+          }
+          closePreview();
+          return true;
+        }
+        if (isFindingModalOpen()) {
+          if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+          }
+          closeFindingModal();
+          return true;
+        }
+        return false;
+      }
+
       document.addEventListener("click", function (event) {
         var findingTarget = event.target.closest("[data-finding-modal]");
         if (findingTarget) {
@@ -1196,13 +1277,7 @@
 
       document.addEventListener("keydown", function (event) {
         if (event.key === "Escape") {
-          if (lightbox.classList.contains("open")) {
-            closePreview();
-            return;
-          }
-          if (findingModal.classList.contains("open")) {
-            closeFindingModal();
-          }
+          closeTopmostModal(event);
         }
       });
 

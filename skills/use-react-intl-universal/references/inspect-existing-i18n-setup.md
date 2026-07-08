@@ -10,6 +10,7 @@ Many repositories wrap extraction with custom project commands, product locale e
 - Which locale is the default/source locale and which locale files already exist.
 - Which command regenerates locale packs and whether it writes only the default locale or multiple locales.
 - How runtime locale selection works: `intl.init`, dynamic imports, locale maps, route/app providers, or product locale enums.
+- Whether the repository already exposes runtime locale helpers or enums, such as `isEn()`, `isEnglish()`, `getLang()`, `currentLocale`, or `LOCALE.EN_US`, so source fixes can reuse them instead of adding ad hoc locale checks.
 - Which adjacent libraries also need runtime locale setup, such as component libraries, `moment`, or `dayjs`.
 
 ## Concrete Places to Check
@@ -17,7 +18,7 @@ Many repositories wrap extraction with custom project commands, product locale e
 - `package.json` scripts whose names or commands contain `intl`, `i18n`, `locale`, `extract`, or `translate`.
 - Installed versions of `react-intl-universal`, extraction tools, component libraries, `moment`, and `dayjs`.
 - Locale JSON location and current locale names.
-- `intl.init`, dynamic locale imports, `getCurrentLocale`, product locale enum mappings, component `ConfigProvider`, `moment.locale`, and `dayjs.locale`.
+- `intl.init`, dynamic locale imports, `getCurrentLocale`, product locale enum mappings, existing helpers such as `isEn()`/`isEnglish()`/`getLang()`, component `ConfigProvider`, `moment.locale`, and `dayjs.locale`.
 - Whether dependencies are installed. If `node_modules` is missing, do not guess third-party locale availability; record the uncertainty and verify after install.
 - Whether the actual extraction command can run at least `--help` or `--version`. Capture outdated-tool warnings separately from i18n contract failures.
 - Whether extraction/export generated every expected locale file. Some project wrappers can exit with code 0 while logging generation failures, so inspect logs and output files/counts. If batch export misses locales, retry the missing locales individually before deciding whether the locale is unsupported.

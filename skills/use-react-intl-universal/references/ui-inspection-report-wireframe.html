@@ -1,0 +1,1259 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>UI Inspection Report Wireframe</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f8fb;
+      --panel: #ffffff;
+      --text: #17202a;
+      --muted: #5f6b7a;
+      --line: #d9e1ec;
+      --blue: #2563eb;
+      --green: #047857;
+      --red: #e11d48;
+      --amber: #b45309;
+      --slate: #475569;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      line-height: 1.5;
+    }
+
+    a {
+      color: var(--blue);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    code,
+    pre {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    }
+
+    code {
+      padding: 1px 4px;
+      border-radius: 4px;
+      background: #f1f5f9;
+    }
+
+    .report-shell {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 28px 28px 80px;
+    }
+
+    .panel,
+    .finding-card {
+      margin: 18px 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
+    }
+
+    .panel {
+      padding: 22px;
+    }
+
+    .report-header {
+      padding: 28px;
+    }
+
+    .report-header h1 {
+      margin: 0 0 8px;
+      font-size: 30px;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(180px, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .summary-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      background: #fbfdff;
+    }
+
+    .summary-card strong {
+      display: block;
+      margin: 4px 0;
+      font-size: 26px;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .section-title h2,
+    .finding-card h3,
+    .finding-card h4 {
+      margin: 0;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #f1f5f9;
+      color: #334155;
+      font-weight: 700;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .overview-title {
+      max-width: 280px;
+      white-space: normal;
+      word-break: normal;
+    }
+
+    .overview-title a[data-finding-modal] {
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .overview-title .risk-note {
+      margin-top: 6px;
+      color: #64748b;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .feedback-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .feedback-cell {
+      min-width: 360px;
+    }
+
+    textarea[data-feedback-id] {
+      width: 100%;
+      min-height: 72px;
+      resize: vertical;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 8px;
+      font: inherit;
+    }
+
+    button {
+      border: 1px solid #b8c4d6;
+      border-radius: 6px;
+      background: #fff;
+      padding: 8px 12px;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    button.primary {
+      border-color: var(--blue);
+      background: var(--blue);
+      color: #fff;
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      padding: 3px 9px;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .badge.high,
+    .badge.open,
+    .badge.attention,
+    .badge.risk-high,
+    .badge.verification-low {
+      border-color: #fecdd3;
+      background: #ffe4e6;
+      color: #be123c;
+    }
+
+    .badge.medium,
+    .badge.risk-medium,
+    .badge.verification-medium {
+      border-color: #fed7aa;
+      background: #ffedd5;
+      color: #9a3412;
+    }
+
+    .badge.low,
+    .badge.info {
+      border-color: #bfdbfe;
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .badge.fixed,
+    .badge.verified-fixed,
+    .badge.risk-low,
+    .badge.verification-high,
+    .badge.covered {
+      border-color: #bbf7d0;
+      background: #dcfce7;
+      color: var(--green);
+    }
+
+    .finding-card {
+      overflow: hidden;
+    }
+
+    .finding-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 20px 22px;
+      border-bottom: 1px solid var(--line);
+      background: #f8fafc;
+    }
+
+    .finding-head p {
+      margin: 4px 0 0;
+    }
+
+    .finding-meta {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(220px, 1fr));
+      gap: 10px;
+      margin: 0;
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .finding-meta div {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px;
+      background: #fff;
+    }
+
+    .finding-meta dt {
+      color: var(--slate);
+      font-weight: 700;
+    }
+
+    .finding-meta dd {
+      margin: 4px 0 0;
+    }
+
+    .shot-grid {
+      padding: 20px 22px;
+    }
+
+    .shot-grid-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .annotated-shot {
+      margin: 0;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .annotated-stage {
+      position: relative;
+      display: block;
+      min-height: 260px;
+      color: inherit;
+      background: #eef2f7;
+    }
+
+    .mock-shot {
+      position: relative;
+      display: grid;
+      grid-template-columns: 150px 1fr;
+      min-height: 260px;
+      overflow: hidden;
+      background: #f8fafc;
+    }
+
+    .mock-sidebar {
+      padding: 18px;
+      border-right: 1px solid #cbd5e1;
+      background: #ffffff;
+    }
+
+    .mock-content {
+      padding: 18px;
+    }
+
+    .mock-row {
+      height: 22px;
+      margin-bottom: 10px;
+      border-radius: 4px;
+      background: #dbe4ef;
+    }
+
+    .mock-row.short {
+      width: 50%;
+    }
+
+    .mock-row.medium {
+      width: 72%;
+    }
+
+    .mock-table {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin-top: 18px;
+    }
+
+    .mock-cell {
+      min-height: 48px;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      background: #fff;
+    }
+
+    .redbox {
+      position: absolute;
+      box-sizing: border-box;
+      border: 2px solid var(--red);
+      border-radius: 3px;
+      background: rgba(225, 29, 72, 0.03);
+      pointer-events: none;
+    }
+
+    .redbox em {
+      position: absolute;
+      left: 0;
+      top: -24px;
+      max-width: 320px;
+      border-radius: 4px;
+      padding: 3px 6px;
+      background: rgba(190, 18, 60, 0.92);
+      color: #fff;
+      font-size: 12px;
+      font-style: normal;
+      line-height: 1.2;
+    }
+
+    figcaption {
+      padding: 10px 12px;
+      background: #fff;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .finding-body {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      padding: 0 22px 22px;
+    }
+
+    .finding-body > section {
+      border-top: 1px solid var(--line);
+      padding-top: 14px;
+    }
+
+    .fix-diff {
+      margin: 0 22px 22px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfdff;
+    }
+
+    .diff-file {
+      overflow: hidden;
+      margin-top: 12px;
+      border: 1px solid #d8dee9;
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .diff-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 12px;
+      border-bottom: 1px solid #d8dee9;
+      background: #f1f5f9;
+    }
+
+    .diff-scroll {
+      overflow-x: auto;
+    }
+
+    .diff-table {
+      min-width: 860px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .diff-table th {
+      width: 50%;
+    }
+
+    .diff-table td {
+      width: 50%;
+      padding: 2px 8px;
+      border-bottom: 0;
+      vertical-align: top;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .diff-table .del td:first-child {
+      background: #fff1f2;
+    }
+
+    .diff-table .add td:last-child {
+      background: #ecfdf5;
+    }
+
+    .diff-table .hunk td {
+      background: #eff6ff;
+      color: #1e40af;
+      font-weight: 700;
+    }
+
+    .appendix-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 14px;
+    }
+
+    .split-panel {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .callout {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      background: #fbfdff;
+    }
+
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 32px;
+      background: rgba(2, 6, 23, 0.86);
+    }
+
+    .lightbox.open {
+      display: flex;
+    }
+
+    .lightbox-inner {
+      max-width: 96vw;
+      max-height: 92vh;
+    }
+
+    .lightbox-stage {
+      position: relative;
+      display: inline-block;
+      width: min(1120px, 92vw);
+      max-height: 88vh;
+      overflow: auto;
+      background: #eef2f7;
+    }
+
+    .lightbox-stage .annotated-stage {
+      min-height: 620px;
+    }
+
+    .lightbox-close {
+      position: fixed;
+      top: 16px;
+      right: 18px;
+      border-color: rgba(255, 255, 255, 0.35);
+      background: rgba(15, 23, 42, 0.5);
+      color: #fff;
+    }
+
+    .finding-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 9500;
+      display: none;
+      align-items: flex-start;
+      justify-content: center;
+      overflow: auto;
+      padding: 36px 24px;
+      background: rgba(15, 23, 42, 0.62);
+    }
+
+    .finding-modal.open {
+      display: flex;
+    }
+
+    .finding-modal-panel {
+      width: min(1180px, 96vw);
+      max-height: calc(100vh - 72px);
+      overflow: auto;
+      border-radius: 10px;
+      background: var(--panel);
+      box-shadow: 0 20px 70px rgba(2, 6, 23, 0.35);
+    }
+
+    .finding-modal-toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .finding-modal-toolbar strong {
+      font-size: 16px;
+    }
+
+    .finding-modal-content {
+      padding: 0;
+    }
+
+    .finding-modal-content .finding-card {
+      margin: 0;
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+    }
+
+    #backTop {
+      position: fixed;
+      top: 50%;
+      right: 18px;
+      z-index: 9000;
+      display: none;
+      transform: translateY(-50%);
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.18);
+    }
+
+    #backTop.show {
+      display: block;
+    }
+
+    @media (max-width: 900px) {
+      .summary-grid,
+      .finding-meta,
+      .shot-grid-row,
+      .finding-body,
+      .split-panel {
+        grid-template-columns: 1fr;
+      }
+
+      .finding-head {
+        flex-direction: column;
+      }
+
+      .feedback-cell {
+        min-width: 220px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="report-shell" id="top">
+    <header class="panel report-header">
+      <h1>UI Inspection Report</h1>
+      <p class="muted">Wireframe reference for UI Inspection Mode report.html. The wireframe uses English as the default report UI language. Replace all sample data with real inspection evidence and localize report text to the requested report language.</p>
+      <div class="summary-grid" aria-label="Summary dashboard">
+        <div class="summary-card">
+          <span>Inspection status</span>
+          <strong>completedWithIssues</strong>
+          <small>Target locale: en_US</small>
+        </div>
+        <div class="summary-card">
+          <span>Findings</span>
+          <strong>3</strong>
+          <small>2 verifiedFixed, 1 open</small>
+        </div>
+        <div class="summary-card">
+          <span>Screenshots</span>
+          <strong>12</strong>
+          <small>Coverage, before, and after evidence</small>
+        </div>
+        <div class="summary-card">
+          <span>Visual review</span>
+          <strong>partial</strong>
+          <small>Reviewer reports triaged</small>
+        </div>
+      </div>
+    </header>
+
+    <section class="panel" aria-labelledby="attention-title">
+      <div class="section-title">
+        <h2 id="attention-title">Human attention and risk</h2>
+      </div>
+      <ul>
+        <li><a href="#I18N-002">I18N-002</a>: high fix risk because it changes a shared table action layout.</li>
+        <li><a href="#BLOCKER-001">BLOCKER-001</a>: route stayed blank after reload; this blocks coverage but is not confirmed as an i18n defect.</li>
+      </ul>
+    </section>
+
+    <section class="panel" id="finding-overview" aria-labelledby="overview-title">
+      <div class="section-title">
+        <h2 id="overview-title">Finding overview and feedback</h2>
+      </div>
+      <div class="feedback-actions">
+        <button class="primary" id="copyFeedback" type="button">Copy findings and feedback</button>
+        <span class="muted" id="copyStatus">Only findings with feedback will be copied.</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Title</th>
+              <th>Fix risk</th>
+              <th>Status</th>
+              <th>Fix verification</th>
+              <th>Feedback</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><a href="#I18N-001">I18N-001</a></td>
+              <td class="overview-title">
+                <a href="#I18N-001" data-finding-modal="I18N-001">Filter placeholder is truncated in English</a>
+                <div class="risk-note">Risk rationale: small local width adjustment only; no shared layout behavior changed.</div>
+              </td>
+              <td><span class="badge risk-low">low</span></td>
+              <td><span class="badge verified-fixed">verifiedFixed</span></td>
+              <td><span class="badge verification-high">high</span></td>
+              <td class="feedback-cell"><textarea data-feedback-id="I18N-001" placeholder="Example: accepted, no further action."></textarea></td>
+            </tr>
+            <tr>
+              <td><a href="#I18N-002">I18N-002</a></td>
+              <td class="overview-title">
+                <a href="#I18N-002" data-finding-modal="I18N-002">Table action group is crowded after translation</a>
+                <div class="risk-note">Risk rationale: broad action-column layout change; scope to affected locale if unavoidable and require human review.</div>
+              </td>
+              <td><span class="badge risk-high">high</span></td>
+              <td><span class="badge verified-fixed">verifiedFixed</span></td>
+              <td><span class="badge verification-high">high</span></td>
+              <td class="feedback-cell"><textarea data-feedback-id="I18N-002" placeholder="Example: please also check narrow screens."></textarea></td>
+            </tr>
+            <tr>
+              <td><a href="#I18N-003">I18N-003</a></td>
+              <td class="overview-title">
+                <a href="#I18N-003" data-finding-modal="I18N-003">Header product separator is mojibake</a>
+                <div class="risk-note">Risk rationale: likely shared shell/header ownership; current repo may not own the fix.</div>
+              </td>
+              <td><span class="badge risk-medium">medium</span></td>
+              <td><span class="badge open">open</span></td>
+              <td><span class="badge verification-low">low</span></td>
+              <td class="feedback-cell"><textarea data-feedback-id="I18N-003" placeholder="Example: route to shared header owner."></textarea></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="findings" aria-labelledby="findings-title">
+      <h2 id="findings-title">Finding details</h2>
+
+      <article class="finding-card" id="I18N-001">
+        <header class="finding-head">
+          <div>
+            <h3>I18N-001 Filter placeholder is truncated in English</h3>
+            <p class="muted">Category: truncation / filter toolbar</p>
+          </div>
+          <div class="badge-row" aria-label="Finding status badges">
+            <span class="badge medium">severity: medium</span>
+            <span class="badge verified-fixed">status: verifiedFixed</span>
+            <span class="badge risk-low">risk: low</span>
+            <span class="badge verification-high">verification: high</span>
+          </div>
+        </header>
+
+        <dl class="finding-meta">
+          <div><dt>State</dt><dd><code>#/rules</code>, English, 1280px viewport</dd></div>
+          <div><dt>i18n relevance</dt><dd>i18n-related</dd></div>
+          <div><dt>Owner</dt><dd>current repository</dd></div>
+          <div><dt>Expected</dt><dd>Placeholder remains fully readable.</dd></div>
+          <div><dt>Actual</dt><dd>Translated placeholder is clipped.</dd></div>
+          <div><dt>Acceptance</dt><dd>Reopen page and capture replacement screenshot.</dd></div>
+        </dl>
+
+        <div class="shot-grid">
+          <div class="shot-grid-row">
+            <div>
+              <h4>Before / issue evidence</h4>
+              <figure class="annotated-shot">
+                <a class="annotated-stage" id="shot-before-001" href="#shot-before-001" data-preview-stage="shot-before-001" aria-label="Open before screenshot preview">
+                  <div class="mock-shot">
+                    <div class="mock-sidebar">
+                      <div class="mock-row"></div>
+                      <div class="mock-row medium"></div>
+                      <div class="mock-row short"></div>
+                    </div>
+                    <div class="mock-content">
+                      <div class="mock-row medium"></div>
+                      <div class="mock-row"></div>
+                      <div class="mock-table">
+                        <div class="mock-cell"></div>
+                        <div class="mock-cell"></div>
+                        <div class="mock-cell"></div>
+                      </div>
+                    </div>
+                  </div>
+                  <span class="redbox" style="left:48%;top:18%;width:28%;height:10%"><em>truncated placeholder</em></span>
+                </a>
+                <figcaption>Before screenshot: red box marks the clipped English placeholder.</figcaption>
+              </figure>
+            </div>
+            <div>
+              <h4>After / verification evidence</h4>
+              <figure class="annotated-shot">
+                <a class="annotated-stage" id="shot-after-001" href="#shot-after-001" data-preview-stage="shot-after-001" aria-label="Open after screenshot preview">
+                  <div class="mock-shot">
+                    <div class="mock-sidebar">
+                      <div class="mock-row"></div>
+                      <div class="mock-row medium"></div>
+                      <div class="mock-row short"></div>
+                    </div>
+                    <div class="mock-content">
+                      <div class="mock-row"></div>
+                      <div class="mock-row medium"></div>
+                      <div class="mock-table">
+                        <div class="mock-cell"></div>
+                        <div class="mock-cell"></div>
+                        <div class="mock-cell"></div>
+                      </div>
+                    </div>
+                  </div>
+                  <span class="redbox" style="left:48%;top:18%;width:36%;height:10%"><em>verified full label</em></span>
+                </a>
+                <figcaption>After screenshot: the same area is readable after the fix.</figcaption>
+              </figure>
+            </div>
+          </div>
+        </div>
+
+        <section class="fix-diff" aria-label="Fix diff">
+          <h4>Code change summary</h4>
+          <div class="diff-file">
+            <div class="diff-title">
+              <strong>src/pages/ExampleToolbar.tsx</strong>
+              <span>Widen the local select only where the translated label needs space.</span>
+            </div>
+            <div class="diff-scroll">
+              <table class="diff-table">
+                <thead><tr><th>Before</th><th>After</th></tr></thead>
+                <tbody>
+                  <tr class="hunk"><td colspan="2">@@ toolbar select width @@</td></tr>
+                  <tr class="del"><td>style={{ width: 200 }}</td><td></td></tr>
+                  <tr class="add"><td></td><td>style={{ width: isEnglish ? 260 : 200 }}</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <div class="finding-body">
+          <section>
+            <h4>Issue explanation</h4>
+            <p>The English label is longer than the default-locale text and the control has a fixed width.</p>
+          </section>
+          <section>
+            <h4>Fix explanation</h4>
+            <p>The fix increases local width after reusing the repository locale helper. It does not shorten source copy for layout.</p>
+          </section>
+          <section>
+            <h4>Human attention</h4>
+            <p>No human follow-up required beyond normal review.</p>
+          </section>
+          <section>
+            <h4>Retest</h4>
+            <p>Open the same URL, locale, and viewport; confirm the placeholder is not clipped; capture a replacement screenshot.</p>
+          </section>
+        </div>
+      </article>
+
+      <article class="finding-card" id="I18N-002">
+        <header class="finding-head">
+          <div>
+            <h3>I18N-002 Table action group is crowded after translation</h3>
+            <p class="muted">Category: component visual integrity / table action group</p>
+          </div>
+          <div class="badge-row">
+            <span class="badge high">severity: high</span>
+            <span class="badge verified-fixed">status: verifiedFixed</span>
+            <span class="badge risk-high">risk: high</span>
+            <span class="badge verification-high">verification: high</span>
+            <span class="badge attention">human review</span>
+          </div>
+        </header>
+        <dl class="finding-meta">
+          <div><dt>State</dt><dd><code>#/monitor</code>, table action column</dd></div>
+          <div><dt>i18n relevance</dt><dd>i18n-related</dd></div>
+          <div><dt>Owner</dt><dd>current repository</dd></div>
+        </dl>
+        <div class="shot-grid">
+          <div class="shot-grid-row">
+            <div><h4>Before</h4><figure class="annotated-shot"><a class="annotated-stage" id="shot-before-002" href="#shot-before-002" data-preview-stage="shot-before-002"><div class="mock-shot"><div class="mock-sidebar"></div><div class="mock-content"><div class="mock-row"></div><div class="mock-row"></div><div class="mock-table"><div class="mock-cell"></div><div class="mock-cell"></div><div class="mock-cell"></div></div></div></div><span class="redbox" style="left:76%;top:32%;width:20%;height:12%"><em>crowded actions</em></span></a><figcaption>Action group is technically visible but visually broken.</figcaption></figure></div>
+            <div><h4>After</h4><figure class="annotated-shot"><a class="annotated-stage" id="shot-after-002" href="#shot-after-002" data-preview-stage="shot-after-002"><div class="mock-shot"><div class="mock-sidebar"></div><div class="mock-content"><div class="mock-row medium"></div><div class="mock-row"></div><div class="mock-table"><div class="mock-cell"></div><div class="mock-cell"></div><div class="mock-cell"></div></div></div></div><span class="redbox" style="left:72%;top:32%;width:24%;height:12%"><em>stable action group</em></span></a><figcaption>Action group remains readable after layout adjustment.</figcaption></figure></div>
+          </div>
+        </div>
+        <div class="finding-body">
+          <section><h4>Issue explanation</h4><p>Translated action text is longer and the locked action column no longer reads as one stable control group.</p></section>
+          <section><h4>Fix explanation</h4><p>Prefer shorter natural action copy first. A small local width adjustment can be low risk; if a broad action-column or responsive layout change is unavoidable, scope it to the affected locale, mark it high risk, and verify neighboring rows, breakpoints, and source-locale layout.</p></section>
+        </div>
+      </article>
+
+      <article class="finding-card" id="I18N-003">
+        <header class="finding-head">
+          <div>
+            <h3>I18N-003 Header product separator is mojibake</h3>
+            <p class="muted">Category: language quality / external dependency</p>
+          </div>
+          <div class="badge-row">
+            <span class="badge medium">severity: medium</span>
+            <span class="badge open">status: open</span>
+            <span class="badge risk-medium">risk: medium</span>
+            <span class="badge verification-low">verification: low</span>
+            <span class="badge attention">needs owner</span>
+          </div>
+        </header>
+        <dl class="finding-meta">
+          <div><dt>State</dt><dd>Global shell header</dd></div>
+          <div><dt>i18n relevance</dt><dd>i18n-related</dd></div>
+          <div><dt>Owner</dt><dd>shared component package</dd></div>
+        </dl>
+        <div class="shot-grid">
+          <div class="shot-grid-row">
+            <div><h4>Issue evidence</h4><figure class="annotated-shot"><a class="annotated-stage" id="shot-open-003" href="#shot-open-003" data-preview-stage="shot-open-003"><div class="mock-shot"><div class="mock-sidebar"></div><div class="mock-content"><div class="mock-row medium"></div><div class="mock-row short"></div></div></div><span class="redbox" style="left:16%;top:6%;width:32%;height:9%"><em>mojibake separator</em></span></a><figcaption>Open issue: route to the shared header owner instead of hiding it locally.</figcaption></figure></div>
+            <div><h4>Follow-up status</h4><div class="callout"><p>No local code diff should be shown when no local source/style/config/locale change was made.</p></div></div>
+          </div>
+        </div>
+        <div class="finding-body">
+          <section><h4>Recommendation</h4><p>Assign to the shared shell/header owner and keep this separate from normal current-repository UI-fit fixes.</p></section>
+          <section><h4>Acceptance criteria</h4><p>Open any inspected page in the target locale and confirm the header separator renders correctly.</p></section>
+        </div>
+      </article>
+    </section>
+
+    <section class="panel" aria-labelledby="coverage-title">
+      <div class="section-title">
+        <h2 id="coverage-title">Coverage matrix</h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Scope</th>
+              <th>URL or state</th>
+              <th>Action</th>
+              <th>Status</th>
+              <th>Screenshot</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Rules list</td>
+              <td><code>#/rules</code></td>
+              <td>Opened from left navigation</td>
+              <td><span class="badge covered">covered</span></td>
+              <td><a href="#shot-coverage-001" data-preview-stage="shot-coverage-001">001-rules-list.png</a></td>
+              <td>Filter toolbar and table visible.</td>
+            </tr>
+            <tr>
+              <td>Create detail</td>
+              <td><code>#/rules/create</code></td>
+              <td>Clicked safe create entry, did not submit</td>
+              <td><span class="badge covered">covered</span></td>
+              <td><a href="#shot-before-001" data-preview-stage="shot-before-001">002-create-detail.png</a></td>
+              <td>Form label and validation states checked.</td>
+            </tr>
+            <tr id="BLOCKER-001">
+              <td>External report route</td>
+              <td><code>#/external-report</code></td>
+              <td>Opened route, waited, reloaded once</td>
+              <td><span class="badge open">blocked</span></td>
+              <td>N/A</td>
+              <td>Blank after reload; recorded as i18n-blocking, not a normal i18n finding.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="separation-title">
+      <div class="section-title">
+        <h2 id="separation-title">Blockers and non-i18n observations</h2>
+      </div>
+      <div class="split-panel">
+        <div class="callout">
+          <h3>Blockers</h3>
+          <p><strong>BLOCKER-001</strong>: The external report route stayed blank after retry. This blocked coverage and needs route/API/runtime investigation.</p>
+        </div>
+        <div class="callout">
+          <h3>Non-i18n observations</h3>
+          <p>Example: a stale data count or backend error that is visibly unrelated to translation should be summarized here, not mixed into normal i18n findings.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="timeline-title">
+      <div class="section-title">
+        <h2 id="timeline-title">Inspection timeline</h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Time</th><th>Action</th><th>Observed state</th><th>Screenshot</th></tr></thead>
+          <tbody>
+            <tr><td>10:00</td><td>Open target URL</td><td>Target locale loaded.</td><td><a href="#shot-coverage-001" data-preview-stage="shot-coverage-001">001-initial.png</a></td></tr>
+            <tr><td>10:05</td><td>Open Rules list</td><td>Filter truncation observed.</td><td><a href="#shot-before-001" data-preview-stage="shot-before-001">002-before.png</a></td></tr>
+            <tr><td>10:30</td><td>Re-inspect after fix</td><td>Replacement screenshot verifies fix.</td><td><a href="#shot-after-001" data-preview-stage="shot-after-001">003-after.png</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="visual-review-title">
+      <div class="section-title">
+        <h2 id="visual-review-title">Independent visual review appendix</h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Report</th><th>Scope</th><th>Result</th><th>Triage</th><th>Linked findings</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td><code>visual-reviews/001-rules.md</code></td><td>Rules list</td><td>issues found</td><td>accepted</td><td><a href="#I18N-001">I18N-001</a></td><td>Reviewer observation converted to normal finding.</td></tr>
+            <tr><td><code>visual-reviews/002-monitor.md</code></td><td>Monitor</td><td>issues found</td><td>accepted</td><td><a href="#I18N-002">I18N-002</a></td><td>Component visual integrity issue accepted.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="appendix-title">
+      <div class="section-title">
+        <h2 id="appendix-title">Screenshot appendix</h2>
+      </div>
+      <p class="muted">A real report must list every screenshot captured during coverage, fixing, and re-inspection. Thumbnails and links open the in-page preview.</p>
+      <div class="appendix-grid">
+        <figure class="annotated-shot">
+          <a class="annotated-stage" id="shot-coverage-001" href="#shot-coverage-001" data-preview-stage="shot-coverage-001">
+            <div class="mock-shot"><div class="mock-sidebar"></div><div class="mock-content"><div class="mock-row"></div><div class="mock-row medium"></div><div class="mock-table"><div class="mock-cell"></div><div class="mock-cell"></div><div class="mock-cell"></div></div></div></div>
+          </a>
+          <figcaption>001-rules-list.png - coverage screenshot for Rules list.</figcaption>
+        </figure>
+        <figure class="annotated-shot">
+          <a class="annotated-stage" href="#shot-before-001" data-preview-stage="shot-before-001">
+            <div class="mock-shot"><div class="mock-sidebar"></div><div class="mock-content"><div class="mock-row medium"></div><div class="mock-row"></div></div></div>
+          </a>
+          <figcaption>002-before.png - issue evidence screenshot.</figcaption>
+        </figure>
+      </div>
+    </section>
+  </main>
+
+  <button id="backTop" type="button">Back to top</button>
+
+  <div class="lightbox" id="lightbox" aria-hidden="true">
+    <button class="lightbox-close" type="button">Close</button>
+    <div class="lightbox-inner" id="lightboxInner"></div>
+  </div>
+
+  <div class="finding-modal" id="findingModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="findingModalTitle">
+    <div class="finding-modal-panel" role="document">
+      <div class="finding-modal-toolbar">
+        <strong id="findingModalTitle">Finding detail</strong>
+        <button class="finding-modal-close" type="button">Close</button>
+      </div>
+      <div class="finding-modal-content" id="findingModalContent"></div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var feedbackInputs = Array.prototype.slice.call(document.querySelectorAll("textarea[data-feedback-id]"));
+      var copyButton = document.getElementById("copyFeedback");
+      var copyStatus = document.getElementById("copyStatus");
+      var storageKey = "ui-inspection-report-wireframe-feedback";
+
+      try {
+        var saved = JSON.parse(localStorage.getItem(storageKey) || "{}");
+        feedbackInputs.forEach(function (input) {
+          if (saved[input.dataset.feedbackId]) {
+            input.value = saved[input.dataset.feedbackId];
+          }
+        });
+      } catch (error) {
+        // Keep the wireframe usable even when storage is unavailable.
+      }
+
+      feedbackInputs.forEach(function (input) {
+        input.addEventListener("input", function () {
+          try {
+            var data = {};
+            feedbackInputs.forEach(function (item) {
+              if (item.value.trim()) {
+                data[item.dataset.feedbackId] = item.value;
+              }
+            });
+            localStorage.setItem(storageKey, JSON.stringify(data));
+          } catch (error) {
+            // Ignore storage errors in local file previews.
+          }
+        });
+      });
+
+      function fallbackCopy(text) {
+        var temporary = document.createElement("textarea");
+        temporary.value = text;
+        temporary.setAttribute("readonly", "");
+        temporary.style.position = "fixed";
+        temporary.style.left = "-9999px";
+        document.body.appendChild(temporary);
+        temporary.select();
+        var copied = false;
+        try {
+          copied = document.execCommand("copy");
+        } catch (error) {
+          copied = false;
+        }
+        document.body.removeChild(temporary);
+        return copied;
+      }
+
+      copyButton.addEventListener("click", function () {
+        var copiedItems = feedbackInputs
+          .map(function (input) {
+            return {
+              id: input.dataset.feedbackId,
+              text: input.value.trim()
+            };
+          })
+          .filter(function (item) {
+            return item.text;
+          })
+          .map(function (item) {
+            return "Finding " + item.id + ": " + item.text;
+          });
+
+        if (!copiedItems.length) {
+          copyStatus.textContent = "No feedback to copy.";
+          return;
+        }
+
+        var text = copiedItems.join(String.fromCharCode(10) + String.fromCharCode(10));
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(function () {
+            copyStatus.textContent = "Copied " + copiedItems.length + " finding(s) with feedback.";
+          }, function () {
+            copyStatus.textContent = fallbackCopy(text) ? "Copied " + copiedItems.length + " finding(s) with feedback." : "Copy failed.";
+          });
+        } else {
+          copyStatus.textContent = fallbackCopy(text) ? "Copied " + copiedItems.length + " finding(s) with feedback." : "Copy failed.";
+        }
+      });
+
+      var lightbox = document.getElementById("lightbox");
+      var lightboxInner = document.getElementById("lightboxInner");
+      var findingModal = document.getElementById("findingModal");
+      var findingModalTitle = document.getElementById("findingModalTitle");
+      var findingModalContent = document.getElementById("findingModalContent");
+
+      function openPreview(stageId) {
+        var source = document.getElementById(stageId);
+        if (!source) {
+          return;
+        }
+        var wrapper = document.createElement("div");
+        wrapper.className = "lightbox-stage";
+        wrapper.appendChild(source.cloneNode(true));
+        lightboxInner.innerHTML = "";
+        lightboxInner.appendChild(wrapper);
+        lightbox.classList.add("open");
+        lightbox.setAttribute("aria-hidden", "false");
+      }
+
+      function closePreview() {
+        lightbox.classList.remove("open");
+        lightbox.setAttribute("aria-hidden", "true");
+        lightboxInner.innerHTML = "";
+      }
+
+      function openFindingModal(findingId) {
+        var source = document.getElementById(findingId);
+        if (!source) {
+          return;
+        }
+        var clone = source.cloneNode(true);
+        clone.removeAttribute("id");
+        Array.prototype.slice.call(clone.querySelectorAll("[id]")).forEach(function (node) {
+          node.removeAttribute("id");
+        });
+        findingModalTitle.textContent = source.querySelector("h3") ? source.querySelector("h3").textContent : findingId;
+        findingModalContent.innerHTML = "";
+        findingModalContent.appendChild(clone);
+        findingModal.classList.add("open");
+        findingModal.setAttribute("aria-hidden", "false");
+      }
+
+      function closeFindingModal() {
+        findingModal.classList.remove("open");
+        findingModal.setAttribute("aria-hidden", "true");
+        findingModalContent.innerHTML = "";
+      }
+
+      document.addEventListener("click", function (event) {
+        var findingTarget = event.target.closest("[data-finding-modal]");
+        if (findingTarget) {
+          event.preventDefault();
+          openFindingModal(findingTarget.getAttribute("data-finding-modal"));
+          return;
+        }
+        var previewTarget = event.target.closest("[data-preview-stage]");
+        if (previewTarget) {
+          event.preventDefault();
+          openPreview(previewTarget.getAttribute("data-preview-stage"));
+          return;
+        }
+        if (event.target === lightbox || event.target.classList.contains("lightbox-close")) {
+          closePreview();
+          return;
+        }
+        if (event.target === findingModal || event.target.classList.contains("finding-modal-close")) {
+          closeFindingModal();
+        }
+      });
+
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape") {
+          if (lightbox.classList.contains("open")) {
+            closePreview();
+            return;
+          }
+          if (findingModal.classList.contains("open")) {
+            closeFindingModal();
+          }
+        }
+      });
+
+      var backTop = document.getElementById("backTop");
+
+      function scrollTopValue() {
+        var scroller = document.scrollingElement || document.documentElement;
+        return Math.max(window.pageYOffset || 0, scroller.scrollTop || 0, document.body.scrollTop || 0);
+      }
+
+      function scrollableContainers() {
+        return Array.prototype.slice.call(document.querySelectorAll("*")).filter(function (element) {
+          var style = window.getComputedStyle(element);
+          return /(auto|scroll|overlay)/.test(style.overflowY) && element.scrollHeight > element.clientHeight + 8;
+        });
+      }
+
+      function updateBackTop() {
+        backTop.classList.toggle("show", scrollTopValue() > 360);
+      }
+
+      function forceTop() {
+        if (location.hash) {
+          history.replaceState(null, document.title, location.pathname + location.search);
+        }
+        var targets = [document.scrollingElement, document.documentElement, document.body].concat(scrollableContainers()).filter(Boolean);
+        window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+        targets.forEach(function (target) {
+          try {
+            target.scrollTop = 0;
+          } catch (error) {
+            // Ignore read-only scroll containers.
+          }
+        });
+        requestAnimationFrame(function () {
+          window.scrollTo(0, 0);
+          targets.forEach(function (target) {
+            try {
+              target.scrollTop = 0;
+            } catch (error) {
+              // Ignore read-only scroll containers.
+            }
+          });
+        });
+      }
+
+      backTop.addEventListener("click", forceTop);
+      window.addEventListener("scroll", updateBackTop, { passive: true });
+      document.addEventListener("scroll", updateBackTop, true);
+      updateBackTop();
+    })();
+  </script>
+</body>
+</html>

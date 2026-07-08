@@ -78,10 +78,15 @@
  *         "deferred": 0,
  *         "wontFix": 0
  *       },
- *       "byFixConfidence": {
+ *       "byFixVerification": {
  *         "high": 1,
  *         "medium": 0,
  *         "low": 0
+ *       },
+ *       "byFixRisk": {
+ *         "high": 0,
+ *         "medium": 0,
+ *         "low": 1
  *       },
  *       "byUrl": {
  *         "https://example.com/orders": 1
@@ -93,7 +98,8 @@
  *       "id": "I18N-001",
  *       "severity": "high",
  *       "status": "verifiedFixed",
- *       "fixConfidence": "high",
+ *       "fixVerification": "high",
+ *       "fixRisk": "low",
  *       "title": "Filter button text overlaps the icon",
  *       "screenshotRefs": ["screenshots/002-filter-overlap-before.png"],
  *       "humanAttention": {
@@ -106,7 +112,14 @@
  *         "fixedBy": "Updated the filter button layout styles.",
  *         "verifiedAt": "2026-07-02T10:17:30+08:00",
  *         "verificationScreenshotRefs": ["screenshots/004-filter-overlap-after.png"],
- *         "notes": "The German label now wraps without shifting neighboring controls."
+ *         "notes": "The German label now wraps without shifting neighboring controls.",
+ *         "codeDiffs": [
+ *           {
+ *             "filePath": "src/pages/orders/FilterBar.module.css",
+ *             "description": "Allow the local filter button label to wrap without covering the icon.",
+ *             "diff": "@@\\n-.filterButton { white-space: nowrap; }\\n+.filterButton { white-space: normal; }\\n"
+ *           }
+ *         ]
  *       }
  *     }
  *   ]
@@ -126,32 +139,71 @@ export type I18nUiInspectionSeverity = "critical" | "high" | "medium" | "low";
 
 /**
  * Finding lifecycle status.
+ *
+ * - open: issue is still present and not fixed.
+ * - fixed: fix was made but exact UI state has not been re-inspected.
+ * - verifiedFixed: fix was confirmed with replacement screenshot evidence.
+ * - deferred: real issue postponed by the team.
+ * - wontFix: real issue that the team does not plan to fix.
+ * - needs-product-confirmation: expected behavior, product wording, data
+ *   ownership, or route ownership must be confirmed before fixing.
+ * - non-i18n: out-of-scope product issue or coverage blocker that is not
+ *   treated as normal localization debt.
  */
 export type I18nUiInspectionFindingStatus =
   | "open"
   | "fixed"
   | "verifiedFixed"
   | "deferred"
-  | "wontFix";
+  | "wontFix"
+  | "needs-product-confirmation"
+  | "non-i18n";
 
 /**
- * Confidence that the fix or recommended fix is correct and unlikely to create
- * important side effects.
+ * Verification level showing how well source review and browser/screenshot
+ * evidence prove that the fix or recommendation solves this finding. This is
+ * not an AI confidence score and not a side-effect risk score; use `fixRisk`
+ * for compatibility or regression risk.
  *
- * - high: verified or low-risk fix; usually does not need human attention.
- * - medium: likely correct, but the scope, side effects, or compatibility
- *   impact should be reviewed.
- * - low: uncertain fix or high side-effect/compatibility risk; human attention
- *   is required before treating the issue as safely resolved.
+ * - high: verified with the relevant UI state and evidence clearly shows the
+ *   issue is resolved.
+ * - medium: likely correct, but coverage is partial or some assumptions remain.
+ * - low: uncertain fix or recommendation; human attention is required before
+ *   treating the issue as resolved.
  */
-export type I18nUiInspectionFixConfidence = "high" | "medium" | "low";
+export type I18nUiInspectionFixVerificationLevel = "high" | "medium" | "low";
+
+/**
+ * @deprecated Use `I18nUiInspectionFixVerificationLevel`.
+ */
+export type I18nUiInspectionFixConfidence = I18nUiInspectionFixVerificationLevel;
+
+/**
+ * Risk that the fix or recommended fix may cause side effects outside the
+ * directly verified finding.
+ *
+ * - high: likely affects shared components, broad page layout, responsive
+ *   grid/column allocation, many routes/locales, critical behavior,
+ *   backend/API contracts, default-locale visual layout, product meaning,
+ *   design-system rules, or introduces a locale-scoped broad layout branch;
+ *   human review is required.
+ * - medium: plausible side effects exist, such as route-family or breakpoint
+ *   impact; human review is recommended.
+ * - low: local, narrow change, such as a small component-level width, spacing,
+ *   or wrapping adjustment, with low compatibility or product risk.
+ */
+export type I18nUiInspectionFixRiskLevel = "high" | "medium" | "low";
 
 /**
  * Primary visible issue category. Use `component visual integrity` when a
  * compact control remains readable and has no overflow, but the component no
  * longer looks like one coherent control because grouped items wrap, borders
  * break, radius is applied to the wrong items, active state detaches, or
- * icon/text/arrow relationships are visually broken.
+ * icon/text/arrow relationships are visually broken. Use
+ * `text wrapping / word-break` for unacceptable mid-word breaks such as a table
+ * header split into `Associatio` / `n Range`, and use
+ * `form label visual integrity` for labels whose colon, required marker, or
+ * punctuation is visually orphaned.
  */
 export type I18nUiInspectionIssueCategory =
   | "language quality"
@@ -160,10 +212,31 @@ export type I18nUiInspectionIssueCategory =
   | "overlap"
   | "misalignment"
   | "component visual integrity"
+  | "text wrapping / word-break"
+  | "form label visual integrity"
   | "untranslated text"
   | "raw placeholder/tag"
   | "terminology inconsistency"
-  | "interaction defect";
+  | "interaction defect"
+  | "page load / blank screen"
+  | "non-i18n observation";
+
+/**
+ * Whether an observation is part of the i18n/localized UI-fit scope.
+ *
+ * - i18n-related: caused or exposed by translation, locale, casing,
+ *   terminology, fallback, ICU/rich-tag rendering, or language-dependent
+ *   layout.
+ * - i18n-blocking: not proven to be caused by i18n, but it blocks inspection
+ *   coverage, such as a blank page, permissions, route failure, or missing test
+ *   data.
+ * - non-i18n: useful context or an out-of-scope observation unrelated to
+ *   localization. These should not dominate the main finding list.
+ */
+export type I18nUiInspectionI18nRelevance =
+  | "i18n-related"
+  | "i18n-blocking"
+  | "non-i18n";
 
 export type I18nUiInspectionTranslationQualityCategory =
   | "Accuracy"
@@ -215,8 +288,8 @@ export type I18nUiInspectionVisualReviewResult =
  *   findings.
  * - needsFollowUp: the report still requires Browser Use, source review, product
  *   context, or human review.
- * - noIssues: reviewer reported no visible issues and the main agent accepted
- *   that result.
+ * - noIssues: reviewer reported no visible issues and the primary inspection
+ *   accepted that result.
  */
 export type I18nUiInspectionVisualReviewTriageStatus =
   | "accepted"
@@ -236,9 +309,19 @@ export type I18nUiInspectionSeverityCounts = Record<I18nUiInspectionSeverity, nu
 export type I18nUiInspectionStatusCounts = Record<I18nUiInspectionFindingStatus, number>;
 
 /**
- * Complete count map for findings grouped by fix confidence.
+ * Complete count map for findings grouped by fix verification.
  */
-export type I18nUiInspectionFixConfidenceCounts = Record<I18nUiInspectionFixConfidence, number>;
+export type I18nUiInspectionFixVerificationCounts = Record<I18nUiInspectionFixVerificationLevel, number>;
+
+/**
+ * @deprecated Use `I18nUiInspectionFixVerificationCounts`.
+ */
+export type I18nUiInspectionFixConfidenceCounts = I18nUiInspectionFixVerificationCounts;
+
+/**
+ * Complete count map for findings grouped by fix risk.
+ */
+export type I18nUiInspectionFixRiskCounts = Record<I18nUiInspectionFixRiskLevel, number>;
 
 export interface I18nUiInspectionTarget {
   /**
@@ -291,28 +374,35 @@ export interface I18nUiInspectionCoverageEvidence {
 
 export interface I18nUiInspectionScreenshotAnnotationBox {
   /**
-   * Left position as a percentage of the original screenshot width.
+   * Left position as a percentage of the original screenshot's natural pixel
+   * width. Compute from screenshot pixels, not from a rendered thumbnail,
+   * cropped preview, viewport, card, or lightbox wrapper.
    */
   x: number;
 
   /**
-   * Top position as a percentage of the original screenshot height.
+   * Top position as a percentage of the original screenshot's natural pixel
+   * height. `report.html` must render this against the actual image stage, not
+   * against a fixed-aspect wrapper that can letterbox or crop the image.
    */
   y: number;
 
   /**
-   * Box width as a percentage of the original screenshot width.
+   * Box width as a percentage of the original screenshot's natural pixel width.
    */
   width: number;
 
   /**
-   * Box height as a percentage of the original screenshot height.
+   * Box height as a percentage of the original screenshot's natural pixel
+   * height.
    */
   height: number;
 
   /**
    * Short visible label for the red-box annotation, such as "truncated label",
-   * "broken border", "wrong unit", or "untranslated text".
+   * "broken border", "wrong unit", or "untranslated text". `report.html`
+   * should render this label visibly as a callout or nearby caption; do not
+   * expose it only through `title` or `alt` text.
    */
   label?: string;
 }
@@ -327,8 +417,12 @@ export interface I18nUiInspectionScreenshotAnnotation {
 
   /**
    * One or more red-box regions to render over this screenshot. Coordinates are
-   * screenshot-relative percentages so `report.html` can reuse them in
-   * thumbnails, finding cards, and enlarged lightbox previews.
+   * screenshot-relative percentages so `report.html` can reuse them in finding
+   * cards, screenshot appendix items, and enlarged lightbox previews. Renderers
+   * must preserve the screenshot image coordinate system: place boxes in a
+   * positioned image stage whose size/aspect ratio matches the rendered image,
+   * and avoid attaching boxes to wrappers using unrelated aspect ratios,
+   * `object-fit`, cropped thumbnails, or page/backdrop coordinates.
    */
   boxes: I18nUiInspectionScreenshotAnnotationBox[];
 }
@@ -400,15 +494,53 @@ export interface I18nUiInspectionIssueSummary {
   byStatus: I18nUiInspectionStatusCounts;
 
   /**
-   * Finding counts by fix confidence. `report.html` should render high as
+   * Finding counts by fix verification. `report.html` should render high as
    * green, medium as yellow, and low as red.
    */
-  byFixConfidence: I18nUiInspectionFixConfidenceCounts;
+  byFixVerification: I18nUiInspectionFixVerificationCounts;
+
+  /**
+   * @deprecated Older reports used this name for fix verification.
+   */
+  byFixConfidence?: I18nUiInspectionFixConfidenceCounts;
+
+  /**
+   * Finding counts by fix risk. `report.html` should render high as red,
+   * medium as yellow, and low as green.
+   */
+  byFixRisk: I18nUiInspectionFixRiskCounts;
 
   /**
    * Finding counts by URL, such as {"https://example.com/settings": 2}.
    */
   byUrl: Record<string, number>;
+
+  /**
+   * Optional finding counts by i18n relevance. Useful for keeping real i18n
+   * issues separate from coverage blockers and out-of-scope product issues.
+   */
+  byI18nRelevance?: Record<I18nUiInspectionI18nRelevance, number>;
+}
+
+export interface I18nUiInspectionCodeDiff {
+  /**
+   * Repository-relative path for the changed file when available.
+   */
+  filePath: string;
+
+  /**
+   * Short description of why this hunk matters for the finding.
+   */
+  description?: string;
+
+  /**
+   * Concise unified diff for the relevant hunk only. Avoid dumping unrelated
+   * changes; the human-readable report should make the fix understandable, not
+   * replace code review. This should be non-empty and should contain at least
+   * one meaningful hunk; omit the whole code-diff entry when no local
+   * source/style/config/locale change was made.
+   */
+  diff: string;
 }
 
 export interface I18nUiInspectionSummary {
@@ -442,6 +574,16 @@ export interface I18nUiInspectionFixEvidence {
    * Screenshot IDs or paths showing the fixed state.
    */
   verificationScreenshotRefs?: string[];
+
+  /**
+   * Concise source/style/config/locale diffs relevant to this finding. Include
+   * only meaningful hunks, and omit when the finding was not fixed locally or
+   * no code/config/locale file changed. `report.html` should render these below
+   * the finding's screenshot evidence as a contained left/right diff. If this
+   * array is empty or every diff parses to no hunk, omit the entire diff area
+   * rather than showing a blank panel.
+   */
+  codeDiffs?: I18nUiInspectionCodeDiff[];
 
   /**
    * Additional fix or verification notes that do not fit other fields.
@@ -493,10 +635,26 @@ export interface I18nUiInspectionFinding {
   status: I18nUiInspectionFindingStatus;
 
   /**
-   * Confidence that the fix or recommended fix is correct and low-risk.
+   * Verification level showing whether the fix or recommended fix solves this
+   * finding.
    * `report.html` should color high as green, medium as yellow, and low as red.
    */
-  fixConfidence: I18nUiInspectionFixConfidence;
+  fixVerification: I18nUiInspectionFixVerificationLevel;
+
+  /**
+   * @deprecated Older reports used this name for fix verification.
+   */
+  fixConfidence?: I18nUiInspectionFixConfidence;
+
+  /**
+   * Side-effect, compatibility, regression, or product-risk level for the fix
+   * or recommended fix. This is separate from `fixVerification`: a fix can be
+   * highly likely to solve the visible issue but still be high risk if it
+   * changes shared layout, responsive allocation, shared components, backend
+   * contracts, default-locale visual layout, product meaning, or adds a
+   * locale-scoped broad layout branch.
+   */
+  fixRisk: I18nUiInspectionFixRiskLevel;
 
   /**
    * Short human-readable finding title.
@@ -507,6 +665,35 @@ export interface I18nUiInspectionFinding {
    * Primary visible issue category. Older reports may omit this field.
    */
   category?: I18nUiInspectionIssueCategory;
+
+  /**
+   * Whether this finding belongs to the i18n/localized UI-fit scope, only
+   * blocks i18n coverage, or is a non-i18n observation. New reports should set
+   * this explicitly so `report.html` can keep non-i18n issues from dominating
+   * the i18n finding list.
+   */
+  i18nRelevance?: I18nUiInspectionI18nRelevance;
+
+  /**
+   * Optional compatibility field for simple consumers that only need a boolean.
+   * Prefer `i18nRelevance` for new reports.
+   */
+  isI18nRelated?: boolean;
+
+  /**
+   * Required when `i18nRelevance` is `i18n-blocking` or `non-i18n`, or when the
+   * finding status is `non-i18n`. Explain why the observation is not being
+   * treated as a normal localization defect.
+   */
+  outOfScopeReason?: string;
+
+  /**
+   * Optional user feedback captured or initialized by `report.html`'s finding
+   * overview table. Reports may leave this empty and store live user edits in
+   * page memory or localStorage; the field exists so follow-up tools can carry
+   * feedback forward when desired.
+   */
+  feedback?: string;
 
   /**
    * Optional subtype for `component visual integrity`, such as
@@ -529,7 +716,7 @@ export interface I18nUiInspectionFinding {
   screenshotRefs: string[];
 
   /**
-   * Human attention and risk explanation, especially for medium/low confidence
+   * Human attention and risk explanation, especially for medium/low verification
    * findings or fixes that may affect compatibility, shared UI, other locales,
    * or neighboring flows.
    */
@@ -564,8 +751,9 @@ export interface I18nUiInspectionReportJson {
 
   /**
    * Display language used for the human-readable `report.html`, such as
-   * `zh-CN` or `en-US`. This follows the current conversation language by
-   * default and may differ from the inspected UI target locale.
+   * `zh-CN` or `en-US`. This follows the language used by the user's
+   * inspection request by default and may differ from the inspected UI target
+   * locale.
    */
   reportDisplayLanguage?: string;
 
@@ -588,7 +776,7 @@ export interface I18nUiInspectionReportJson {
   screenshotDirectory: string;
 
   /**
-   * Every page URL covered by this run.
+   * Every page URL covered by the inspection scope.
    */
   targets: I18nUiInspectionTarget[];
 
@@ -608,9 +796,9 @@ export interface I18nUiInspectionReportJson {
   screenshotAnnotations?: I18nUiInspectionScreenshotAnnotation[];
 
   /**
-   * Independent screenshot-review Markdown reports and the main agent's triage
-   * result for each report. Broad/full-product inspections should populate this
-   * when subagents are available; otherwise explain the limitation in
+   * Independent screenshot-review Markdown reports and the primary-inspection
+   * triage result for each report. Broad/full-product inspections should
+   * populate this when subagents are available; otherwise explain the limitation in
    * `inspection-log.md` and `report.html`.
    */
   visualReviewReports?: I18nUiInspectionVisualReviewReport[];
@@ -623,7 +811,7 @@ export interface I18nUiInspectionReportJson {
   summary: I18nUiInspectionSummary;
 
   /**
-   * Visible localized UI or language-quality issues observed during this run.
+   * Visible localized UI or language-quality issues observed during inspection.
    */
   findings: I18nUiInspectionFinding[];
 }

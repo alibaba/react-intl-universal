@@ -7,7 +7,7 @@ Use these rules when generating, reviewing, or merging non-default locale text.
 - Preserve every `{variable}` and `<tag>` exactly. Translation text may change; the message contract must not.
 - Treat the default message as the source of product intent, not as a sentence template to preserve. Native target-locale wording, local word order, and concise UI phrasing are preferred when they express the same intent more naturally.
 - Use existing non-target locale translations as terminology and tone references when task files provide them, but keep the default message as the source of truth for variables, rich tags, and current product meaning.
-- When using subagents for translation, ask each subagent to return delta JSON only. The main agent should merge files and run audit.
+- When using subagents for translation, ask each subagent to return delta JSON only. The coordinator should merge files and run audit.
 
 ## Meaning-First Localization
 
@@ -35,7 +35,11 @@ Use these rules when generating, reviewing, or merging non-default locale text.
 - Long-form text is usually lower risk. For paragraphs, FAQ text, docs notes, help text, descriptions, and explanatory content, prefer natural and accurate translation over artificial shortening.
 - When compact UI is high risk, first try a shorter non-default translation only if it preserves business meaning, naturalness, and terminology consistency.
 - If accurate wording cannot be shortened safely, keep the accurate translation and consider a general layout fix. For grouped controls, prefer preventing free wrapping inside the visual group, using an explicit grid layout, allowing the whole group to move to a new row, switching to a vertical segmented-control style with correct per-position borders/radius, increasing container width, or replacing the group with a select/dropdown when space is constrained.
-- Use language-specific CSS only as a last option when a general layout fix is too costly, breaks the default-locale visual design, or creates broader layout risk.
+- Keep layout changes as small and local as possible. A small component-level width, spacing, or wrapping adjustment can be low risk when it does not alter shared layout behavior or unaffected locales.
+- Treat broad page layout, shared table column allocation, responsive grid, fixed/locked column, default-locale visual changes, or locale-scoped broad layout branches as high-risk fixes that need human review, even when they solve the target-locale issue.
+- If a broad layout change is truly required, first identify the language or locale where the issue occurs and scope the broad change to that problem language instead of changing unaffected languages.
+- Use language-specific CSS only when needed to avoid breaking unaffected languages or the default-locale layout, and keep that branch as narrow as possible.
+- If a layout fix needs runtime locale branching, first search for and reuse the current repository's locale helper, such as `isEn()`, `isEnglish()`, `getLang()`, a `LOCALE.EN_US` enum, or a project-specific locale store. Use a local one-off check such as `intl?.getInitOptions?.()?.currentLocale?.includes?.('en')` only when no existing helper or enum is available, and keep that fallback scoped to the smallest affected component.
 - If static review is uncertain, record a UI-fit review item with key, locale, source usage, width comparison, and the reason for uncertainty. Do not enter UI Inspection Mode unless the user asks, provides a page URL for QA, or the task is a release/preflight quality gate.
 
 ## English Target Locale Rules

@@ -12,7 +12,7 @@
  *    Large tasks can be split into batch files with --max-items-per-task.
  *
  * The script does not translate text and does not edit locale files. Subagents
- * or humans should return delta JSON, and the main agent should merge those
+ * or humans should return delta JSON, and the coordinator should merge those
  * deltas with apply-translation-deltas.mjs.
  */
 
@@ -529,7 +529,7 @@ function main() {
   let commentedSourceItemCount = 0;
 
   // Create one isolated task per target locale. This shape is safe for parallel
-  // subagents because they only produce delta files; the main agent does the
+  // subagents because they only produce delta files; the coordinator does the
   // actual merge later to avoid concurrent writes to locale JSON files.
   for (const target of targets) {
     const previousTargetJson = readJsonFromGit(args["base-ref"] ? String(args["base-ref"]) : null, target.filePath);
@@ -630,7 +630,7 @@ function main() {
           "Preserve product names, technical terms, and domain terms when the target locale commonly uses them in English unless the project has a clear localized convention.",
           "Do not modify the default locale message for length reasons.",
           "Keep all ICU variables and rich tags exactly equivalent to the default message.",
-          "Prefer concise wording for compact UI copy when meaning and naturalness are preserved; if accurate wording must be longer, keep accuracy and let the main agent consider a general layout adjustment. For grouped controls, preserve component visual integrity rather than relying only on absence of overflow.",
+          "Prefer concise wording for compact UI copy when meaning and naturalness are preserved; if accurate wording must be longer, keep accuracy and let the coordinator consider a general layout adjustment. For grouped controls, preserve component visual integrity rather than relying only on absence of overflow.",
           "Return delta JSON only; do not edit locale files directly when working as a subagent.",
         ],
         items: batchItems,

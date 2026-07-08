@@ -931,7 +931,7 @@ export function inferDefaultLocale(sourceMessages, localeData) {
   const second = candidates[1] ?? null;
   const isAmbiguous = Boolean(best && second && best.score > 0 && Math.abs(best.score - second.score) < 0.05);
   // If the best and second-best candidates are too close, return unknown to
-  // force the main agent to ask or inspect project config rather than guessing.
+  // force the caller to ask or inspect project config rather than guessing.
   const defaultLocale = best && best.score >= 0.2 && !isAmbiguous ? best.locale : null;
 
   return {

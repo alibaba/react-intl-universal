@@ -5,7 +5,7 @@
  * Apply translation delta JSON files into locale JSON files.
  *
  * This script is the only step that writes translated locale files in the
- * subagent workflow. Subagents should return delta JSON; the main agent runs
+ * subagent workflow. Subagents should return delta JSON; the coordinator runs
  * this script to merge those deltas in a controlled, auditable way.
  * By default, no files are written unless every delta entry passes validation.
  */

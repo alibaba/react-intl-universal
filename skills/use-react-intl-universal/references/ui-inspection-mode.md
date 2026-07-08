@@ -28,7 +28,7 @@ Before starting, identify:
 - the expected account, role, tenant, workspace, or test data if the app requires login;
 - viewport requirements if the user provides them.
 
-By default, write the final `report.html` in the current conversation language. If the user explicitly asks for a report language, use that instead. The inspected UI target locale and the report display language are different concepts: for example, an English UI inspection requested in a Chinese conversation should still produce a Chinese `report.html` unless the user asks otherwise.
+By default, write the final `report.html` in the language used by the user's inspection request. If the user explicitly asks for a report language, use that instead. If the request language is unclear, use English as the fallback default. The inspected UI target locale and the report display language are different concepts: for example, an English UI inspection requested in Chinese should still produce a Chinese `report.html` unless the user asks otherwise.
 
 If the page is inaccessible, blocked by login, or missing test data, record the blocker in the report and ask only for the minimum missing access needed to continue.
 
@@ -71,7 +71,7 @@ When unsure, capture the state before the risky action and record the untested a
 11. After each meaningful state change, capture a screenshot and append the action, observed state, screenshot path, and notes to `inspection-log.md`.
 12. For every requested route, menu item, tab, or feature entry that is considered covered, capture at least one page/state screenshot. If it has an in-scope detail page, modal, drawer, tab, or representative row action, capture a second screenshot for that detail state when the action is safe.
 13. Do not mark a scope item as covered only because a URL was listed in text. It needs screenshot evidence, or it must be marked `blocked`, `skipped-risky`, `external-out-of-scope`, or `not-reached` with a reason.
-14. For broad, full-navigation, release-quality, or user-requested high-confidence inspections, run the independent visual review pass after each route/module screenshot set is captured when subagents are available. Do not wait until the main agent's context is overloaded.
+14. For broad, full-navigation, release-quality, or user-requested high-assurance inspections, run the independent visual review pass after each route/module screenshot set is captured when subagents are available. Keep review close to the captured screenshot set instead of waiting until final report generation.
 15. Read each visual review report, triage every observation, and append accepted findings or dismissed observations with rationale to `inspection-log.md`.
 16. When a finding is discovered, append the full finding detail, likely root cause, fix recommendation, and acceptance criteria to `inspection-log.md`.
 17. If the task includes fixing issues, append each attempted fix and re-inspection result to `inspection-log.md`, including before/after screenshot paths.
@@ -83,13 +83,48 @@ For repeated controls, sample enough instances to cover different text lengths a
 
 Do not rely only on DOM overflow metrics such as `scrollWidth > clientWidth`, bounding boxes, or obvious text truncation. These are useful signals, but they do not prove UI-fit. Also inspect screenshots for whether compact components still look like complete components.
 
+### Scrollable Container Triage
+
+Horizontal scrolling is not automatically a UI-fit defect. Many dense tables, tab strips, code panes, metric grids, and wide comparison views are intentionally designed to expose off-screen content through a visible horizontal scrollbar, scroll buttons, trackpad scrolling, or a clear sticky/fixed-column pattern.
+
+Before reporting a cropped table column, hidden tab, fixed-column boundary, or right-side content as an obstruction:
+
+1. Check whether the component has an obvious and usable horizontal-scroll affordance.
+2. Scroll it horizontally in both directions when it is safe, then capture the relevant scrolled state if the concern remains.
+3. Treat it as normal interaction when all important content and controls can be reached by the intended scroll behavior and the component still behaves coherently.
+4. Do not create a finding only because a screenshot at scroll-left does not show every wide-table column, tab, or action.
+5. Create a finding only when content remains hidden after scrolling, the scrollbar/scroll buttons are missing or unusable, fixed/sticky columns cover content at reachable scroll positions, the user cannot access a primary action, or translated text breaks the component beyond the intended scrolling pattern.
+
+If an independent reviewer flags a horizontally scrollable area but the primary inspection confirms that scrolling reveals the content normally, dismiss the observation in `inspection-log.md` with that rationale instead of promoting it to an i18n/UI-fit finding.
+
+### Blank Page and Load-Failure Retest
+
+If a route or page state appears blank, mostly white, missing its expected application shell, or stuck with only a global header/loading skeleton, do not immediately classify it as an i18n issue.
+
+Use this retest sequence before creating a finding:
+
+1. Capture the first blank-state screenshot and record the URL, route, locale, viewport, timestamp, and why the page is considered blank or suspiciously incomplete.
+2. Wait for late data, route chunks, slow network requests, or module federation remotes to load. Use a concrete wait window, normally at least 10 seconds unless the user supplied a tighter time limit, and record the actual wait duration.
+3. Inspect the page body again. Use visible main-content signals, not only hidden DOM text or global shell/header text.
+4. If the main content is still blank or suspiciously incomplete, reload the same Chrome/browser tab once with the browser's reload operation. Do not count a hash change, route re-entry, or opening a new tab as this required reload step.
+5. After the reload, wait again with a concrete wait window, normally at least 10 seconds, then capture a second screenshot named so the before/after relationship is obvious, for example `operation-check-before-reload.png` and `operation-check-after-browser-reload.png`.
+6. Collect lightweight diagnostics when available: console errors/warnings after reload, body text, visible element list, route name, component source reference, and network/API status if the browser tool exposes it safely.
+7. Only then classify the item:
+   - if the page remains blank after the explicit same-tab reload, record it as a coverage blocker or `page load / blank screen` finding;
+   - if the blank state disappears after reload, record a transient load issue in `inspection-log.md`, keep both screenshots as evidence, continue coverage, and do not call it a blocker;
+   - if the blank state blocks i18n inspection but is not caused by localization, mark it as an i18n-blocking non-i18n observation.
+
+Report wording must be precise. Do not write "blank page = i18n issue" unless evidence ties the failure to locale loading, missing translations, locale-specific runtime code, or translated data. Prefer:
+
+> The route stayed blank after reload and blocked i18n coverage. This may be a page-load, routing, permission, API, or runtime issue; it is not confirmed as an i18n defect.
+
 ## Independent Visual Review Pass
 
-Use this pass to reduce missed visual issues caused by the main agent's growing context during long Browser Use inspections.
+Use the independent review as a second visual QA layer for broad or long Browser Use inspections.
 
 Run an independent screenshot review when any of these is true and subagents are available:
 
-- the user asks for a full navigation, full product, release-quality, patrol, audit, or high-confidence inspection;
+- the user asks for a full navigation, full product, release-quality, patrol, audit, or high-assurance inspection;
 - the run has many screenshots, routes, menus, tabs, or detail states;
 - earlier inspection evidence suggests subtle visual problems, such as grouped controls, dense filter toolbars, tables, dashboards, or long translated labels;
 - the user explicitly asks for a second visual review.
@@ -106,7 +141,7 @@ visual-reviews/002-asset-health.md
 visual-reviews/003-business-health-analysis.md
 ```
 
-If running several visual reviewers in parallel, keep batches small enough that each reviewer can inspect every screenshot carefully. Reuse the same checklist, but do not include the main agent's suspected findings unless the review is explicitly a fix verification pass.
+If running several visual reviewers in parallel, keep batches small enough that each reviewer can inspect every screenshot carefully. Reuse the same checklist, but do not include primary-inspection suspected findings unless the review is explicitly a fix verification pass.
 
 ### Reviewer Prompt Inputs
 
@@ -118,24 +153,28 @@ Give the reviewer only the minimum task-local evidence:
 - interaction state, such as "filter drawer open", "row detail panel open", or "language menu open";
 - the visual checklist below.
 
-Avoid leaking the main agent's conclusions, intended fixes, or suspected bugs. The point is an independent visual read of the screenshots.
+Avoid including primary-inspection conclusions, intended fixes, or suspected bugs. The point is an independent visual read of the screenshots.
 
 ### Reviewer Checklist
 
 Ask the reviewer to inspect screenshots for:
 
 - text truncation, clipping, ellipsis that hides important meaning, or text running out of its container;
-- layout overflow, horizontal scroll, cropped controls, or content hidden behind fixed headers/sidebars;
+- unexpected layout overflow, unusable horizontal scroll, cropped controls, or content hidden behind fixed headers/sidebars;
 - overlap between text, icons, buttons, inputs, tooltips, badges, tables, and dialogs;
 - alignment problems caused by translated text length;
 - component visual integrity for tabs, segmented controls, button groups, filter groups, chips, badges, pagination, table action groups, menus, breadcrumbs, and compact dashboards;
 - grouped-control wrapping, broken joined borders, wrong first/last radius after wrapping, detached active/selected states, isolated row fragments, or broken icon/text/arrow relationships;
+- English words broken in the middle inside table headers, filters, buttons, tabs, menus, badges, pagination, or other compact controls;
+- form labels whose colon, required marker, or punctuation is visually detached or orphaned on a separate line;
 - untranslated or hardcoded source-language text;
 - raw ICU placeholders or rich tags;
 - inconsistent terminology, casing, units, dates, numbers, or locale conventions visible in the UI;
 - suspicious empty states, validation messages, popovers, tooltips, or dialogs.
 
 DOM overflow being absent is not enough for a pass. The reviewer should judge the screenshot as a product UI, not only as a text container.
+
+Normal scrollable content is also not enough for a finding. If a wide table, tab row, or dense grid is designed to scroll horizontally and the content is reachable after scrolling, report it as normal interaction or an uncertainty for the primary inspector to verify, not as confirmed obstruction.
 
 ### Reviewer Markdown Output
 
@@ -169,9 +208,9 @@ The reviewer must write a Markdown report into `visual-reviews/` in the current 
 
 The reviewer should prefer concrete observations over broad advice. If no issues are visible, the report still needs a `Result: no issues` line and the screenshot list.
 
-### Main Agent Triage
+### Primary Inspection Triage
 
-The main agent owns the final decision. After each visual review report is written:
+The primary inspection owner makes the final decision. After each visual review report is written:
 
 1. Read it before generating `report.json` or `report.html`.
 2. For every reviewer finding, either convert it into an inspection finding or dismiss it with a short rationale in `inspection-log.md`.
@@ -180,7 +219,7 @@ The main agent owns the final decision. After each visual review report is writt
 5. If the reviewer is uncertain, use Browser Use, DOM inspection, source review, or another screenshot to resolve the uncertainty when it is in scope.
 6. When fixing is in scope, re-inspect accepted findings with replacement screenshots.
 
-Subagent reports are evidence, not final reports. The final `report.json` and `report.html` must reflect the main agent's triage status and must not silently drop reviewer observations.
+Reviewer reports are evidence, not final reports. The final `report.json` and `report.html` must reflect the primary-inspection triage status and must not silently drop reviewer observations.
 
 ## What to Check
 
@@ -202,7 +241,10 @@ Localized UI quality:
 - No misalignment caused by translated text length.
 - Buttons and form controls still have enough padding.
 - Tables, filters, tabs, menus, and dialogs remain readable.
+- Wide tables, tab strips, and dense grids that are designed for horizontal scrolling remain usable after scrolling. Do not treat content outside the initial scroll-left viewport as obstruction when the intended scrollbar or scroll buttons reveal it normally.
 - Compact UI such as placeholders, badges, sidebars, breadcrumbs, and table cells still works.
+- English words are not broken in the middle inside compact labels, table headers, buttons, tabs, filters, or form labels. A header such as `Associatio` / `n Range` is a UI-fit failure even when no DOM overflow is detected.
+- Form labels do not leave punctuation or required markers visually orphaned. A colon on its own line after a translated label is an alignment/form-label visual-integrity failure.
 - Component visual integrity is preserved. For tabs, segmented controls, button groups, filter groups, chip groups, badges, pagination, and table action groups, verify that wrapping does not split one visual group into broken pieces:
   - borders remain continuous where the design expects a joined control;
   - border radius appears only on the outer boundary of the whole control or is reset correctly for a deliberate vertical layout;
@@ -219,15 +261,29 @@ Do not run translation-quality classification as a separate inspection pass. Use
 
 For each finding:
 
-1. Assign severity based on user impact.
-2. Choose the primary issue category from the visible symptom.
-3. Add a translation quality category only when the problem is about wording quality.
-4. Classify the likely root cause and record evidence.
-5. Choose a recommended owner.
-6. Write the fix recommendation and why that fix should be tried first.
-7. Assign fix confidence: high, medium, or low.
-8. Record whether human attention is needed, especially when the fix may have compatibility risk, shared-component side effects, route-family impact, locale-specific risk, or product-copy uncertainty.
-9. Write acceptance criteria that can prove the fix worked.
+1. Decide whether the observation is related to localization or whether it only blocks localization coverage.
+2. Assign severity based on user impact.
+3. Choose the primary issue category from the visible symptom.
+4. Add a translation quality category only when the problem is about wording quality.
+5. Classify the likely root cause and record evidence.
+6. Choose a recommended owner.
+7. Write the fix recommendation and why that fix should be tried first.
+8. Assign fix verification: high, medium, or low.
+9. Assign fix risk: high, medium, or low.
+10. Record whether human attention is needed, especially when fix verification is low or fix risk is high because of compatibility risk, shared-component side effects, route-family impact, locale-specific risk, or product-copy uncertainty.
+11. Write acceptance criteria that can prove the fix worked.
+
+### I18n Relevance Gate
+
+UI Inspection Mode is focused on internationalization and localized UI-fit. Before spending fix effort, classify each observation:
+
+- `i18n-related`: caused or exposed by translated text length, target-locale wording, casing, terminology, missing translation, fallback, ICU/rich-tag rendering, locale-specific data formatting, or language-dependent layout.
+- `i18n-blocking`: not proven to be caused by i18n, but it blocks inspection coverage, such as a blank route, login blocker, permission blocker, failing remote module, or API/runtime failure.
+- `non-i18n`: visibly unrelated to localization, such as generic product logic, backend data failure, non-localized performance issue, or a layout bug that reproduces independent of language.
+
+Only `i18n-related` findings should drive localization fixes by default. `i18n-blocking` issues may appear in the report as blockers with diagnostics. `non-i18n` observations should be summarized as out-of-scope notes and should not dominate the report or fix plan.
+
+If an observation is not i18n-related, keep the finding title and status explicit, for example `non-i18n observation` or `i18n coverage blocker`, and fill an out-of-scope reason. This prevents the report from treating every product defect as localization debt.
 
 ### Severity
 
@@ -248,12 +304,20 @@ Choose the category that best explains what the user can see or experience:
 - overlap;
 - misalignment;
 - component visual integrity;
+- text wrapping / word-break;
+- form label visual integrity;
 - untranslated text;
 - raw placeholder/tag;
 - terminology inconsistency;
-- interaction defect.
+- interaction defect;
+- page load / blank screen;
+- non-i18n observation.
 
 Use `component visual integrity` when a control is technically readable and not overflowing, but no longer looks or behaves as one coherent component. Common subtypes include grouped-control wrapping, broken joined borders, incorrect first/last-item radius after wrapping, detached active states, and icon/text/arrow separation. If a reporting system cannot accept a new category, use `misalignment` and set the subtype or finding title to `grouped-control wrapping/broken border`.
+
+Use `text wrapping / word-break` when translated or target-locale text remains visible but breaks inside a word in a way normal readers would not accept, especially in table headers, compact filter labels, tabs, buttons, menus, chips, badges, and pagination. This is not allowed for ordinary English UI text; fix by increasing width, preventing mid-word breaks, using natural shorter labels, or adding a tooltip as a supplement.
+
+Use `form label visual integrity` when translated form labels no longer align with fields, lose their required marker relationship, or leave punctuation such as `:` orphaned on its own line. This is not allowed even when the field value remains usable. Fix by widening the label column, keeping the label and punctuation together, switching to a top-label layout, or using a shorter label that preserves meaning.
 
 ### Translation Quality Category
 
@@ -274,6 +338,22 @@ Examples:
 - An English page title uses sentence case where the product uses Title Case: Locale convention.
 
 Keep this lightweight. Do not require a full MQM scorecard during UI inspection. If a translation-quality issue also causes truncation, overflow, overlap, misalignment, or blocks the user flow, prioritize the UI/layout finding and fix recommendation first. Do not recommend a longer or more elaborate translation when it would break the localized UI.
+
+### Fix Verification and Fix Risk
+
+Keep these as separate fields.
+
+Fix verification answers: "How well does the evidence show that this finding is solved or that the recommendation is correct?"
+
+- High: the exact affected UI state was re-inspected, replacement screenshots show the problem is gone, and source review matches the browser evidence.
+- Medium: the fix is likely correct, but only representative states were checked, the issue was not fully re-inspected, or some product/context assumptions remain.
+- Low: the fix or recommendation is uncertain; human attention is required before treating the finding as resolved.
+
+Fix risk answers: "How likely is this change to create side effects outside the finding?"
+
+- High: the change touches shared components, design-system styles, broad page layout, responsive grid/column allocation, many routes/locales, critical workflows, backend/API contracts, default-locale visual layout, product meaning, or a locale-scoped broad layout branch. Mark human attention as required.
+- Medium: the change is scoped but may affect a route family, breakpoint family, related locale, table/form pattern, or neighboring workflow. Human review is recommended.
+- Low: the change is local and narrow, such as a small component-level width, spacing, or wrapping adjustment, and is unlikely to affect other layouts, routes, locales, or product meaning.
 
 ### Root Cause and Owner
 
@@ -309,9 +389,34 @@ Every finding must include a fix recommendation. If the issue appears fixable in
 For UI layout issues such as truncation, overflow, overlap, misalignment, or component visual integrity:
 
 1. Prefer improving the target-locale wording first when the translation is unnecessarily long, literal, or awkward.
-2. If shorter natural wording would lose important meaning, adjust the UI style or layout.
-3. Prefer general layout fixes that work across locales. Avoid language-specific CSS when a robust shared layout fix is reasonable.
-4. Use language-specific styles only when a general fix is too costly, would make the default locale look worse, or would create broader layout risk.
+2. If shorter natural wording would lose important meaning, prefer a small local layout or width adjustment when it solves the issue. This can be low risk when it is component-scoped and does not alter shared layout behavior or unaffected locales.
+3. Keep layout changes as small and local as possible. Do not use a broad layout rewrite when a natural target-locale wording change, local width adjustment, or narrower component-level fix would solve the issue.
+4. If a broad layout change is truly required, first identify the language or locale where the issue occurs and scope the broad change to that problem language instead of changing unaffected languages.
+5. Mark the fix risk as high when the fix changes shared layout behavior, page-level structure, table column allocation, responsive grid rules, locked/fixed columns, default-locale visual layout, or introduces a locale-scoped broad layout branch, even if the target-locale screenshot looks fixed.
+6. Prefer general small fixes that work across locales. Use language-specific styles or locale branches only when needed to avoid breaking unaffected languages or the default-locale layout.
+
+When a fix truly needs runtime locale branching, inspect the repository's existing i18n setup before writing the condition. Prefer existing helpers, enums, or stores such as `isEn()`, `isEnglish()`, `getLang()`, `LOCALE.EN_US`, `currentLocale`, or a project-specific locale utility. Add a new local condition only when no reusable project method exists. A fallback such as:
+
+```ts
+const isEn = intl?.getInitOptions?.()?.currentLocale?.includes?.('en');
+```
+
+is acceptable only as a small, local last resort; do not introduce it when the repository already has a clearer locale helper or exact locale enum.
+
+For table headers and compact labels that break an English word in the middle:
+
+1. Treat the finding as real even when no overflow metric fires.
+2. Prefer increasing the relevant column/control width or changing the table's responsive column allocation.
+3. Prevent mid-word wrapping where the UI framework allows it.
+4. Use a shorter natural label only when it does not reduce meaning or conflict with product terminology.
+5. Add a tooltip for full text when the column must stay compact, but do not use tooltip as the only fix if the visible label is unreadable.
+
+For form labels whose punctuation, colon, or required marker becomes visually detached:
+
+1. Prefer increasing the form label column width or switching that form area to a top-label layout.
+2. Keep label text, required marker, and colon/punctuation visually bound as one label unit.
+3. If the long label repeats nearby context, consider a shorter label such as `Owner` only when the surrounding section heading already supplies the missing context.
+4. Avoid per-locale CSS unless a general form layout fix would create broader regressions.
 
 For segmented controls, tabs, button groups, chip groups, pagination, and table action groups:
 
@@ -351,6 +456,8 @@ Every screenshot should have a short caption in `inspection-log.md` while inspec
 - what action produced it;
 - whether it is normal coverage evidence or issue evidence.
 
+After every screenshot capture, verify the screenshot file exists and has a plausible non-zero size before using it as evidence. If the browser tool returns screenshot bytes, prefer explicitly writing those bytes and then checking the file. Record screenshot-write failures in `inspection-log.md`; do not mark a route as covered with a missing or zero-byte screenshot.
+
 For broad route, menu, or full-product inspections, maintain a screenshot manifest in `inspection-log.md` as a table or compact list. Each row should map one coverage item to its screenshot evidence:
 
 - scope label, such as a menu item, tab, route, or detail state;
@@ -362,25 +469,14 @@ For broad route, menu, or full-product inspections, maintain a screenshot manife
 
 The final `report.html` must reproduce this coverage evidence. Do not only show issue screenshots or a few "important" screenshots when the user asked for a broad inspection; the reader must be able to audit which pages were actually opened.
 
-In `report.html`, screenshot thumbnails and screenshot links, including links in the coverage matrix `Screenshot` column, should open in an in-page enlarged preview instead of navigating away from the report. Use a small no-dependency lightbox or equivalent page-local interaction:
-
-- clicking a screenshot thumbnail or screenshot-path link opens the enlarged image in the current report page;
-- pressing `Escape` closes the enlarged preview;
-- clicking the backdrop or an explicit close button also closes it;
-- keep the original image `href` as a no-JavaScript fallback;
-- do not require new npm packages, external CDNs, or separate viewer files for this behavior.
-
-In the Findings section, screenshot evidence must be visible as image cards, not only as text links. Use a two-column evidence layout:
-
-- for fixed or re-inspected findings, left column = issue/before screenshot and right column = verified-fix/after screenshot;
-- for open or deferred findings, left column = issue screenshot and right column = follow-up status, owner note, or additional evidence screenshot;
-- for findings with several evidence screenshots, use a responsive two-column grid of screenshot cards;
-- every screenshot card must still be clickable and use the same in-page enlarged preview behavior as the screenshot appendix.
+In `report.html`, screenshot evidence must be visible inline, not only as text links. Follow the wireframe for screenshot presentation and preview behavior. Keep the original image `href` as a no-JavaScript fallback, and do not require new npm packages, external CDNs, or separate viewer files for core screenshot review.
 
 When the issue location is not obvious from the screenshot, add red-box annotations to point at the relevant UI region:
 
-- store annotation boxes as percentages relative to the original screenshot, using `x`, `y`, `width`, and `height` values from `0` to `100`;
+- store annotation boxes as percentages relative to the original screenshot's natural pixel dimensions, using `x`, `y`, `width`, and `height` values from `0` to `100`;
+- calculate percentages from the original screenshot pixels, for example `x = leftPx / naturalWidth * 100`; do not estimate coordinates from a scaled thumbnail, a cropped preview, or the current browser viewport unless you convert them back to the original screenshot dimensions;
 - use a short label such as "truncated label", "broken border", "wrong unit", or "untranslated text";
+- render that label visibly in `report.html`, either as a small callout attached to the red box or as a nearby caption. Do not hide the explanation only in `title`, `alt`, or the surrounding prose;
 - keep the original screenshot file unchanged; render the red boxes as `report.html` overlays by default;
 - render the same annotation boxes in thumbnail/image-card views and in the enlarged lightbox preview;
 - for before/after evidence, annotate the problem region in the before screenshot and the corresponding verified region in the after screenshot;
@@ -388,6 +484,41 @@ When the issue location is not obvious from the screenshot, add red-box annotati
 - do not require new npm packages for default report generation. If an environment already has an image tool such as `sharp`, optionally generate additional annotated PNGs, but keep the original screenshots and the HTML overlay as the portable source of truth.
 
 When an issue is found, capture the smallest screenshot that clearly shows the problem. If context matters, also include a wider screenshot.
+
+### Screenshot Annotation Rendering Contract
+
+Red-box annotation coordinates are only trustworthy when the overlay is rendered in the same coordinate space as the image itself. The report generator must use an annotated image stage whose layout is defined by the screenshot image, not by an unrelated card, fixed ratio wrapper, or cropped thumbnail.
+
+Use this safe pattern for finding evidence and annotated screenshot appendix items:
+
+```html
+<figure class="annotated-shot">
+  <a class="annotated-stage" href="screenshots/004-example.png" data-preview="screenshots/004-example.png">
+    <img src="screenshots/004-example.png" alt="..." />
+    <span class="redbox" style="left:10%;top:20%;width:30%;height:8%"><em>truncated label</em></span>
+  </a>
+  <figcaption>truncated label - the filter text is clipped</figcaption>
+</figure>
+```
+
+```css
+.annotated-stage { position: relative; display: block; }
+.annotated-stage img { display: block; width: 100%; height: auto; }
+.annotated-stage .redbox { position: absolute; box-sizing: border-box; border: 2px solid #e11d48; }
+```
+
+For the enlarged preview, use the same rule: place the image and red boxes inside a single positioned stage, let the image's rendered size define the stage, and render red boxes relative to that stage. The stage may be constrained by `max-width` or `max-height`, but the image must scale uniformly and the overlay must scale with it.
+
+Do not use these patterns for annotated finding screenshots unless you explicitly compensate for the image's rendered offset and scale:
+
+- a fixed thumbnail ratio such as `aspect-ratio: 16 / 9` around screenshots with different natural ratios;
+- `object-fit: contain` or `object-fit: cover` on the image while positioning red boxes against the outer wrapper;
+- cropped thumbnails that hide part of the original screenshot while still showing original screenshot-relative boxes;
+- positioning red boxes against the card, figure, page, viewport, or lightbox backdrop instead of the rendered image stage.
+
+If the report needs uniform thumbnail heights for the screenshot appendix, it may use cropped thumbnails only when there are no annotations on that thumbnail. Annotated finding cards should preserve the screenshot's natural aspect ratio, or use an inner image stage with the exact screenshot aspect ratio.
+
+After generating `report.html`, verify at least one annotated finding screenshot in both the inline card and the enlarged preview. A DOM check that `.redbox` exists is not enough; visually confirm the box surrounds the intended UI region and that the visible label explains what the reader should look at.
 
 ## Inspection Artifacts
 
@@ -408,7 +539,7 @@ During active inspection, create and maintain only these artifacts:
 
 - `inspection-log.md`: raw chronological task log. Update this while inspecting, fixing, and re-inspecting.
 - `screenshots/`: all screenshots captured during inspection, fixing, and re-inspection.
-- `visual-reviews/`: independent screenshot-review Markdown reports written by visual-review subagents, plus the main agent's triage references in `inspection-log.md`.
+- `visual-reviews/`: independent screenshot-review Markdown reports written by visual-review subagents, plus triage references in `inspection-log.md`.
 
 Do not create `report.json` or `report.html` while inspection is still in progress. These files are final-report artifacts, not live working notes.
 
@@ -430,11 +561,11 @@ Update it during the task with:
 - observed state after each meaningful action;
 - screenshot path for each meaningful state;
 - blockers, skipped risky actions, and untested areas;
-- independent visual review report paths, reviewer result status, and main-agent triage decision for each reviewer observation;
+- independent visual review report paths, reviewer result status, and primary-inspection triage decision for each reviewer observation;
 - finding details as soon as an issue is discovered;
 - root-cause reasoning and evidence;
-- fix recommendation, fix confidence, human-attention reason, and acceptance criteria;
-- fix attempts, code or configuration areas touched when known, re-inspection result, and after-fix screenshots when fixing is in scope.
+- fix recommendation, fix verification, fix risk, human-attention reason, and acceptance criteria;
+- fix attempts, code or configuration areas touched when known, concise relevant code diffs, re-inspection result, and after-fix screenshots when fixing is in scope.
 
 The log does not need polished prose. Do not delete failed fix attempts or earlier observations when they explain the final recommendation.
 
@@ -453,71 +584,79 @@ Completion conditions are:
 
 `report.json` is for statistics, dashboards, CI summaries, and follow-up automation. It should not introduce facts that are absent from `inspection-log.md` or screenshots. The root object must use the `I18nUiInspectionReportJson` interface from [UI Inspection Report Types](ui-inspection-report-types.ts).
 
-When adding red-box annotations for screenshots, write them to `screenshotAnnotations` in `report.json`. Use screenshot-relative percentage coordinates so the same data can be rendered in cards, coverage links, the screenshot appendix, and the lightbox preview without recalculating for each display size.
+When adding red-box annotations for screenshots, write them to `screenshotAnnotations` in `report.json`. Use screenshot-relative percentage coordinates so the same data can be rendered across report views without recalculating for each display size.
 
-When independent visual review is used, write review evidence to `visualReviewReports` in `report.json`. Each entry should point to the Markdown report in `visual-reviews/`, list the screenshots reviewed, and state how the main agent triaged the reviewer observations. If the pass was skipped or unavailable for a broad inspection, state that limitation in `inspection-log.md` and `report.html` instead of pretending screenshot coverage equals independent review coverage.
+When independent visual review is used, write review evidence to `visualReviewReports` in `report.json`. Each entry should point to the Markdown report in `visual-reviews/`, list the screenshots reviewed, and state how reviewer observations were triaged. If the pass was skipped or unavailable for a broad inspection, state that limitation in `inspection-log.md` and `report.html` instead of pretending screenshot coverage equals independent review coverage.
 
 When a finding is about component visual integrity, set `category` to `component visual integrity` and include a concise subtype when useful, such as `grouped-control wrapping/broken border`. If a legacy consumer cannot handle that category, mirror the subtype in the finding title or human-readable notes while keeping the visible issue clear in `report.html`.
 
+For every finding, write both `fixVerification` and `fixRisk`. `fixVerification` is about whether the fix or recommendation solves the visible issue; `fixRisk` is about possible side effects. Older reports may contain a deprecated `fixConfidence` field with the same meaning; new reports should use `fixVerification`. When local source, style, config, or locale files were changed for a finding, write concise relevant non-empty hunks to `fixEvidence.codeDiffs`. Omit `fixEvidence.codeDiffs` when no local source/style/config/locale file changed or when there is no meaningful diff hunk. Do not dump unrelated diffs into the report.
+
 ### `report.html`
 
-`report.html` is the human-readable final report. It should be easier to read than raw Markdown and should make screenshot evidence visible without forcing the reader to open many files.
+`report.html` is the human-readable final report. Use [UI Inspection Report Wireframe](ui-inspection-report-wireframe.html) as the structural and interaction reference instead of rewriting the report layout from prose. The wireframe is not a required visual theme or component library, and its sample data must not be copied into real reports.
 
 Choose the `report.html` display language before writing the file:
 
-- use the current conversation language by default;
+- use the language of the user's inspection request by default;
 - use a user-specified report language when provided;
+- use English as the fallback default when the request language is unclear;
 - do not infer the report language from the inspected UI target locale;
 - localize report headings, dashboard labels, prose, finding explanations, table headers, screenshot captions, status labels, validation notes, blocker text, and lightbox controls;
 - keep product names, locale codes, URLs, file paths, commands, finding IDs, key names, and code identifiers unchanged when translating them would reduce precision.
 
-Include these sections:
+The wireframe defines the expected report information architecture and default interactions. Keep detailed visual, layout, and interaction choices in the wireframe. This document only defines the durable report contracts below:
 
-1. Summary dashboard:
-   - inspected URL/routes, locales, viewports, browser/tool, and account/role if relevant;
-   - total interactions and screenshots;
-   - independent visual review status: run, partially run, skipped, or unavailable, with reviewer report count;
-   - issue totals by severity, status, and fix confidence;
-   - coverage status for text overflow/truncation, layout overflow, alignment, and component visual integrity;
-   - human-attention items, with medium confidence shown in yellow and low confidence shown in red;
-   - blockers and untested areas.
-2. Findings:
-   - one card or section per finding;
-   - severity, status, fix confidence, category, translation quality category, likely root cause, recommended owner, and affected state;
-   - render fix confidence as a colored badge: high = green, medium = yellow, low = red;
-   - reproduction steps, expected result, actual result, fix recommendation, fix priority/rationale, human-attention note, and acceptance criteria;
-   - screenshot evidence rendered inline as image cards, not only as screenshot-path text links;
-   - before/after screenshot comparison when fix evidence exists. Use a two-column layout where the left column shows the issue screenshot and the right column shows the verified-fix screenshot;
-   - for open or deferred findings, still use a two-column evidence area: issue screenshot on the left, and either follow-up status, owner note, or additional evidence screenshot on the right;
-   - red-box annotations for screenshots where the issue or verified fix is hard to locate, rendered from shared screenshot-relative percentage coordinates;
-   - all finding screenshot cards must use the same in-page enlarged preview behavior as coverage and appendix screenshots.
-3. Coverage evidence matrix:
-   - one row per requested route, menu item, tab, feature entry, or representative detail state;
-   - label, URL/route/state, action taken, status, screenshot thumbnail or link, and notes;
-   - blocked, skipped risky, external, and not-reached items must be visible in the same matrix, not hidden in prose;
-   - for full left-navigation or full-product inspections, this matrix is mandatory and is the primary proof that the agent actually visited the requested areas.
-4. Inspection timeline:
-   - concise chronological table derived from `inspection-log.md`;
-   - action, observed state, notes, and screenshot link.
-5. Screenshot appendix:
-   - all screenshot captions and paths, including normal coverage screenshots, detail-state screenshots, issue screenshots, and fix/re-inspection screenshots;
-   - render screenshots as clickable thumbnails or a gallery when the count is manageable;
-   - clicking a screenshot thumbnail or screenshot-path link should enlarge it in the current page; `Escape`, backdrop click, or a close button should dismiss the preview;
-   - if a screenshot has red-box annotations, show those annotations both in the thumbnail/gallery context and in the enlarged preview;
-   - if the report uses collapsed sections for many screenshots, the default visible text must still list every screenshot filename and caption.
-6. Independent visual review appendix:
-   - list every `visual-reviews/*.md` file created during the run;
-   - show the scope label, screenshots reviewed, reviewer result, main-agent triage status, and linked finding IDs or dismissal notes;
-   - if a broad inspection did not use an independent visual review pass, state the reason clearly.
-7. Appendix:
-   - blockers, skipped risky actions, and untested areas;
-   - external dependency or backend/API ownership notes when relevant.
+- Include the requested scope, locale, viewports, browser/tool, coverage status, visual-review status, blockers, skipped areas, and every accepted finding from `inspection-log.md` and `report.json`.
+- Keep blockers and non-i18n observations visually separate from normal i18n/UI-fit findings.
+- Distinguish text overflow/truncation, layout overflow, alignment, and component visual integrity. Do not summarize the result as only "No visible overflow found".
+- Use screenshot annotation data from `report.json` and preserve coordinate alignment in cards, modals, appendices, and enlarged previews.
+- Show concise code diffs only for findings with local source, style, config, or locale changes. Omit empty diff blocks.
+- Keep the feedback-copy behavior: copy only findings whose feedback textarea is not empty after trimming whitespace. Use one blank line between findings, formatted as:
+
+```text
+Finding I18N-010: This should be fixed by increasing the column width.
+
+Finding I18N-012: Please fix. Prefer increasing the label column width.
+```
+
+- If every feedback textarea is empty, show a localized "no feedback to copy" status instead of copying blank findings.
+- Ensure local `file://` report interactions work without new npm packages. External CDNs are optional only when the report also has a local fallback.
+- Preserve modal stack behavior from the wireframe. If a finding-detail modal is open and the user opens an image preview/lightbox from inside it, pressing `Escape` must close only the topmost image preview. A second `Escape` may then close the underlying finding-detail modal.
+
+Report interaction JavaScript must be generated defensively:
+
+- Prefer static JavaScript that reads values from DOM attributes or `<script type="application/json">` data blocks. Keep dynamic report strings out of executable JavaScript when practical.
+- When executable JavaScript must contain generated strings, serialize them with `JSON.stringify(...)` or an equivalent safe string literal emitter. Do not hand-concatenate unescaped finding titles, labels, screenshot paths, feedback text, or copied text templates into JavaScript source.
+- For copy-feedback text, build the separator in runtime JavaScript as `'\n'`, `String.fromCharCode(10)`, or a value produced by `JSON.stringify('\n')`. Never generate a quoted JavaScript string that contains a literal newline.
+- Treat one inline-script syntax error as a report blocker because it can disable multiple report interactions together.
+- After writing `report.html`, run this no-dependency syntax smoke test before opening or handing off the report:
+
+```bash
+REPORT_HTML=tmp/i18n-ui-inspection-YYYYMMDD-HHMMSS/report.html
+node - "$REPORT_HTML" <<'NODE'
+const fs = require('fs');
+const vm = require('vm');
+const file = process.argv[2];
+const html = fs.readFileSync(file, 'utf8');
+let count = 0;
+for (const match of html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)) {
+  const attrs = match[1] || '';
+  if (/type=["']application\/json["']/i.test(attrs)) continue;
+  count += 1;
+  new vm.Script(match[2], { filename: `${file}#script-${count}` });
+}
+console.log(`checked ${count} executable script(s)`);
+NODE
+```
 
 The final report must not make the user open the screenshots folder just to know whether the requested scope was covered. If every screenshot is saved on disk but the HTML report omits the complete coverage matrix or screenshot appendix, the report is incomplete.
 
 If no issues are found, still generate `report.html`, include process screenshots for all covered scope items, and state what was actually verified. Do not write only "No visible overflow found" as the final result. Distinguish at least text overflow/truncation, layout overflow, alignment, and component visual integrity. If the run only checked overflow metrics or screenshots for obvious truncation, state that component visual integrity was not fully verified.
 
 If independent visual review was used and no issues were accepted, state that visual-review observations were triaged and no findings remained. If reviewer observations were dismissed, include the dismissal rationale in the independent visual review appendix.
+
+Before handing off, open the generated `report.html` when possible and verify representative wireframe interactions. Also verify there are no JavaScript syntax errors, red-box annotations are visually aligned in at least one normal and enlarged report view, nested modal `Escape` behavior closes only the topmost modal, empty code-diff blocks are omitted, and any scroll-to-top behavior changes the actual scroll container rather than only calling `window.scrollTo`.
 
 ## Finding Details
 
@@ -530,8 +669,10 @@ For each issue, include:
 - expected result;
 - actual result;
 - screenshot link;
+- i18n relevance: `i18n-related`, `i18n-blocking`, or `non-i18n`;
+- out-of-scope reason when the issue is non-i18n or only blocks i18n coverage;
 - visual review evidence when relevant, such as `visual-reviews/003-business-health-analysis.md` and reviewer finding ID `VR-001`;
-- likely category: language quality, truncation, overflow, overlap, misalignment, component visual integrity, untranslated text, raw placeholder/tag, terminology inconsistency, or interaction defect;
+- likely category: language quality, truncation, overflow, overlap, misalignment, component visual integrity, text wrapping / word-break, form label visual integrity, untranslated text, raw placeholder/tag, terminology inconsistency, interaction defect, page load / blank screen, or non-i18n observation;
 - component visual integrity subtype when relevant, such as `grouped-control wrapping/broken border`;
 - translation quality category: Accuracy, Fluency, Terminology, Locale convention, or N/A for pure layout issues;
 - likely root cause: frontend application issue, backend/API issue, external dependency issue, or unknown/needs investigation;
@@ -539,7 +680,9 @@ For each issue, include:
 - recommended owner: current repository, backend/API, shared component package, module federation remote, third-party vendor, or unknown;
 - fix recommendation: the concrete change to try first, or the owner/investigation path if it is not fixable in the current repository;
 - fix priority/rationale: why this recommendation comes before other options, such as shortening a translation before changing CSS.
-- fix confidence: high, medium, or low;
+- fix verification: high, medium, or low;
+- fix risk: high, medium, or low, with a short side-effect or compatibility explanation;
+- fix diff: concise relevant unified diff hunks for source/style/config/locale changes made for this finding. In `report.html`, omit the diff block entirely when no local code change was made or when no non-empty diff hunk exists; in `inspection-log.md`, `N/A` is acceptable text for no local code change;
 - human attention: whether human review is needed, why, and any side-effect or compatibility risk;
 - acceptance criteria: the exact retest steps or observable conditions that confirm the issue is fixed.
 
@@ -550,6 +693,8 @@ Use these lifecycle statuses for the matching `report.json` finding:
 - `verifiedFixed`: the fix was re-inspected and confirmed with replacement screenshot evidence.
 - `deferred`: the issue is real, but the team postponed it.
 - `wontFix`: the issue is real, but the team does not plan to fix it.
+- `needs-product-confirmation`: the observation may be real, but product/data ownership or expected behavior must be confirmed before fixing.
+- `non-i18n`: the issue is outside the i18n/UI-fit scope. Include it only when it blocks coverage or is useful context, and do not let it dominate the report.
 
 Example:
 
@@ -569,7 +714,12 @@ Example:
 - Recommended owner: current repository
 - Fix recommendation: First review whether the German label can be shortened naturally without losing meaning. If not, allow the button label to wrap or increase the button min-width with a shared responsive rule.
 - Fix priority/rationale: Text refinement is lower risk for compact UI when the wording is unnecessarily long; use a general layout fix next because this button may receive long labels in multiple locales.
-- Fix confidence: medium
+- Fix verification: medium
+- Fix risk: medium, because a layout change to compact filter buttons may affect neighboring table filters.
+- Fix diff: `src/pages/orders/FilterBar.module.css`
+  `@@`
+  `-.filterButton { white-space: nowrap; }`
+  `+.filterButton { white-space: normal; }`
 - Human attention: Review the shared filter button usage before treating this as fully safe, because a min-width or wrapping change could affect compact table filters in other routes.
 - Acceptance criteria: Reopen `https://example.com/orders` at 1280x800 in German, open the advanced filter drawer, select "Delivery status", and confirm the button label and chevron no longer overlap. Capture a replacement screenshot.
 
@@ -589,7 +739,12 @@ Example:
 - Recommended owner: current repository
 - Fix recommendation: Prevent free wrapping inside the visual group, allow the whole group to move to a new row, use an explicit grid, or implement a deliberate vertical segmented-control style with corrected per-position borders/radius. If space remains constrained, consider a select/dropdown.
 - Fix priority/rationale: This is a component-integrity issue, not a translation-quality issue; shortening text is optional only if it preserves meaning and product terminology.
-- Fix confidence: medium
+- Fix verification: medium
+- Fix risk: high, because changing grouped-control wrapping behavior may affect shared segmented controls and filter toolbars.
+- Fix diff: `src/pages/assets/SegmentedGroup.module.css`
+  `@@`
+  `-.segmentedGroup { display: flex; flex-wrap: wrap; }`
+  `+.segmentedGroup { display: inline-grid; grid-template-columns: repeat(3, max-content); }`
 - Human attention: Review neighboring toolbar breakpoints because the fix may affect compact filter layouts.
 - Acceptance criteria: Reopen the same URL/locale/viewport and confirm the segmented control is either one coherent horizontal group or a deliberate vertical/grouped layout, with no broken borders or detached active states. Capture a replacement screenshot.
 ```
@@ -604,6 +759,7 @@ When reporting back to the user, include:
 - the screenshot folder path;
 - the `visual-reviews/` folder path and independent visual-review status when that pass was used, skipped, unavailable, or only partially completed;
 - a short issue summary;
+- any high-risk fixes or low-verification fixes that need human review;
 - any blockers or untested risky actions.
 
 Do not paste every screenshot into the chat unless the user asks. The durable artifacts should be the complete source of evidence.

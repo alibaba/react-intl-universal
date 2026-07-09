@@ -45,6 +45,23 @@ Avoid confirming actions such as:
 It is usually safe to open dialogs, menus, popovers, filters, dropdowns, date pickers, pagination, tabs, validation states, and close/cancel flows.
 When unsure, capture the state before the risky action and record the untested action as a coverage limitation.
 
+## Current Source Risk Scan
+
+When the current frontend repository is available, use the current source tree to build a risk checklist before or alongside browser exploration. This scan does not replace browser inspection; it tells the browser pass where subtle localized UI-fit failures are likely.
+
+Record the scan summary in `inspection-log.md`, including searched patterns, important matches, and the page states where each match should be verified. Prioritize source matches that correspond to the current page, route family, or visible feature entry.
+
+Use `rg` first. Search for high-risk localized UI patterns such as:
+
+- narrow fixed widths: `width: 40px`, `width: 50px`, `width: 80px`, fixed action-column widths, compact inline styles, and CSS variables used as narrow control widths;
+- form labels: `.form-item-label`, `.dc-form-item-label`, `labelCol`, `labelWidth`, required-marker or colon rendering, and label grids;
+- table action areas: `fixed: 'right'`, `fixed="right"`, `lock="right"`, action columns, row-action menus, and table-column `width` values;
+- clipping and wrapping constraints: `ellipsis`, `text-overflow`, `overflow: hidden`, `white-space: nowrap`, `word-break`, `line-clamp`, and compact tooltip-only labels;
+- grouped controls: tabs, segmented controls, button groups, chip groups, badges, pagination, filter groups, and `flex`/`inline-flex` with `flex-wrap`, collapsed borders, first/last-child radius rules, or active-state styling;
+- long target-locale candidates: placeholders, table headers, button labels, menu items, status labels, empty states, validation messages, tooltip/help text, and product-defined enum display names.
+
+For unexpected-language text, source search is required by the origin-triage workflow. For UI-fit issues, source risk scan is a targeting aid: a source match becomes a finding only after browser or screenshot evidence shows a visible problem.
+
 ## Exploration Workflow
 
 1. Check the repository `.gitignore` for an existing ignored temporary-output location, such as `tmp/`, `.tmp/`, `temp/`, or another project-specific scratch directory.
@@ -82,6 +99,28 @@ When unsure, capture the state before the risky action and record the untested a
 For repeated controls, sample enough instances to cover different text lengths and states. Do not spend time clicking identical repeated buttons that render the same UI unless their row data changes the text or layout risk.
 
 Do not rely only on DOM overflow metrics such as `scrollWidth > clientWidth`, bounding boxes, or obvious text truncation. These are useful signals, but they do not prove UI-fit. Also inspect screenshots for whether compact components still look like complete components.
+
+### Safe Interaction Depth Contract
+
+For each reachable route, menu item, tab, or feature entry in scope, cover more than the initial page state unless access, data, or safety boundaries prevent it. At minimum, attempt and log these layers:
+
+1. Initial state: capture the loaded page or tab state.
+2. Filters: open representative dropdowns, selects, date pickers, segmented controls, or search inputs. If several control types exist, sample different types.
+3. Primary action: open create, configure, edit, or setup entry points to a safe state without final submission.
+4. Row action: open a representative row action menu, detail drawer, detail route, or safe inline action.
+5. Table behavior: check pagination, page-size controls, horizontal scroll, fixed/locked columns, and hover-revealed row actions when present.
+6. Help and transient UI: sample a tooltip, help popover, hover state, notification, drawer, or modal close/cancel flow.
+7. Empty, validation, disabled, or loading state: trigger one safe state when it is available without mutating real data.
+
+For each safe control or representative control group, write one of these coverage decisions in `inspection-log.md` and `report.json` coverage evidence:
+
+- `covered`: interacted with or visually inspected and screenshot evidence exists;
+- `skipped-risky`: skipped because the next action could mutate data or produce irreversible side effects;
+- `duplicate-sampled`: skipped after a representative repeated control with the same rendering pattern was covered;
+- `blocked`: blocked by access, loading, permission, missing test data, or runtime/API failure;
+- `not-reached`: in scope but not reached before the run stopped.
+
+If a route has only an initial screenshot and no safe second-layer interaction, mark that route as partial coverage unless the page truly has no safe interactive controls. The final report must list the untested safe interactions instead of implying full coverage.
 
 ### Scrollable Container Triage
 
@@ -304,6 +343,25 @@ For each unexpected-language observation:
 
 Normal `I18N-xxx` findings for unexpected-language text must include direct localization evidence: frontend source/fallback evidence, or clear evidence that system product copy is being rendered in the wrong language. User-created data and uncertain ownership should stay out of the normal i18n finding list.
 
+Unexpected-language triage answers only "who likely owns this text." It must not end the inspection. Even when all unexpected-language text is classified as user-created data or out of scope, continue the UI-fit pass for truncation, wrapping, table behavior, forms, dialogs, popovers, grouped controls, and layout integrity.
+
+### Observation Evidence Contract
+
+`non-i18n`, `i18n-blocking`, and `needs-product-confirmation` observations are not normal localization findings, but they still require evidence when they are included in the final report.
+
+For each such observation, record:
+
+- a separate ID such as `BLOCKER-001`, `NON-I18N-001`, or `CONFIRM-001`;
+- URL or state, target locale, viewport, action sequence, and observed text or behavior;
+- at least one screenshot reference when the UI was reachable, with red-box annotations when the region is not obvious;
+- source-search evidence when the observation involves visible text in an unexpected language;
+- runtime/API/data-field evidence when browser tooling exposes it safely;
+- user-created-data assessment when relevant;
+- out-of-scope reason or human follow-up action;
+- recommended owner or next investigation path.
+
+The final `report.html` must render these as evidence cards with inline screenshots, not only as prose notes. Render `i18n-blocking` items under a separate `Blockers` report topic. Render `non-i18n` and `needs-product-confirmation` items under a separate `Non-i18n observations` report topic. Keep both topics visually separate from normal `I18N-xxx` findings and do not count them as fixed i18n issues.
+
 ### Severity
 
 Use a severity level that reflects user impact, not only visual obviousness:
@@ -455,6 +513,20 @@ For translation quality issues:
 
 For issues that do not appear fixable in the current repository, recommend the next owner or investigation path instead of proposing a local code change. Examples include backend/API payload changes, shared component package fixes, module federation remote fixes, or third-party widget limitations.
 
+### Fix Scope Handling
+
+When the user asks for fixing or the task scope otherwise includes remediation, do not stop at reporting current-repository issues that are low risk and directly verifiable. Prefer the smallest local change when all of these are true:
+
+- the finding is `i18n-related`;
+- recommended owner is `current repository`;
+- fix risk is `low`, or a locally contained `medium` risk that can be verified in the affected page state;
+- the fix does not require destructive actions, final submissions, permission changes, backend/API contract changes, publishing, deletion, or external system mutation;
+- the exact affected UI state can be re-inspected with before/after screenshots.
+
+For each attempted fix, update `inspection-log.md` with the changed file paths, concise relevant diff, validation command, before screenshot, after screenshot, and retest result. A finding should become `verifiedFixed` only after browser re-inspection shows the visible issue is gone.
+
+When fixing is out of scope, blocked, too risky, owned outside the current repository, or unverifiable, leave the finding open and write the reason, recommended change, acceptance criteria, and human follow-up. Do not show empty diff blocks in `report.html`.
+
 ### Acceptance Criteria
 
 Write observable retest steps for every finding. Include the same URL, locale, viewport, user action, and expected visual or language result. When the issue had screenshot evidence, the acceptance criteria should ask for a replacement screenshot after the fix.
@@ -471,11 +543,12 @@ screenshots/003-dialog-validation.png
 screenshots/004-issue-overflow-filter-label.png
 ```
 
-Every screenshot should have a short caption in `inspection-log.md` while inspecting. When the final report is generated, include the same caption context in `report.html`:
+Every screenshot should have a short caption and capture timestamp in `inspection-log.md` while inspecting. Use exact timestamps with timezone when available. When the final report is generated, include the same caption context and capture time in `report.html`:
 
 - what page or state it shows;
 - what action produced it;
-- whether it is normal coverage evidence or issue evidence.
+- whether it is normal coverage evidence or issue evidence;
+- when the screenshot was captured.
 
 After every screenshot capture, verify the screenshot file exists and has a plausible non-zero size before using it as evidence. If the browser tool returns screenshot bytes, prefer explicitly writing those bytes and then checking the file. Record screenshot-write failures in `inspection-log.md`; do not mark a route as covered with a missing or zero-byte screenshot.
 
@@ -485,10 +558,11 @@ For broad route, menu, or full-product inspections, maintain a screenshot manife
 - URL/route or page state;
 - action taken;
 - screenshot path;
+- captured time;
 - status: `covered`, `blocked`, `skipped-risky`, `external-out-of-scope`, or `not-reached`;
 - short note.
 
-The final `report.html` must reproduce this coverage evidence. Do not only show issue screenshots or a few "important" screenshots when the user asked for a broad inspection; the reader must be able to audit which pages were actually opened.
+The final `report.html` must reproduce this coverage evidence. The screenshot appendix must show every screenshot with filename, caption/context, and captured time under the thumbnail. Do not only show issue screenshots or a few "important" screenshots when the user asked for a broad inspection; the reader must be able to audit which pages were actually opened.
 
 In `report.html`, screenshot evidence must be visible inline, not only as text links. Follow the wireframe for screenshot presentation and preview behavior. Keep the original image `href` as a no-JavaScript fallback, and do not require new npm packages, external CDNs, or separate viewer files for core screenshot review.
 
@@ -578,6 +652,7 @@ Generate `report.json` and `report.html` only after one of these completion cond
 Update it during the task with:
 
 - environment: inspected URL/routes, locale, browser/tool, viewport, account/role if relevant, and inspection start time;
+- current source risk scan summary, searched patterns, key matches, and browser states targeted by those matches when a repository is available;
 - chronological actions: what was opened, clicked, typed, hovered, or closed;
 - observed state after each meaningful action;
 - screenshot path for each meaningful state;
@@ -607,6 +682,8 @@ Completion conditions are:
 
 When adding red-box annotations for screenshots, write them to `screenshotAnnotations` in `report.json`. Use screenshot-relative percentage coordinates so the same data can be rendered across report views without recalculating for each display size.
 
+Write blockers, non-i18n observations, and product-confirmation items into their dedicated top-level report arrays when present. Do not bury them in prose or mix them into the normal `findings` array unless a legacy consumer requires compatibility. Each observation needs screenshot evidence when reachable and source/runtime evidence when it involves visible unexpected-language text.
+
 When independent visual review is used, write review evidence to `visualReviewReports` in `report.json`. Each entry should point to the Markdown report in `visual-reviews/`, list the screenshots reviewed, and state how reviewer observations were triaged. If the pass was skipped or unavailable for a broad inspection, state that limitation in `inspection-log.md` and `report.html` instead of pretending screenshot coverage equals independent review coverage.
 
 When a finding is about component visual integrity, set `category` to `component visual integrity` and include a concise subtype when useful, such as `grouped-control wrapping/broken border`. If a legacy consumer cannot handle that category, mirror the subtype in the finding title or human-readable notes while keeping the visible issue clear in `report.html`.
@@ -615,7 +692,15 @@ For every finding, write both `fixVerification` and `fixRisk`. `fixVerification`
 
 ### `report.html`
 
-`report.html` is the human-readable final report. Use [UI Inspection Report Wireframe](ui-inspection-report-wireframe.html) as the structural and interaction reference instead of rewriting the report layout from prose. The wireframe is not a required visual theme or component library, and its sample data must not be copied into real reports.
+`report.html` is the human-readable final report. When [UI Inspection Report Wireframe](ui-inspection-report-wireframe.html) is available, generate the final report by copying that file to the inspection artifact folder as `report.html`, then editing the copied file in place. Do not hand-roll a separate report layout from prose.
+
+The wireframe must contain report-like sample content only. Keep template usage instructions, replacement contracts, and generation rules in this skill document and checklist, not as visible sections inside the wireframe HTML.
+
+After copying the wireframe, replace every sample value, mock screenshot, placeholder finding, source path, diff, and observation with real inspection evidence from `inspection-log.md`, `report.json`, and the screenshot folder. Remove `data-template-sample="true"` and any remaining template-only markers from the final report after replacement.
+
+The report wireframe is a desktop-only, latest-Chrome template. Do not spend report-generation effort on mobile or legacy-browser fallbacks unless the user explicitly asks for them. The wireframe uses the complete Bootstrap 4.5.3 CSS file from `https://g.alicdn.com/code/lib/bootstrap/4.5.3/css/bootstrap.min.css`. Do not also include `bootstrap-grid.min.css`, because the complete CSS already includes the grid and component styles. Reuse Bootstrap component and utility classes for standard UI pieces such as badges, tables, buttons, form controls, cards, alerts, and muted text. Keep custom CSS for report-specific structure, screenshot annotation overlays, modal/lightbox layout, and evidence presentation. Do not include Bootstrap 4 JavaScript from the CDN unless the report also supplies the required jQuery dependency; the wireframe's modal, lightbox, feedback-copy, and back-to-top behavior should remain implemented with native JavaScript.
+
+Preserve the wireframe's required section order, CSS class structure, modal/lightbox behavior, feedback-copy behavior, coverage matrix, and screenshot appendix unless the run has no data for that section. Empty sections should be marked with a real inspection limitation or a no-data statement, not left with sample rows.
 
 Choose the `report.html` display language before writing the file:
 
@@ -623,15 +708,19 @@ Choose the `report.html` display language before writing the file:
 - use a user-specified report language when provided;
 - use English as the fallback default when the request language is unclear;
 - do not infer the report language from the inspected UI target locale;
-- localize report headings, dashboard labels, prose, finding explanations, table headers, screenshot captions, status labels, validation notes, blocker text, and lightbox controls;
+- localize report headings, dashboard labels, prose, finding explanations, table headers, screenshot captions, status labels, blocker text, and lightbox controls;
 - keep product names, locale codes, URLs, file paths, commands, finding IDs, key names, and code identifiers unchanged when translating them would reduce precision.
 
 The wireframe defines the expected report information architecture and default interactions. Keep detailed visual, layout, and interaction choices in the wireframe. This document only defines the durable report contracts below:
 
 - Include the requested scope, locale, viewports, browser/tool, coverage status, visual-review status, blockers, skipped areas, and every accepted finding from `inspection-log.md` and `report.json`.
-- Keep blockers and non-i18n observations visually separate from normal i18n/UI-fit findings.
+- Keep `Blockers` and `Non-i18n observations` as separate report topics, and keep both visually separate from normal i18n/UI-fit findings.
+- Render blockers, non-i18n observations, and needs-product-confirmation items as evidence cards with inline screenshots, source search/runtime evidence, ownership rationale, and human follow-up or out-of-scope reason. Place needs-product-confirmation cards under `Non-i18n observations` unless the user asks for a separate product-confirmation topic.
+- Do not include a separate "Inspection timeline" section in `report.html`; keep chronological details in `inspection-log.md` and use screenshot capture times in the screenshot appendix for reader context.
+- Do not include standalone "Human attention and risk", "Report interaction validation", or "Independent visual review appendix" sections in `report.html`; keep report-interaction verification details and independent visual-review triage details in `inspection-log.md`, and keep human-attention/risk details inside the relevant finding or observation cards.
 - Distinguish text overflow/truncation, layout overflow, alignment, and component visual integrity. Do not summarize the result as only "No visible overflow found".
 - Use screenshot annotation data from `report.json` and preserve coordinate alignment in cards, modals, appendices, and enlarged previews.
+- In the screenshot appendix, render every screenshot with filename, caption/context, and capture time under the thumbnail. Prefer the exact timestamp recorded when the screenshot was captured, including timezone when available.
 - Show concise code diffs only for findings with local source, style, config, or locale changes. Omit empty diff blocks.
 - Keep the feedback-copy behavior: copy only findings whose feedback textarea is not empty after trimming whitespace. Use one blank line between findings, formatted as:
 
@@ -642,8 +731,10 @@ Finding I18N-012: Please fix. Prefer increasing the label column width.
 ```
 
 - If every feedback textarea is empty, show a localized "no feedback to copy" status instead of copying blank findings.
-- Ensure local `file://` report interactions work without new npm packages. External CDNs are optional only when the report also has a local fallback.
+- If clipboard access is unavailable, show a visible fallback textarea containing only the generated non-empty feedback payload so the user can copy manually. This is preferable to reporting a generic copy failure.
+- Ensure local `file://` report interactions work without new npm packages or external JavaScript. Bootstrap CSS may load from the approved Alibaba CDN above; all report interactions must still work if only the inline native JavaScript runs.
 - Preserve modal stack behavior from the wireframe. If a finding-detail modal is open and the user opens an image preview/lightbox from inside it, pressing `Escape` must close only the topmost image preview. A second `Escape` may then close the underlying finding-detail modal.
+- Implement `Escape` handling on the real latest-Chrome keyboard event path with a capture-phase `keydown` listener and `event.key === "Escape"`. Ignore `event.repeat` so a long key press does not close both a lightbox and its parent modal. Make modal and lightbox containers focusable and move focus into the active modal when it opens, so manual keyboard use and browser-driven key events both work.
 
 Report interaction JavaScript must be generated defensively:
 
@@ -675,17 +766,34 @@ This smoke test is a final-report gate, not an optional diagnostic:
 
 - Do not hand off `report.html` if this command fails.
 - Do not replace this with string-presence checks such as checking whether `copyFeedback`, `modalStack`, or `addEventListener` appears in the HTML; those checks do not prove the script parses.
-- Save the exact successful output, such as `checked 1 executable script(s)`, in `inspection-log.md`.
-- Include the same result in the final `report.html` validation/status area so the reader can see that executable report JavaScript was actually parsed.
+- Save the exact successful output, such as `checked 1 executable script(s)`, in `inspection-log.md` so the run has durable evidence that executable report JavaScript was actually parsed.
 - If browser policy or environment restrictions prevent opening `report.html`, this syntax smoke test is still required. State the browser limitation separately instead of treating it as a reason to skip the script parse check.
+
+Before handoff, verify the final `report.html` no longer contains the wireframe-only template marker `data-template-sample="true"`, any visible template usage instructions such as a "Template replacement contract" section, or unreplaced sample identifiers such as `ExampleToolbar.tsx`, `mock-shot`, or the wireframe reference paragraph. If any remain, the report has not been generated from real inspection data yet.
 
 The final report must not make the user open the screenshots folder just to know whether the requested scope was covered. If every screenshot is saved on disk but the HTML report omits the complete coverage matrix or screenshot appendix, the report is incomplete.
 
 If no issues are found, still generate `report.html`, include process screenshots for all covered scope items, and state what was actually verified. Do not write only "No visible overflow found" as the final result. Distinguish at least text overflow/truncation, layout overflow, alignment, and component visual integrity. If the run only checked overflow metrics or screenshots for obvious truncation, state that component visual integrity was not fully verified.
 
-If independent visual review was used and no issues were accepted, state that visual-review observations were triaged and no findings remained. If reviewer observations were dismissed, include the dismissal rationale in the independent visual review appendix.
+If independent visual review was used and no issues were accepted, state that visual-review observations were triaged and no findings remained. If reviewer observations were dismissed, include the dismissal rationale in `inspection-log.md`; do not create a separate visual-review appendix in `report.html`.
 
 Before handing off, open the generated `report.html` when possible and verify representative wireframe interactions. Also verify there are no JavaScript syntax errors, red-box annotations are visually aligned in at least one normal and enlarged report view, nested modal `Escape` behavior closes only the topmost modal, empty code-diff blocks are omitted, and any scroll-to-top behavior changes the actual scroll container rather than only calling `window.scrollTo`.
+
+Do not validate `Escape` behavior only by calling `document.dispatchEvent(new KeyboardEvent(...))` from page JavaScript. That can produce false positives. Use a manual key press or browser automation that sends a real key event, such as Chrome DevTools `Input.dispatchKeyEvent`, Playwright `page.keyboard.press("Escape")`, or an equivalent browser-level keyboard action.
+
+The representative browser interaction check must cover at least:
+
+1. Click a finding title in the overview and confirm the finding detail modal opens.
+2. From inside the finding modal, click a screenshot and confirm the lightbox opens.
+3. Press `Escape` once and confirm only the lightbox closes while the finding modal remains open.
+4. Press `Escape` again and confirm the finding modal closes.
+5. Click a screenshot from the screenshot appendix or an observation evidence card and confirm the lightbox opens.
+6. Click "copy findings and feedback" with all feedback fields empty and confirm the localized empty-feedback status appears.
+7. Add feedback to one finding, copy again, and confirm only non-empty feedback is copied or reported as copied.
+8. Scroll down until the right-side Back to top button appears, click it, and confirm the actual scroll container returns to the top and any hash-only position is cleared.
+9. Verify modal close buttons and backdrop clicks close the active modal without breaking the `Escape` topmost-modal behavior.
+
+If opening `report.html` through `file://` is blocked by browser policy, serve the inspection folder through a local static HTTP server and repeat the interaction check there. Do not hand off the report as fully verified when only the inline-script syntax smoke test has run.
 
 ## Finding Details
 

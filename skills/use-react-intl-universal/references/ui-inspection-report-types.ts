@@ -304,8 +304,23 @@ export type I18nUiInspectionCoverageStatus =
   | "covered"
   | "blocked"
   | "skipped-risky"
+  | "duplicate-sampled"
   | "external-out-of-scope"
   | "not-reached";
+
+/**
+ * Dedicated observation records that render under separate report topics and
+ * stay visually separated from normal `I18N-xxx` findings in `report.html`.
+ *
+ * - i18n-blocking: blocks coverage but is not proven to be caused by i18n.
+ * - non-i18n: useful out-of-scope context, such as likely user-created data.
+ * - needs-product-confirmation: ownership or expected behavior needs a human
+ *   product/data decision before it can be treated as a defect.
+ */
+export type I18nUiInspectionObservationKind =
+  | "i18n-blocking"
+  | "non-i18n"
+  | "needs-product-confirmation";
 
 /**
  * Independent screenshot-review result written by a visual-review subagent.
@@ -398,6 +413,13 @@ export interface I18nUiInspectionCoverageEvidence {
   screenshotRef?: string;
 
   /**
+   * ISO timestamp when this screenshot was captured. Include timezone
+   * information when available. `report.html` should show this under the
+   * screenshot thumbnail in the screenshot appendix.
+   */
+  capturedAt?: string;
+
+  /**
    * Short caption explaining what the screenshot or status proves.
    */
   caption: string;
@@ -462,6 +484,38 @@ export interface I18nUiInspectionScreenshotAnnotation {
    * `object-fit`, cropped thumbnails, or page/backdrop coordinates.
    */
   boxes: I18nUiInspectionScreenshotAnnotationBox[];
+}
+
+export interface I18nUiInspectionScreenshotManifestItem {
+  /**
+   * Screenshot path relative to the report folder or repository root, matching
+   * the value used by findings, coverage evidence, observations, and the
+   * screenshot appendix.
+   */
+  screenshotRef: string;
+
+  /**
+   * ISO timestamp when the screenshot was captured. Include timezone
+   * information when available.
+   */
+  capturedAt: string;
+
+  /**
+   * Short reader-facing caption or state summary shown under the screenshot in
+   * the appendix.
+   */
+  caption: string;
+
+  /**
+   * Optional URL, route, or state identifier for the screenshot.
+   */
+  url?: string;
+
+  /**
+   * Optional action that produced the screenshot, such as opening a dropdown,
+   * entering a drawer, or re-inspecting after a fix.
+   */
+  action?: string;
 }
 
 export interface I18nUiInspectionVisualReviewReport {
@@ -741,12 +795,131 @@ export interface I18nUiInspectionUnexpectedLanguageEvidence {
   ownershipRationale: string;
 }
 
+export interface I18nUiInspectionObservation {
+  /**
+   * Separate observation ID. Use prefixes such as `BLOCKER-001`,
+   * `NON-I18N-001`, or `CONFIRM-001` so readers do not confuse these with
+   * normal localization findings.
+   */
+  id: string;
+
+  /**
+   * Section where this observation belongs.
+   */
+  kind: I18nUiInspectionObservationKind;
+
+  /**
+   * Short reader-facing title.
+   */
+  title: string;
+
+  /**
+   * Optional severity when the observation materially affects coverage or user
+   * understanding. Normal i18n finding counts should not include this.
+   */
+  severity?: I18nUiInspectionSeverity;
+
+  /**
+   * Visible category for the observation, such as `page load / blank screen` or
+   * `non-i18n observation`.
+   */
+  category?: I18nUiInspectionIssueCategory;
+
+  /**
+   * Full URL, route, or state identifier where the observation was seen.
+   */
+  url?: string;
+
+  /**
+   * Interaction state, such as "row action menu open" or "Quality Reports tab
+   * after same-tab reload".
+   */
+  state?: string;
+
+  /**
+   * Target UI locale, such as `en-US`, when known.
+   */
+  targetLocale?: string;
+
+  /**
+   * Viewport used when the screenshot or observation was captured.
+   */
+  viewport?: string;
+
+  /**
+   * User action sequence or reproduction steps that produced the observation.
+   */
+  action: string;
+
+  /**
+   * What was visible in the UI. For unexpected-language data, include the
+   * observed text here and put origin evidence in
+   * `unexpectedLanguageEvidence`.
+   */
+  observation: string;
+
+  /**
+   * Screenshot IDs or paths showing the observation. Required when the UI state
+   * was reachable; only omit when capture was impossible and explain why in
+   * `notes`.
+   */
+  screenshotRefs: string[];
+
+  /**
+   * Source-search evidence for visible unexpected-language text or ownership
+   * classification. Use this even when the conclusion is non-i18n user-created
+   * data, so humans can audit the decision quickly.
+   */
+  sourceSearch?: I18nUiInspectionSourceSearchEvidence;
+
+  /**
+   * Runtime or API evidence, such as endpoint shape, response field names, or
+   * "appeared only after the rules list API loaded". Avoid sensitive payloads.
+   */
+  runtimeEvidence?: string;
+
+  /**
+   * Full unexpected-language evidence when the observation involves text in the
+   * wrong language for the target locale.
+   */
+  unexpectedLanguageEvidence?: I18nUiInspectionUnexpectedLanguageEvidence;
+
+  /**
+   * Assessment for values that may be customer-created data rather than product
+   * copy.
+   */
+  userCreatedDataAssessment?: I18nUiInspectionUserCreatedDataAssessment;
+
+  /**
+   * Why this is not counted as a normal i18n finding, or what human decision is
+   * required before it can be fixed.
+   */
+  outOfScopeReason?: string;
+
+  /**
+   * Recommended owner or next investigation path, such as `backend/API`,
+   * `current repository`, `shared component package`, or `unknown`.
+   */
+  recommendedOwner?: string;
+
+  /**
+   * Human follow-up required for blockers or uncertain ownership.
+   */
+  humanAttention?: I18nUiInspectionHumanAttention;
+
+  /**
+   * Additional concise notes, such as wait/reload diagnostics for blank pages or
+   * why screenshot capture was unavailable.
+   */
+  notes?: string;
+}
+
 export interface I18nUiInspectionFinding {
   /**
    * Stable finding ID. Use normal "I18N-001" style IDs only for
    * `i18n-related` findings. Blockers and non-i18n observations should use
-   * visibly separate IDs or sections in `report.html` so they are not mistaken
-   * for localization defects.
+   * visibly separate IDs and report topics so they are not mistaken for
+   * localization defects.
    */
   id: string;
 
@@ -934,12 +1107,43 @@ export interface I18nUiInspectionReportJson {
   screenshotAnnotations?: I18nUiInspectionScreenshotAnnotation[];
 
   /**
+   * Complete screenshot appendix manifest. Broad inspections should include
+   * every screenshot captured during coverage, fixing, and re-inspection so
+   * `report.html` can render each screenshot with filename, caption/context, and
+   * capture time under the thumbnail. If omitted, renderers may derive a partial
+   * appendix from coverage/finding/observation screenshot refs, but they should
+   * still show capture time whenever it is known.
+   */
+  screenshotManifest?: I18nUiInspectionScreenshotManifestItem[];
+
+  /**
    * Independent screenshot-review Markdown reports and the primary-inspection
    * triage result for each report. Broad/full-product inspections should
    * populate this when subagents are available; otherwise explain the limitation in
    * `inspection-log.md` and `report.html`.
    */
   visualReviewReports?: I18nUiInspectionVisualReviewReport[];
+
+  /**
+   * Coverage blockers that are not counted as normal i18n findings, such as a
+   * blank route after same-tab reload, login/access blockers, missing test data,
+   * or runtime/API failures. Render these as evidence cards in `report.html`.
+   */
+  blockers?: I18nUiInspectionObservation[];
+
+  /**
+   * Out-of-scope observations that are still useful for human review. Typical
+   * examples include likely user-created names, uploaded file names, custom
+   * tags, comments, project/resource names, or generic product issues unrelated
+   * to localization. Render screenshots and ownership evidence inline.
+   */
+  nonI18nObservations?: I18nUiInspectionObservation[];
+
+  /**
+   * Observations whose product/data ownership or expected behavior is uncertain
+   * and must be confirmed before they are treated as localization defects.
+   */
+  needsProductConfirmation?: I18nUiInspectionObservation[];
 
   /**
    * Aggregated counts derived from the inspection log, targets, and findings.

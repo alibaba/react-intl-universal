@@ -696,11 +696,32 @@ For every finding, write both `fixVerification` and `fixRisk`. `fixVerification`
 
 The wireframe must contain report-like sample content only. Keep template usage instructions, replacement contracts, and generation rules in this skill document and checklist, not as visible sections inside the wireframe HTML.
 
+Treat the copied wireframe as the source file for the final report, not as visual inspiration and not as a starter file to overwrite. After copying it, keep its information architecture, CSS, section wrappers, major class names, modal/lightbox JavaScript, feedback-copy JavaScript, navigation topics, and screenshot annotation structure. The report-writing task is a copy-edit/data-replacement task inside the copied file.
+
+Do not generate a new complete HTML document string and write it over the copied `report.html`. Do not replace the wireframe with a smaller custom Bootstrap page, a simplified report card layout, or a bespoke generated layout. If using a script to help with report generation, the script must transform the copied wireframe in place or fill designated repeated blocks while preserving the wireframe skeleton.
+
+Allowed copy-edit operations:
+
+- replace visible sample text, metadata, counts, table rows, captions, screenshot paths, finding IDs, code diffs, and observation content with real run data;
+- duplicate an existing wireframe finding card or observation card to represent additional real findings or observations, preserving its class names and internal structure;
+- remove extra sample finding cards only after all real findings have been rendered through the same wireframe card structure;
+- replace `mock-shot` placeholder content with real `<img>` evidence while keeping the `annotated-shot`, `annotated-stage`, and `redbox` overlay structure;
+- localize visible report text to the chosen report language without changing section identity or interaction behavior.
+
+Forbidden report-generation operations:
+
+- deleting required top-level topics such as `Blockers`, `Non-i18n observations`, `Coverage matrix`, or `Screenshot appendix` because the run has little or no data for them;
+- replacing `annotated-shot` / `annotated-stage` evidence blocks with generic image cards;
+- omitting red-box annotations for finding evidence when the issue region is not visually obvious;
+- replacing wireframe finding cards with simplified before/after cards;
+- moving skill/tooling notes into a new top-level report section when they belong in `inspection-log.md` or concise report notes;
+- replacing the wireframe's modal, lightbox, feedback-copy, or back-to-top script with unrelated custom behavior.
+
 After copying the wireframe, replace every sample value, mock screenshot, placeholder finding, source path, diff, and observation with real inspection evidence from `inspection-log.md`, `report.json`, and the screenshot folder. Remove `data-template-sample="true"` and any remaining template-only markers from the final report after replacement.
 
 The report wireframe is a desktop-only, latest-Chrome template. Do not spend report-generation effort on mobile or legacy-browser fallbacks unless the user explicitly asks for them. The wireframe uses the complete Bootstrap 4.5.3 CSS file from `https://g.alicdn.com/code/lib/bootstrap/4.5.3/css/bootstrap.min.css`. Do not also include `bootstrap-grid.min.css`, because the complete CSS already includes the grid and component styles. Reuse Bootstrap component and utility classes for standard UI pieces such as badges, tables, buttons, form controls, cards, alerts, and muted text. Keep custom CSS for report-specific structure, screenshot annotation overlays, modal/lightbox layout, and evidence presentation. Do not include Bootstrap 4 JavaScript from the CDN unless the report also supplies the required jQuery dependency; the wireframe's modal, lightbox, feedback-copy, and back-to-top behavior should remain implemented with native JavaScript.
 
-Preserve the wireframe's required section order, CSS class structure, modal/lightbox behavior, feedback-copy behavior, coverage matrix, and screenshot appendix unless the run has no data for that section. Empty sections should be marked with a real inspection limitation or a no-data statement, not left with sample rows.
+Preserve the wireframe's required section order, CSS class structure, modal/lightbox behavior, feedback-copy behavior, coverage matrix, blockers topic, non-i18n topic, and screenshot appendix. Empty sections should be marked with a real inspection limitation or a no-data statement, not deleted and not left with sample rows.
 
 Choose the `report.html` display language before writing the file:
 

@@ -711,6 +711,33 @@
       gap: 18px;
     }
 
+    .appendix-meta {
+      padding: 10px 13px 13px;
+      border-top: 1px solid #edf2f7;
+      background: #fff;
+    }
+
+    .appendix-meta dl {
+      display: grid;
+      grid-template-columns: 86px minmax(0, 1fr);
+      gap: 5px 10px;
+      margin: 0;
+      color: #334155;
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .appendix-meta dt {
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .appendix-meta dd {
+      min-width: 0;
+      margin: 0;
+      overflow-wrap: anywhere;
+    }
+
     .shot-time {
       display: block;
       margin-top: 4px;
@@ -873,9 +900,7 @@
       <nav class="nav quick-nav" aria-label="Report sections">
         <a class="nav-link active" href="#finding-overview">Overview</a>
         <a class="nav-link" href="#findings">Findings</a>
-        <a class="nav-link" href="#coverage">Coverage</a>
         <a class="nav-link" href="#blockers">Blockers</a>
-        <a class="nav-link" href="#non-i18n">Non-i18n</a>
         <a class="nav-link" href="#appendix">Screenshots</a>
       </nav>
 
@@ -1161,56 +1186,6 @@
         </article>
       </section>
 
-      <section class="card report-card" id="coverage" aria-labelledby="coverage-title">
-        <div class="section-head">
-          <div>
-            <div class="section-kicker">Route coverage</div>
-            <h2 id="coverage-title">Coverage matrix</h2>
-            <p>Every row should map to concrete browser activity and screenshot evidence.</p>
-          </div>
-        </div>
-        <div class="table-responsive table-wrap">
-          <table class="table table-sm table-hover">
-            <thead class="thead-light">
-              <tr>
-                <th>Scope</th>
-                <th>URL or state</th>
-                <th>Action</th>
-                <th>Status</th>
-                <th>Screenshot</th>
-                <th>Notes</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Rules list</td>
-                <td><code>#/rules</code></td>
-                <td>Opened from left navigation</td>
-                <td><span class="badge badge-pill badge-success">covered</span></td>
-                <td><a href="#shot-coverage-001" data-preview-stage="shot-coverage-001">001-rules-list.png</a></td>
-                <td>Filter toolbar and table visible.</td>
-              </tr>
-              <tr>
-                <td>Create detail</td>
-                <td><code>#/rules/create</code></td>
-                <td>Clicked safe create entry, did not submit</td>
-                <td><span class="badge badge-pill badge-success">covered</span></td>
-                <td><a href="#shot-before-001" data-preview-stage="shot-before-001">002-create-detail.png</a></td>
-                <td>Form label and validation states checked.</td>
-              </tr>
-              <tr id="coverage-blocker-001">
-                <td>External report route</td>
-                <td><code>#/external-report</code></td>
-                <td>Opened route, waited, reloaded once</td>
-                <td><span class="badge badge-pill badge-danger">blocked</span></td>
-                <td>N/A</td>
-                <td>Blank after reload; recorded as i18n-blocking, not a normal i18n finding.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
       <section class="card report-card" id="blockers" aria-labelledby="blockers-title">
         <div class="section-head">
           <div>
@@ -1251,90 +1226,12 @@
         </div>
       </section>
 
-      <section class="card report-card" id="non-i18n" aria-labelledby="non-i18n-title">
-        <div class="section-head">
-          <div>
-            <div class="section-kicker">Out-of-scope evidence</div>
-            <h2 id="non-i18n-title">Non-i18n observations</h2>
-            <p>These observations are useful for review, but should not be counted as fixed i18n issues.</p>
-          </div>
-        </div>
-        <div class="observation-grid">
-          <article class="card observation-card" id="NON-I18N-001">
-            <header class="observation-head">
-              <h3>NON-I18N-001 Chinese row value appears to be user data</h3>
-              <div class="badge-row">
-                <span class="badge badge-pill badge-info">non-i18n</span>
-                <span class="badge badge-pill badge-success">out of scope</span>
-              </div>
-            </header>
-            <div class="observation-body">
-              <figure class="annotated-shot">
-                <a class="annotated-stage" id="shot-non-i18n-001" href="#shot-non-i18n-001" data-preview-stage="shot-non-i18n-001">
-                  <div class="mock-shot">
-                    <div class="mock-sidebar"></div>
-                    <div class="mock-content">
-                      <div class="mock-row medium"></div>
-                      <div class="mock-table"><div class="mock-cell"></div><div class="mock-cell"></div><div class="mock-cell"></div></div>
-                    </div>
-                  </div>
-                  <span class="redbox" style="left:45%;top:42%;width:28%;height:13%"><em>row data value</em></span>
-                </a>
-                <figcaption>Chinese value is shown inside a data row, not as a button, menu, label, or system message.</figcaption>
-              </figure>
-              <div class="table-responsive table-wrap">
-                <table class="table table-sm evidence-table">
-                  <tbody>
-                    <tr><th>Observed text</th><td><code>质量规则模板</code> in an English page table row.</td></tr>
-                    <tr><th>Source search</th><td>Search exact text and nearby labels; no frontend UI-copy match found.</td></tr>
-                    <tr><th>Runtime evidence</th><td>Appears after table data loads from an API field that maps to a create/edit name field.</td></tr>
-                    <tr><th>Assessment</th><td>Likely user-created or persisted business data, so it is not counted as localization debt.</td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </article>
-
-          <article class="card observation-card" id="CONFIRM-001">
-            <header class="observation-head">
-              <h3>CONFIRM-001 API-returned label needs product confirmation</h3>
-              <div class="badge-row">
-                <span class="badge badge-pill badge-warning">needs product confirmation</span>
-                <span class="badge badge-pill badge-warning">human review</span>
-              </div>
-            </header>
-            <div class="observation-body">
-              <figure class="annotated-shot">
-                <a class="annotated-stage" id="shot-confirm-001" href="#shot-confirm-001" data-preview-stage="shot-confirm-001">
-                  <div class="mock-shot">
-                    <div class="mock-sidebar"></div>
-                    <div class="mock-content"><div class="mock-row"></div><div class="mock-row medium"></div><div class="mock-row short"></div></div>
-                  </div>
-                  <span class="redbox" style="left:52%;top:28%;width:26%;height:10%"><em>API display label</em></span>
-                </a>
-                <figcaption>API-returned display label may be product-owned system copy, but ownership is not proven.</figcaption>
-              </figure>
-              <div class="table-responsive table-wrap">
-                <table class="table table-sm evidence-table">
-                  <tbody>
-                    <tr><th>Observed text</th><td>Unexpected-language label in a filter option or status column.</td></tr>
-                    <tr><th>Source search</th><td>No local UI-copy match. Record exact and partial searched terms.</td></tr>
-                    <tr><th>Runtime evidence</th><td>Record endpoint path, status, and relevant field names without sensitive payloads.</td></tr>
-                    <tr><th>Follow-up</th><td>Product/API owner should confirm whether this field is user-created data or backend-owned localized system copy.</td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </article>
-        </div>
-      </section>
-
       <section class="card report-card" id="appendix" aria-labelledby="appendix-title">
         <div class="section-head">
           <div>
             <div class="section-kicker">Screenshot ledger</div>
             <h2 id="appendix-title">Screenshot appendix</h2>
-            <p>A real report lists every screenshot captured during coverage, fixing, and re-inspection. Each caption includes capture time.</p>
+            <p>A real report lists every screenshot captured during coverage, fixing, and re-inspection. Each screenshot includes capture time, URL/state, action, status, and notes.</p>
           </div>
         </div>
         <div class="appendix-grid">
@@ -1343,12 +1240,30 @@
               <div class="mock-shot"><div class="mock-sidebar"></div><div class="mock-content"><div class="mock-row"></div><div class="mock-row medium"></div><div class="mock-table"><div class="mock-cell"></div><div class="mock-cell"></div><div class="mock-cell"></div></div></div></div>
             </a>
             <figcaption>001-rules-list.png - coverage screenshot for Rules list.<span class="shot-time">Captured: 2026-07-08 10:00 Asia/Shanghai</span></figcaption>
+            <div class="appendix-meta">
+              <dl>
+                <dt>Scope</dt><dd>Rules list</dd>
+                <dt>URL/state</dt><dd><code>#/rules</code></dd>
+                <dt>Action</dt><dd>Opened from left navigation.</dd>
+                <dt>Status</dt><dd><span class="badge badge-pill badge-success">covered</span></dd>
+                <dt>Notes</dt><dd>Filter toolbar and table visible.</dd>
+              </dl>
+            </div>
           </figure>
           <figure class="annotated-shot">
             <a class="annotated-stage" href="#shot-before-001" data-preview-stage="shot-before-001">
               <div class="mock-shot"><div class="mock-sidebar"></div><div class="mock-content"><div class="mock-row medium"></div><div class="mock-row"></div></div></div>
             </a>
             <figcaption>002-before.png - issue evidence screenshot.<span class="shot-time">Captured: 2026-07-08 10:05 Asia/Shanghai</span></figcaption>
+            <div class="appendix-meta">
+              <dl>
+                <dt>Scope</dt><dd>Create detail</dd>
+                <dt>URL/state</dt><dd><code>#/rules/create</code></dd>
+                <dt>Action</dt><dd>Clicked safe create entry, did not submit.</dd>
+                <dt>Status</dt><dd><span class="badge badge-pill badge-success">covered</span></dd>
+                <dt>Notes</dt><dd>Form label and validation states checked.</dd>
+              </dl>
+            </div>
           </figure>
         </div>
       </section>

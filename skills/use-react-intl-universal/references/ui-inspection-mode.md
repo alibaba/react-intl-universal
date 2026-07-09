@@ -136,6 +136,15 @@ Before reporting a cropped table column, hidden tab, fixed-column boundary, or r
 
 If an independent reviewer flags a horizontally scrollable area but the primary inspection confirms that scrolling reveals the content normally, dismiss the observation in `inspection-log.md` with that rationale instead of promoting it to an i18n/UI-fit finding.
 
+For tab strips and other scrollable grouped controls, treat a working scroll affordance as normal product behavior unless there is a concrete visual-integrity failure. Before promoting a tab strip to a normal `I18N-xxx` finding, record:
+
+- the visible tab labels before scrolling and after scrolling;
+- whether the active indicator, scroll buttons, and tab labels still belong to one coherent tab strip;
+- whether any tab label or primary adjacent control is overlapped, clipped, or unreachable after using the intended scroll buttons;
+- if source changes are attempted, the before/after visible tab capacity, such as visible tab count or visible label range, at the same viewport and scroll position.
+
+Do not fix a scrollable tab strip merely to expose more off-screen tabs when its scroll buttons work. Do not mark a tab-strip fix as `verifiedFixed` if the after screenshot shows fewer visible tabs, a narrower visible label range, worse overlap, or more reliance on scrolling than the before screenshot.
+
 ### Blank Page and Load-Failure Retest
 
 If a route or page state appears blank, mostly white, missing its expected application shell, or stuck with only a global header/loading skeleton, do not immediately classify it as an i18n issue.
@@ -474,6 +483,8 @@ For UI layout issues such as truncation, overflow, overlap, misalignment, or com
 5. Mark the fix risk as high when the fix changes shared layout behavior, page-level structure, table column allocation, responsive grid rules, locked/fixed columns, default-locale visual layout, or introduces a locale-scoped broad layout branch, even if the target-locale screenshot looks fixed.
 6. Prefer general small fixes that work across locales. Use language-specific styles or locale branches only when needed to avoid breaking unaffected languages or the default-locale layout.
 
+For CSS width, flex, overflow, or scroll-container fixes, inspect the DOM hierarchy and existing parent/child width rules before editing. Do not apply the same reserved-space calculation to both a parent wrapper and its child scroll container, such as setting `width: calc(100% - rightToolbarWidth)` on both levels. A valid fix must preserve or improve visible content capacity at the same viewport. If the after screenshot shows a smaller visible range, fewer visible tabs/columns/actions, or a newly hidden adjacent control, roll the fix back and re-triage the observation instead of reporting it as fixed.
+
 When a fix truly needs runtime locale branching, inspect the repository's existing i18n setup before writing the condition. Prefer existing helpers, enums, or stores such as `isEn()`, `isEnglish()`, `getLang()`, `LOCALE.EN_US`, `currentLocale`, or a project-specific locale utility. Add a new local condition only when no reusable project method exists. A fallback such as:
 
 ```ts
@@ -503,6 +514,7 @@ For segmented controls, tabs, button groups, chip groups, pagination, and table 
 2. Prefer keeping same-group items on one row, allowing the whole group to move to a new row, or using an explicit grid that preserves group boundaries.
 3. If the group must become multi-line, implement a deliberate vertical or multi-row grouped-control style with correct borders, radius, active states, and separators for every position.
 4. If space remains constrained, consider increasing the container width, shortening natural target-locale labels without losing meaning, or replacing the group with a select/dropdown.
+5. For horizontally scrollable tab strips or grouped controls, compare before/after visible item capacity. A change that reduces the visible tab range, hides more actions, or makes scroll controls consume more content space is a regression even if the scroll buttons still work.
 
 For translation quality issues:
 
@@ -562,7 +574,7 @@ For broad route, menu, or full-product inspections, maintain a screenshot manife
 - status: `covered`, `blocked`, `skipped-risky`, `external-out-of-scope`, or `not-reached`;
 - short note.
 
-The final `report.html` must reproduce this coverage evidence. The screenshot appendix must show every screenshot with filename, caption/context, and captured time under the thumbnail. Do not only show issue screenshots or a few "important" screenshots when the user asked for a broad inspection; the reader must be able to audit which pages were actually opened.
+The final `report.html` must reproduce this coverage evidence in the screenshot appendix rather than in a separate coverage matrix. Follow the wireframe's Screenshot appendix information structure for every screenshot, including coverage metadata when available. Do not only show issue screenshots or a few "important" screenshots when the user asked for a broad inspection; the reader must be able to audit which pages were actually opened from the screenshot appendix.
 
 In `report.html`, screenshot evidence must be visible inline, not only as text links. Follow the wireframe for screenshot presentation and preview behavior. Keep the original image `href` as a no-JavaScript fallback, and do not require new npm packages, external CDNs, or separate viewer files for core screenshot review.
 
@@ -710,7 +722,7 @@ Allowed copy-edit operations:
 
 Forbidden report-generation operations:
 
-- deleting required top-level topics such as `Blockers`, `Non-i18n observations`, `Coverage matrix`, or `Screenshot appendix` because the run has little or no data for them;
+- deleting required top-level topics such as `Blockers`, `Non-i18n observations`, or `Screenshot appendix` because the run has little or no data for them;
 - replacing `annotated-shot` / `annotated-stage` evidence blocks with generic image cards;
 - omitting red-box annotations for finding evidence when the issue region is not visually obvious;
 - replacing wireframe finding cards with simplified before/after cards;
@@ -721,7 +733,7 @@ After copying the wireframe, replace every sample value, mock screenshot, placeh
 
 The report wireframe is a desktop-only, latest-Chrome template. Do not spend report-generation effort on mobile or legacy-browser fallbacks unless the user explicitly asks for them. The wireframe uses the complete Bootstrap 4.5.3 CSS file from `https://g.alicdn.com/code/lib/bootstrap/4.5.3/css/bootstrap.min.css`. Do not also include `bootstrap-grid.min.css`, because the complete CSS already includes the grid and component styles. Reuse Bootstrap component and utility classes for standard UI pieces such as badges, tables, buttons, form controls, cards, alerts, and muted text. Keep custom CSS for report-specific structure, screenshot annotation overlays, modal/lightbox layout, and evidence presentation. Do not include Bootstrap 4 JavaScript from the CDN unless the report also supplies the required jQuery dependency; the wireframe's modal, lightbox, feedback-copy, and back-to-top behavior should remain implemented with native JavaScript.
 
-Preserve the wireframe's required section order, CSS class structure, modal/lightbox behavior, feedback-copy behavior, coverage matrix, blockers topic, non-i18n topic, and screenshot appendix. Empty sections should be marked with a real inspection limitation or a no-data statement, not deleted and not left with sample rows.
+Preserve the wireframe's required section order, CSS class structure, modal/lightbox behavior, feedback-copy behavior, blockers topic, non-i18n topic, and screenshot appendix. Empty sections should be marked with a real inspection limitation or a no-data statement, not deleted and not left with sample rows.
 
 Choose the `report.html` display language before writing the file:
 
@@ -741,7 +753,7 @@ The wireframe defines the expected report information architecture and default i
 - Do not include standalone "Human attention and risk", "Report interaction validation", or "Independent visual review appendix" sections in `report.html`; keep report-interaction verification details and independent visual-review triage details in `inspection-log.md`, and keep human-attention/risk details inside the relevant finding or observation cards.
 - Distinguish text overflow/truncation, layout overflow, alignment, and component visual integrity. Do not summarize the result as only "No visible overflow found".
 - Use screenshot annotation data from `report.json` and preserve coordinate alignment in cards, modals, appendices, and enlarged previews.
-- In the screenshot appendix, render every screenshot with filename, caption/context, and capture time under the thumbnail. Prefer the exact timestamp recorded when the screenshot was captured, including timezone when available.
+- In the screenshot appendix, render every screenshot with filename, caption/context, and capture time under the thumbnail. Prefer the exact timestamp recorded when the screenshot was captured, including timezone when available. When the screenshot is tied to coverage evidence, render scope, URL/state, action, status, and notes in the same appendix item.
 - Show concise code diffs only for findings with local source, style, config, or locale changes. Omit empty diff blocks.
 - Keep the feedback-copy behavior: copy only findings whose feedback textarea is not empty after trimming whitespace. Use one blank line between findings, formatted as:
 
@@ -792,7 +804,7 @@ This smoke test is a final-report gate, not an optional diagnostic:
 
 Before handoff, verify the final `report.html` no longer contains the wireframe-only template marker `data-template-sample="true"`, any visible template usage instructions such as a "Template replacement contract" section, or unreplaced sample identifiers such as `ExampleToolbar.tsx`, `mock-shot`, or the wireframe reference paragraph. If any remain, the report has not been generated from real inspection data yet.
 
-The final report must not make the user open the screenshots folder just to know whether the requested scope was covered. If every screenshot is saved on disk but the HTML report omits the complete coverage matrix or screenshot appendix, the report is incomplete.
+The final report must not make the user open the screenshots folder just to know whether the requested scope was covered. If every screenshot is saved on disk but the HTML report omits the complete screenshot appendix or omits coverage metadata from appendix items, the report is incomplete.
 
 If no issues are found, still generate `report.html`, include process screenshots for all covered scope items, and state what was actually verified. Do not write only "No visible overflow found" as the final result. Distinguish at least text overflow/truncation, layout overflow, alignment, and component visual integrity. If the run only checked overflow metrics or screenshots for obvious truncation, state that component visual integrity was not fully verified.
 

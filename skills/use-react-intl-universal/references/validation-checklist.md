@@ -1,66 +1,49 @@
 # Validation Checklist
 
-Before finishing changes:
+Use this as a final sanity check before handoff. Prioritize checks that match the current task. For small code or locale changes, do not turn this into a full UI-inspection or report QA pass.
 
-- Run project discovery in unfamiliar repositories and follow existing extraction scripts before generic commands.
-- Verify `.d()` uses ICU placeholders instead of JavaScript interpolation for translatable values.
-- Run the repository extraction command or `react-intl-universal-extract` when default locale files are generated from `.d()`.
-- After extraction/export, run `verify-locale-export.mjs` for every expected locale file and plausible key counts; do not rely on exit code alone.
-- Verify no new `getHTML` usage was introduced for React UI.
-- Verify rich formatter examples render the translated `chunks`.
-- Infer or confirm the default locale before changing translated locale files.
-- Generate translation tasks for changed default-locale keys instead of translating entire locale files.
-- Run `review-translation-deltas.mjs` before applying subagent or human translation deltas.
-- Generate `create-translation-review-tasks.mjs` when delta review reports warnings, or use `--include-all` for a deliberate naturalness/terminology pass.
-- For English target locales, verify casing follows the English Target Locale Rules: Sentence case for ordinary UI copy, Title Case for title-like UI when the product uses title style, proper casing for names/acronyms/months/languages/the pronoun `I`, and no unnecessary all-caps.
-- After merge, run `audit-changed-locale-keys.mjs` for the task manifest, or `audit-locale-key.mjs` for a small manual key list.
-- Confirm the changed-key audit was run for the current task manifest, not an older generated task set.
-- Audit changed keys by default. Do not run full-project scans unless the task is broad, the user asks for it, or the changed-key audit reveals evidence of wider i18n debt.
-- Review `length-risk` and `long-translation` warnings from delta review, changed-key audit, or selected full-audit reports as static UI-fit prompts based on estimated display width.
-- For changed keys where the non-default translation is wider than the default message in compact UI, inspect the source usage before modifying translations or CSS. Use the key, source line, JSX/source context, component props, `className`, CSS, and layout container to decide risk.
-- Check compact grouped controls for visual-integrity risk even when there is no overflow warning. High-risk patterns include tabs, segmented controls, button groups, filter groups, chip groups, badges, pagination, and table action groups that use flex/inline-flex wrapping, collapsed borders, first/last-child radius rules, fixed/min widths, or nowrap child labels.
-- For grouped controls, verify or record whether wrapping preserves the whole component: continuous borders, radius only on the outer boundary, clear active/selected state, no isolated row fragments, and stable icon/text/arrow relationships.
-- If accurate wording cannot be shortened safely, keep the translation and consider general layout changes such as wrapping, flexible width, or responsive layout before language-specific CSS.
-- If a fix uses runtime language branching for layout, verify it reuses the current repository's existing locale helper, enum, or store when one exists. Use a one-off check such as `intl?.getInitOptions?.()?.currentLocale?.includes?.('en')` only when no repository-specific method is available, and keep it locally scoped.
-- If static UI-fit risk is uncertain, record a review item with the key, locale, source usage, warning evidence, and next action.
-- Run `audit-i18n-contract.mjs --length-warnings` only after broad i18n changes or before a full release-quality locale-pack check, then summarize large JSON reports before acting on length warnings.
-- Run `find-hardcoded-cjk.mjs` only when the task includes finding hardcoded Chinese/CJK text.
-- Do not treat Browser Use as a daily development requirement. Run Browser Use/UI Inspection Mode only when the user asks for page inspection, provides a page URL for QA, or the task is a release/preflight quality gate; otherwise state in the handoff that Browser Use was not run for the daily workflow.
-- In UI Inspection Mode with a current repository available, verify `inspection-log.md` records a current source risk scan summary: searched high-risk patterns, important matches, and browser states targeted by those matches.
-- Verify source risk scan did not replace browser evidence. A source match becomes a finding only when screenshot/browser evidence shows a visible localized UI or language issue.
-- Verify every in-scope route, tab, menu item, or feature entry attempted safe second-layer interactions: filters, primary actions, row actions, table behavior, tooltips/popovers, and safe empty/validation/disabled states where available.
-- Verify coverage evidence uses explicit statuses for safe controls or representative groups: `covered`, `skipped-risky`, `duplicate-sampled`, `blocked`, or `not-reached`.
-- Verify any route with only an initial screenshot is marked partial unless it truly has no safe interactive controls.
-- In Browser Use/UI Inspection Mode, do not treat "no visible overflow" as a complete pass. Separately report text overflow/truncation, layout overflow, alignment, and component visual integrity coverage; if only overflow metrics were checked, state that visual integrity was not fully verified.
-- In UI Inspection Mode, verify blank or white-screen routes were not immediately reported as i18n defects. Confirm the agent captured the first blank state, waited briefly, reloaded once, captured the post-reload state, and recorded diagnostics before classifying the issue.
-- Verify non-i18n product issues were filtered or downgraded to `i18n-blocking` blockers or `non-i18n` out-of-scope observations. Do not let unrelated backend, permission, routing, data, or generic product failures dominate the i18n finding list.
-- Verify every included `non-i18n`, `i18n-blocking`, or `needs-product-confirmation` observation has evidence: separate ID, URL/state, screenshot when reachable, source-search evidence for unexpected-language text, runtime/data-field evidence when available, user-created-data assessment when relevant, and out-of-scope reason or human follow-up.
-- Verify unexpected-language triage did not end the inspection early. Even when wrong-language text is classified as user-created data or out of scope, UI-fit coverage still needs table, form, dialog, popover, grouped-control, and layout checks.
-- Verify every normal `I18N-xxx` finding has direct i18n or localized UI-fit evidence. Business logic, backend/domain data, permission, routing, calculation, workflow-state, and generic product defects must stay in blockers or non-i18n observations, and must not be fixed during UI Inspection Mode unless the user explicitly asks.
-- Verify `Blockers` and `Non-i18n observations` are separate report topics. Do not combine coverage blockers, user-created-data observations, and needs-product-confirmation items under one mixed section heading.
-- Verify raw keys, IDs, enum values, or internal-looking tokens were not automatically treated as i18n defects. First confirm they are frontend user-facing copy under locale ownership; otherwise record them as `non-i18n` or `needs-product-confirmation`.
-- Verify every unexpected-language normal `I18N-xxx` finding includes source-origin evidence: observed text, expected locale, source search terms/results, runtime evidence when checked, user-created-data assessment, and ownership rationale.
-- Verify button, menu, tab, navigation, toolbar action, dropdown action, and form command labels were treated as frontend-leaning before assigning backend/API ownership. Backend/API ownership needs concrete evidence that the UI renders server-provided action/menu configuration, remote module metadata, or platform-delivered configuration.
-- Verify likely user-created data such as file names, project/resource names, titles, descriptions, tags, comments, notes, uploaded asset names, imported record values, and custom fields were not counted as i18n defects unless product evidence says they should be localized system copy.
-- Verify uncertain API/data ownership is marked `needs-product-confirmation`, with `fixVerification: low`, `humanAttention.required: true`, and a concrete human follow-up action.
-- Verify English words are not broken in the middle in compact UI such as table headers, filters, buttons, tabs, menu items, badges, or pagination. Treat mid-word breaks as UI-fit failures even when no DOM overflow is detected.
-- Verify form labels keep their label text, required marker, and colon/punctuation visually bound together. A colon on its own line is not acceptable; record or fix it as form-label visual integrity/alignment.
-- When fixing is in scope, verify current-repository `i18n-related` findings with low or locally contained medium risk were either minimally fixed and re-inspected, or have a clear blocked/risk/out-of-scope reason. Fixed findings need before/after screenshots, concise relevant diff, validation command, and retest result.
-- For broad, full-navigation, release-quality, or high-assurance UI Inspection Mode runs, verify an independent screenshot visual-review pass was run when subagents were available. The inspection folder should contain `visual-reviews/*.md` files, each tied to a route/module/screenshot set.
-- Verify every independent visual review report was read and triaged before final report generation. Accepted reviewer observations should become normal findings; dismissed or uncertain observations should have a short rationale or follow-up note in `inspection-log.md`.
-- For UI Inspection Mode final `report.html`, verify it was generated by copying `references/ui-inspection-report-wireframe.html` and editing that copy in place. Do not maintain or hand-roll a separate report layout.
-- Verify the final report keeps the desktop/latest-Chrome Bootstrap architecture: include the complete Bootstrap 4.5.3 CSS from `https://g.alicdn.com/code/lib/bootstrap/4.5.3/css/bootstrap.min.css`, do not also include `bootstrap-grid.min.css`, and do not include Bootstrap 4 JavaScript unless the required jQuery dependency is also intentionally supplied. Native inline JavaScript should own report interactions. Standard UI pieces should reuse Bootstrap classes where practical, especially `badge badge-*`, `table`, `btn`, `form-control`, `card`, `alert`, and `text-muted`, instead of custom equivalent styles.
-- Verify final `report.html` removed wireframe-only template markers, internal template instructions, and sample content: no `data-template-sample="true"`, no visible "Template replacement contract" or equivalent generation-instruction section, no `ExampleToolbar.tsx`, no unreplaced `mock-shot` placeholders, and no wireframe reference paragraph.
-- Verify final `report.html` does not include separate `Inspection timeline`, `Human attention and risk`, `Report interaction validation`, or `Independent visual review appendix` sections. Chronological details, report-interaction verification, and visual-review triage details belong in `inspection-log.md`; human-attention/risk details belong inside the relevant finding or observation cards.
-- Verify the screenshot appendix lists every screenshot with filename, caption/context, and capture time shown under the thumbnail.
-- Verify the display language follows the language used by the user's inspection request unless the user explicitly requested another report language. The inspected UI target locale may be different from the report language; keep locale codes, URLs, file paths, commands, finding IDs, key names, and code identifiers exact.
-- Verify final report data is consistent across `inspection-log.md`, `report.json`, and `report.html`: covered scope, accepted findings, blockers, non-i18n observations, independent visual-review status, fix verification, fix risk, human-attention items, and relevant fix diffs.
-- Verify feedback copy follows the durable contract from `references/ui-inspection-mode.md`: copy only findings with non-empty trimmed feedback, use `Finding I18N-001: feedback text` format, omit empty feedback rows, and show a clear status when there is nothing to copy.
-- Verify inline JavaScript has no syntax errors before testing interactions. Run the no-dependency `node`/`vm.Script` smoke test from `references/ui-inspection-mode.md`; ensure generated strings are serialized safely with `JSON.stringify(...)`, DOM attributes, or JSON data blocks.
-- Verify the exact successful smoke-test output, for example `checked 1 executable script(s)`, is recorded in `inspection-log.md`. Do not hand off the report if the output is missing or if only string-presence checks were performed.
-- When browser access is available, open `report.html` and verify representative wireframe interactions with real browser input: finding modal opens from overview, a real `Escape` key event closes that modal, screenshot lightbox opens from inside the modal, first real `Escape` closes only the lightbox, second real `Escape` closes the finding modal, appendix or observation-card screenshots open in the lightbox, empty feedback copy shows the no-feedback status, non-empty feedback copy reports copied feedback or opens the manual-copy fallback textarea containing only non-empty feedback, the right-side Back to top button appears after scrolling and returns the actual scroll container to top, and modal close buttons/backdrop clicks close the active modal. Do not count `document.dispatchEvent(new KeyboardEvent(...))` as sufficient ESC verification. If `file://` is blocked, use a local static HTTP server. If browser access is unavailable, state that limitation.
-- Verify `fixEvidence.codeDiffs` contains only concise relevant source/style/config/locale hunks and is omitted when there is no local change or no meaningful diff hunk.
-- Verify screenshot annotations use the `report.json` percentage-coordinate contract and are visually aligned in at least one inline and enlarged preview. A DOM count of `.redbox` elements is not sufficient.
-- Verify every screenshot referenced by coverage, findings, visual review, and the screenshot appendix exists on disk and has a plausible non-zero file size. Do not count a route as covered if its screenshot write silently failed.
-- Run the project's available validation commands, but distinguish existing toolchain/dependency failures from failures introduced by the i18n work. Dependency/type-tooling failures are review evidence to classify, not automatic proof that i18n changes are broken.
-- Generate handoff evidence and follow unresolved next actions. For normal incremental work, the handoff should primarily explain changed-key sync status, translation review status, static UI-fit review status, remaining review items, changed-key audit results, Browser Use status, and validation status.
+## Code And Locale Changes
+
+- Confirm the repository's i18n conventions before editing: default locale, `.d()` extraction flow, generated locale files, helper APIs, key naming, and visible-copy style.
+- Keep ICU placeholders, rich formatter tags, `.d()` defaults, and existing key structure intact. Do not introduce JavaScript string interpolation inside translatable messages.
+- Use the repository's extraction, sync, or review scripts when default locale files are generated from source. Do not manually rewrite generated locale output unless the repo has no working script or the user asked for it.
+- Review changed keys by default. Run broad locale scans only when the task is broad, the user asks, or changed-key evidence points to wider i18n debt.
+- For English target locales, check changed visible copy for casing, terminology, punctuation, and product style.
+- Verify no unsafe React UI pattern was introduced, especially `getHTML` for normal React UI, unescaped HTML, or rich formatter code that drops translated `chunks`.
+
+## UI-Fit Risk
+
+- Inspect source usage for changed labels in compact UI: buttons, tabs, menus, filters, badges, table headers, form labels, pagination, and grouped controls.
+- Treat clipping, overlap, broken grouping, mid-word breaks, or label/colon/required-marker separation as issues even if DOM overflow checks pass.
+- Prefer natural shorter copy or narrow local layout fixes. Avoid broad CSS rewrites, locale-specific branches, or reduced visible capacity unless clearly needed.
+- For CSS, flex, width, or overflow fixes, compare before and after. If the fix makes the component show fewer useful items or hides reachable content, stop and retriage.
+- For scrollable tabs or tables, do not report off-screen content as a defect when there is a clear working scroll affordance.
+
+## Unexpected Language
+
+- When wrong-language text is visible, first search frontend source and default locale files for exact or near matches.
+- Treat buttons, menus, tabs, navigation, toolbar actions, dropdown actions, form commands, statuses, empty states, error messages, and system enum labels as frontend-leaning unless runtime evidence proves remote ownership.
+- Treat user-created data such as project names, file names, resource names, titles, descriptions, tags, comments, custom field values, and imported record values as non-i18n unless product evidence says otherwise.
+- If text appears API/backend-owned and user-data ownership is unclear, classify it as `needs-product-confirmation` with evidence and a concrete follow-up, not as a confidently fixed issue.
+
+## Browser/UI Inspection When Requested
+
+- Capture initial evidence and relevant interaction screenshots; click safe first- and second-layer controls instead of stopping at the landing state.
+- Separate `I18N-xxx` findings from blockers and non-i18n observations. Keep generic product, permission, routing, backend, and data issues out of normal i18n findings.
+- For every fixed finding, re-inspect the affected UI and keep before/after evidence. Do not accept a fix that reduces visible content or degrades layout.
+- For skipped risky or blocked interactions, record what was skipped and why.
+
+## Validation Commands
+
+- Run targeted validation available for touched files: JSON parse, extraction/sync checks, changed-key audit, typecheck, build, tests, or lint as appropriate for the repo and change size.
+- If validation fails, identify whether touched files are implicated. Existing unrelated toolchain or dependency failures should be recorded as such.
+- Run `git diff --check`.
+
+## Artifacts And Report
+
+Only use these checks when UI Inspection Mode produced artifacts.
+
+- Keep `inspection-log.md`, `report.json`, and `report.html` consistent for accepted findings, fixes, blockers, non-i18n observations, screenshot references, and remaining human follow-ups.
+- Generate `report.html` from the wireframe and remove obvious sample or template leftovers.
+- Keep the screenshot appendix complete enough for human review, including screenshot filename, context, capture time, and coverage metadata when available.
+- Run one lightweight report smoke test when handing off the report. Do not let report layout or interaction checks dominate code validation unless the user explicitly asks for report QA.

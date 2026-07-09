@@ -10,6 +10,7 @@ Open this reference when writing, reviewing, or migrating concrete `react-intl-u
 - [Plural Messages](#plural-messages)
 - [Date and Time Formatting](#date-and-time-formatting)
 - [Number Formatting](#number-formatting)
+- [Locale-Aware Separators and Wrappers](#locale-aware-separators-and-wrappers)
 - [getHTML](#gethtml)
 - [React vs Non-React Code](#react-vs-non-react-code)
 - [TypeScript](#typescript)
@@ -192,6 +193,128 @@ Locale pack:
 ```
 
 `react-intl-universal` does not provide a dedicated `formatCurrency` helper. If product currency formatting is required, use the project's approved money formatter first, then pass the formatted value into `intl.get`.
+
+## Locale-Aware Separators and Wrappers
+
+Use the built-in helper APIs for punctuation and separators whose shape changes by locale.
+Do not hardcode English punctuation such as `", "`, `": "`, `"("`, or `")"` when the UI must also look natural in CJK locales.
+Do not hardcode CJK punctuation such as `"、"`, `"："`, `"（"`, or `"）"` in React UI that can render in English.
+
+### Lists
+
+Use `intl.formatList(nodeList, options)` when joining translated text, names, links, tags, or mixed React nodes.
+It returns a `ReactNode[]`, preserving original React nodes and inserting locale-appropriate separators.
+The default options are `{ style: "narrow" }`; pass normal `Intl.ListFormatOptions` when the product needs conjunction, disjunction, or another style.
+
+```tsx
+const owners = intl.formatList([
+  <UserLink key="tony" userId="tony" />,
+  <UserLink key="lucy" userId="lucy" />,
+]);
+
+return <span>{owners}</span>;
+```
+
+Typical output:
+
+- `en-US`: `Tony, Lucy`
+- `zh-CN`: `Tony、Lucy`
+
+Use `type: "conjunction"` or `type: "disjunction"` when the wording matters:
+
+```tsx
+const choices = intl.formatList(
+  [
+    intl.get("EMAIL").d("Email"),
+    intl.get("SMS").d("SMS"),
+    intl.get("WEBHOOK").d("Webhook"),
+  ],
+  { type: "disjunction", style: "long" }
+);
+
+return (
+  <span>
+    {intl.get("ALERT_CHANNELS").d("Alert channels")}
+    {intl.getColon()}
+    {choices}
+  </span>
+);
+```
+
+Avoid this:
+
+```tsx
+<span>{items.join(", ")}</span>
+```
+
+Also avoid manually joining React nodes with CJK punctuation:
+
+```tsx
+<>
+  {first}
+  {"、"}
+  {second}
+</>
+```
+
+### Parentheses
+
+Use `intl.formatParentheses(node)` when wrapping text or React nodes in locale-aware parentheses.
+It returns a `ReactNode[]`.
+
+```tsx
+return (
+  <span>
+    {intl.get("RULE_NAME").d("Rule name")}
+    {intl.formatParentheses(<RuleId id={ruleId} />)}
+  </span>
+);
+```
+
+Typical output:
+
+- `en-US`: `Rule name (123)`
+- `zh-CN`: `Rule name（123）`
+
+Avoid this in localized React UI:
+
+```tsx
+<span>({ruleId})</span>
+```
+
+### Label-Value Colons
+
+Use `intl.getColon()` between a label and its value.
+It returns `": "` for non-full-width locales and `"："` for full-width locales such as `zh-CN`, `ja-JP`, and `ko-KR`.
+
+```tsx
+return (
+  <span>
+    {intl.get("ITEM_NAME").d("Name")}
+    {intl.getColon()}
+    {itemName}
+  </span>
+);
+```
+
+Typical output:
+
+- `en-US`: `Name: Alice`
+- `zh-CN`: `名称：Alice`
+
+Avoid hardcoded label separators:
+
+```tsx
+<>
+  {label}: {value}
+</>
+```
+
+```tsx
+<>
+  {label}：{value}
+</>
+```
 
 ## getHTML
 

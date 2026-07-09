@@ -62,6 +62,27 @@ Use `rg` first. Search for high-risk localized UI patterns such as:
 
 For unexpected-language text, source search is required by the origin-triage workflow. For UI-fit issues, source risk scan is a targeting aid: a source match becomes a finding only after browser or screenshot evidence shows a visible problem.
 
+## Default Scope And Coverage Strategy
+
+When the user provides a page URL and asks for inspection, patrol, audit, or QA without saying "only inspect the current tab/state", treat the reachable product area around that URL as in scope. Do not interpret the URL as permission to inspect only the default active tab.
+
+Include reachable, non-destructive entries such as:
+
+- app-shell primary and secondary navigation inside the same product/workspace area;
+- left sidebar menu items, side tabs, tree nodes, accordion sections, and page-level tab strips;
+- top navigation tabs, feature cards, dashboard modules, toolbar dropdowns, and safe settings/detail entry points;
+- representative table row actions, detail drawers, modals, filters, and popovers.
+
+Use an inventory-driven depth-first inspection pass:
+
+1. Build a coverage inventory from visible navigation, sidebars, tab strips, and feature entry points.
+2. Pick the next safe first-level tab/menu/feature entry from the inventory, open it to its initial state, and capture screenshot evidence.
+3. Before declaring that entry covered, inspect its safe child tabs, submenus, feature entries, and representative second-layer controls such as filters, primary actions, row actions, drawers, and validation states.
+4. Then return to the inventory and repeat the same depth-first inspection for the next first-level entry.
+5. If there are too many items for the user-provided time or scope, prioritize distinct modules and visible high-risk localized UI, then mark the rest `not-reached`, `duplicate-sampled`, `skipped-risky`, or `blocked` with reasons. Do not silently omit them.
+
+If a page has a left sidebar or tab strip and only the first active item was inspected, coverage is partial by definition unless every other visible item is risky, blocked, external, or explicitly out of scope.
+
 ## Exploration Workflow
 
 1. Check the repository `.gitignore` for an existing ignored temporary-output location, such as `tmp/`, `.tmp/`, `temp/`, or another project-specific scratch directory.
@@ -71,9 +92,11 @@ For unexpected-language text, source search is required by the origin-triage wor
 5. Create `inspection-log.md` immediately. This is the raw task log and should be updated while inspecting, fixing, and re-inspecting.
 6. Open the user-provided page URL and capture an initial full-page or viewport screenshot.
 7. Record the environment in `inspection-log.md`: URL, locale, browser/tool, viewport size, account/role if known, and inspection time.
-8. Enumerate visible interactive elements:
-   - navigation links;
-   - tabs;
+8. Build the initial coverage inventory from visible interactive elements:
+   - primary and secondary navigation links;
+   - left sidebar items, tree nodes, accordion sections, and side tabs;
+   - top tabs and page-level tabs;
+   - feature cards, dashboard modules, and safe detail/setup entry points;
    - buttons;
    - segmented controls, button groups, chip groups, badges, and pagination;
    - dropdowns and selects;
@@ -83,7 +106,7 @@ For unexpected-language text, source search is required by the origin-triage wor
    - tooltips and hover states;
    - forms and validation states;
    - modals, drawers, popovers, notifications, and confirmation dialogs.
-9. For broad page or navigation inspections, create a coverage record for every requested route, menu item, tab, or feature entry before or while inspecting it. The record must include the label, URL/route when known, intended action, coverage status, screenshot path once captured, and notes for blocked or skipped actions.
+9. For every requested or discovered in-scope route, menu item, tab, or feature entry, create a coverage record before or while inspecting it. The record must include the label, URL/route when known, intended action, coverage status, screenshot path once captured, and notes for blocked or skipped actions.
 10. Interact with each safe element or representative group of repeated elements.
 11. After each meaningful state change, capture a screenshot and append the action, observed state, screenshot path, and notes to `inspection-log.md`.
 12. For every requested route, menu item, tab, or feature entry that is considered covered, capture at least one page/state screenshot. If it has an in-scope detail page, modal, drawer, tab, or representative row action, capture a second screenshot for that detail state when the action is safe.

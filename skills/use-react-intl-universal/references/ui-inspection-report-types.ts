@@ -662,7 +662,10 @@ export interface I18nUiInspectionFixEvidence {
   verifiedAt?: string;
 
   /**
-   * Screenshot IDs or paths showing the fixed state.
+   * Screenshot IDs or paths showing the fixed state. Required in practice when
+   * the finding status is `verifiedFixed`; the screenshot must reproduce the
+   * before evidence's route, product locale, viewport, interaction, and
+   * equivalent data state, with all pre-existing key widgets loaded.
    */
   verificationScreenshotRefs?: string[];
 
@@ -1020,9 +1023,12 @@ export interface I18nUiInspectionFinding {
 
   /**
    * Screenshot IDs or paths showing the issue. Before-fix issue screenshots
-   * should appear here. In `report.html`, these must be rendered as visible
-   * finding screenshot cards, not only as text links. When the problem location
-   * is hard to see, add matching entries to `screenshotAnnotations`.
+   * should appear here, and a normal UI-inspection finding must have at least
+   * one clean screenshot containing the exact visible defect. Source-only
+   * candidates without reachable UI evidence do not belong in `findings`. In
+   * `report.html`, these must be rendered as visible finding screenshot cards,
+   * not only as text links. When the problem location is hard to see, add
+   * matching entries to `screenshotAnnotations`.
    */
   screenshotRefs: string[];
 
@@ -1107,12 +1113,15 @@ export interface I18nUiInspectionReportJson {
   screenshotAnnotations?: I18nUiInspectionScreenshotAnnotation[];
 
   /**
-   * Complete screenshot appendix manifest. Broad inspections should include
-   * every screenshot captured during coverage, fixing, and re-inspection so
-   * `report.html` can render each screenshot with filename, caption/context, and
-   * capture time under the thumbnail. If omitted, renderers may derive a partial
-   * appendix from coverage/finding/observation screenshot refs, but they should
-   * still show capture time whenever it is known.
+   * Accepted screenshot appendix manifest. Broad inspections should include
+   * every accepted screenshot used for coverage, findings, observations, and
+   * re-inspection so `report.html` can render each screenshot with filename,
+   * caption/context, and capture time under the thumbnail. Keep transient blank
+   * states, corrupt compositor captures, browser-extension overlays, and other
+   * rejected screenshots in `inspection-log.md`, not in this final-report
+   * manifest. If omitted, renderers may derive a partial appendix from
+   * coverage/finding/observation screenshot refs, but they should still show
+   * capture time whenever it is known.
    */
   screenshotManifest?: I18nUiInspectionScreenshotManifestItem[];
 

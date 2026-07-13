@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - feat/rich_message
   workflow_dispatch:
 
 permissions:

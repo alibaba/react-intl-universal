@@ -17,6 +17,7 @@ import SkillComponent from "components/skill";
 import ExtractComponent from "components/extract";
 import DateComponent from "components/date";
 import CurrencyComponent from "components/currency";
+import LocaleFormattingComponent from "components/locale-formatting";
 import MessageNotInComponent from "components/message-not-in-component";
 
 const LOCALES_LIST = [
@@ -191,6 +192,7 @@ const ReactIntlUniversalExample: React.FC<any> = (props) => {
               <PluralComponent />
               <DateComponent />
               <CurrencyComponent />
+              <LocaleFormattingComponent />
             </section>
 
             <section className="example-section" id="extract-usage">

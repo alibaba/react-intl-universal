@@ -1226,6 +1226,45 @@
         </div>
       </section>
 
+      <section class="card report-card" id="non-i18n" aria-labelledby="non-i18n-title">
+        <div class="section-head">
+          <div>
+            <div class="section-kicker">Excluded observations</div>
+            <h2 id="non-i18n-title">Non-i18n observations</h2>
+            <p>Visually observable exclusions are documented with screenshots and kept out of normal i18n finding counts.</p>
+          </div>
+        </div>
+        <div class="observation-grid">
+          <article class="card observation-card" id="NONI18N-001">
+            <header class="observation-head">
+              <h3>NONI18N-001 Custom name uses a different language</h3>
+              <div class="badge-row">
+                <span class="badge badge-pill badge-secondary">user-created data</span>
+                <span class="badge badge-pill badge-success">excluded</span>
+              </div>
+            </header>
+            <div class="observation-body">
+              <figure class="annotated-shot">
+                <a class="annotated-stage" id="shot-non-i18n-001" href="#shot-non-i18n-001" data-preview-stage="shot-non-i18n-001">
+                  <div class="mock-shot"><div class="mock-sidebar"></div><div class="mock-content"><div class="mock-row"></div><div class="mock-table"><div class="mock-cell"></div><div class="mock-cell"></div><div class="mock-cell"></div></div></div></div>
+                  <span class="redbox" style="left:24%;top:32%;width:34%;height:12%"><em>user-created name</em></span>
+                </a>
+                <figcaption>The visible value was entered by a user; system labels around it are localized.</figcaption>
+              </figure>
+              <div class="table-responsive table-wrap">
+                <table class="table table-sm evidence-table">
+                  <tbody>
+                    <tr><th>Source assessment</th><td>User-created/custom entity field.</td></tr>
+                    <tr><th>Classification</th><td>Non-i18n observation; do not create an <code>I18N-xxx</code> finding.</td></tr>
+                    <tr><th>Evidence required</th><td>Record the creation/edit flow or source/API context that proves user ownership.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
       <section class="card report-card" id="appendix" aria-labelledby="appendix-title">
         <div class="section-head">
           <div>

@@ -3,9 +3,9 @@
 Use these scripts when the repository has locale JSON files and deterministic i18n checks are useful.
 All scripts use only Node.js standard library modules. The display-width helper used for daily static UI-fit risk review is bundled under `scripts/lib/display-width.mjs`; it follows the default behavior of `string-width` closely enough for lightweight localization review, but does not require installing `string-width` or any other npm package. These display-width warnings are static review prompts, not browser pixel measurements or proof that a real layout will break. They also do not prove component visual integrity: a tabs/segmented-control/button-group/chip-group can have no text overflow and still look broken if same-group items wrap and borders, radius, active state, or icon/text/arrow relationships no longer form one coherent control.
 
-UI Inspection Mode report generation is usually performed by the agent for the active run rather than by a bundled script. If you create or edit a local report generator for a run, keep it aligned with [UI Inspection Mode](ui-inspection-mode.md), [UI Inspection Report Types](ui-inspection-report-types.ts), and [UI Inspection Report Wireframe](ui-inspection-report-wireframe.html). Do not duplicate report layout rules here; use the wireframe as the structural and interaction reference. The generator should still enforce data contracts: referenced screenshots exist, `report.json` fields match the TypeScript contract, screenshot annotations use screenshot-relative percentages, empty code-diff blocks are omitted, non-i18n observations stay separate from normal findings, and blank pages are not called i18n defects without supporting diagnostics.
+UI Inspection Mode uses `render-ui-inspection-report.mjs` to populate the copied wireframe from `report.json`. Keep `report.json` as the only report data model; do not independently hand-maintain HTML counts, finding cards, screenshot lists, or annotations. The renderer replaces only the wireframe content region, so Bootstrap, styling, modal/lightbox behavior, feedback controls, and Back to top remain template-owned.
 
-After generating or editing `report.html`, run the no-dependency inline-script syntax smoke test from [UI Inspection Mode](ui-inspection-mode.md). When browser access is available, open the report and spot-check the wireframe interactions instead of maintaining a separate interaction checklist here. If browser access to the local file is blocked, state that browser interaction verification was unavailable.
+After generating or editing `report.html`, run the focused integrity checks from [UI Inspection Evidence](ui-inspection-evidence.md). When browser access is available, open the report and spot-check representative wireframe interactions. If browser policy blocks the local report, state that browser interaction verification was unavailable and do not circumvent the policy.
 Set `SKILL_DIR` to the absolute path of the directory that contains this skill's `SKILL.md`:
 
 ```bash
@@ -15,6 +15,7 @@ export SKILL_DIR=/absolute/path/to/use-react-intl-universal
 ## Table of Contents
 
 - [Discover Existing I18n Setup](#discover-existing-i18n-setup)
+- [Render UI Inspection Report](#render-ui-inspection-report)
 - [Daily Development Changed-Key Workflow](#daily-development-changed-key-workflow)
 - [Export Verification](#export-verification)
 - [Default Locale](#default-locale)
@@ -40,6 +41,19 @@ node "$SKILL_DIR/scripts/discover-project-i18n.mjs" \
 ```
 
 Use this first in unfamiliar repositories. It reports relevant `package.json` scripts, installed i18n dependencies, locale files, extraction export languages, command availability, expected-locale support in known locale provider/UI/date packages, and source files that wire locale imports or providers. For normal copy, extraction, translation, or audit work, use it to understand the existing setup.
+
+## Render UI Inspection Report
+
+After updating the capture ledger, admitted screenshot manifest, findings, annotations, and summary in `report.json`, render the same run report:
+
+```bash
+node "$SKILL_DIR/scripts/render-ui-inspection-report.mjs" \
+  --report-json <run-folder>/report.json \
+  --template "$SKILL_DIR/references/ui-inspection-report-wireframe.html" \
+  --output <run-folder>/report.html
+```
+
+The renderer accepts schema `2.1` and keeps rejected capture candidates out of the HTML because it reads only `screenshotManifest`. It fails on incomplete capture metadata, pending pixel review in a completed report, duplicate or conflicting admission, missing image files, rejected-capture leakage, invalid references or annotations, summary drift, `verifiedFixed` without admitted before evidence, or final after evidence from the wrong commit. It also fails if the wireframe content region is missing or sample DOM survives population. Run it after each coherent evidence batch and before handoff.
 
 ## Daily Development Changed-Key Workflow
 

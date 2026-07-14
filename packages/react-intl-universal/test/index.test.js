@@ -1,5 +1,6 @@
 import React from "react";
 import intl, { ReactIntlUniversal } from "../src/index";
+import * as intlExports from "../src/index";
 import zhCN from "./locales/zh-CN";
 import enUS from "./locales/en-US";
 import enUSMore from "./locales/en-US-more";
@@ -10,7 +11,261 @@ const dataKey = 'data-i18n-key';
 const locales = {
   "en-US": enUS,
   "zh-CN": zhCN,
+  "zh-TW": zhCN,
+  "ja-JP": enUS,
 };
+
+describe("Public API behavior", () => {
+  test("default export exposes public singleton methods", () => {
+    const publicMethods = [
+      "get",
+      "getHTML",
+      "formatMessage",
+      "formatHTMLMessage",
+      "determineLocale",
+      "changeCurrentLocale",
+      "init",
+      "getInitOptions",
+      "load",
+      "getLocaleFromCookie",
+      "getLocaleFromLocalStorage",
+      "getLocaleFromURL",
+      "getDescendantProp",
+      "getLocaleFromBrowser",
+      "formatList",
+      "formatParentheses",
+      "getColon",
+      "formatDate",
+      "formatTime",
+      "formatDateTime",
+      "formatNumber",
+    ];
+
+    publicMethods.forEach((method) => {
+      expect(typeof intl[method]).toBe("function");
+    });
+    expect(intl.ReactIntlUniversal).toBe(ReactIntlUniversal);
+  });
+
+  test("named exports keep operating on the default singleton", () => {
+    const namedExports = [
+      "get",
+      "getHTML",
+      "formatMessage",
+      "formatHTMLMessage",
+      "determineLocale",
+      "changeCurrentLocale",
+      "init",
+      "getInitOptions",
+      "load",
+      "getLocaleFromCookie",
+      "getLocaleFromLocalStorage",
+      "getLocaleFromURL",
+      "getDescendantProp",
+      "getLocaleFromBrowser",
+      "formatList",
+      "formatParentheses",
+      "getColon",
+      "formatDate",
+      "formatTime",
+      "formatDateTime",
+      "formatNumber",
+    ];
+
+    namedExports.forEach((exportName) => {
+      expect(typeof intlExports[exportName]).toBe("function");
+    });
+    expect(intlExports.default).toBe(intl);
+    expect(intlExports.ReactIntlUniversal).toBe(ReactIntlUniversal);
+
+    intlExports.init({ locales, currentLocale: "en-US" });
+    expect(intlExports.get("SIMPLE")).toBe("Simple");
+    intlExports.changeCurrentLocale("zh-CN");
+    expect(intlExports.get("SIMPLE")).toBe("简单");
+  });
+
+  test("react-intl mirror APIs preserve defaultMessage and d fallback compatibility", () => {
+    intl.init({ locales, currentLocale: "en-US" });
+    expect(intl.formatMessage({ id: "not-exist-key" }).d("fallback text")).toBe("fallback text");
+
+    const fallbackElement = React.createElement("span", { className: "fallback" }, "Fallback");
+    const result = intl.formatHTMLMessage({ id: "not-exist-key" }).d(fallbackElement);
+    expect(result).toBe(fallbackElement);
+  });
+
+  test("debug messages keep defaultMessage and d aliases", () => {
+    const innerIntl = new ReactIntlUniversal();
+    innerIntl.init({ locales, currentLocale: "zh-CN", debug: true });
+
+    const message = innerIntl.get("SIMPLE");
+    expect(message.defaultMessage("fallback").props[dataKey]).toBe("SIMPLE");
+    expect(message.d("fallback").props[dataKey]).toBe("SIMPLE");
+  });
+
+  test("determineLocale prefers URL, then cookie, then localStorage, then browser", () => {
+    localStorage.setItem("guardStorageLang", "ja-JP");
+    document.cookie = "guardCookieLang=zh-CN";
+
+    window.history.pushState({}, "", "?guardUrlLang=fr-FR");
+    expect(intl.determineLocale({
+      urlLocaleKey: "guardUrlLang",
+      cookieLocaleKey: "guardCookieLang",
+      localStorageLocaleKey: "guardStorageLang",
+    })).toBe("fr-FR");
+
+    window.history.pushState({}, "", "?other=1");
+    expect(intl.determineLocale({
+      urlLocaleKey: "guardUrlLang",
+      cookieLocaleKey: "guardCookieLang",
+      localStorageLocaleKey: "guardStorageLang",
+    })).toBe("zh-CN");
+
+    expect(intl.determineLocale({
+      urlLocaleKey: "guardUrlLang",
+      cookieLocaleKey: "missingGuardCookieLang",
+      localStorageLocaleKey: "guardStorageLang",
+    })).toBe("ja-JP");
+
+    expect(intl.determineLocale({
+      urlLocaleKey: "guardUrlLang",
+      cookieLocaleKey: "missingGuardCookieLang",
+      localStorageLocaleKey: "missingGuardStorageLang",
+    })).toBe("en-US");
+  });
+});
+
+describe("Exceptional path behavior", () => {
+  test("intlGetHook receives key and locale, and hook errors do not break formatting", () => {
+    const innerIntl = new ReactIntlUniversal();
+    const intlGetHook = jest.fn(() => {
+      throw new Error("hook failed");
+    });
+    const logSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+
+    innerIntl.init({ locales, currentLocale: "en-US", intlGetHook });
+    expect(innerIntl.get("SIMPLE")).toBe("Simple");
+    expect(intlGetHook).toHaveBeenCalledWith("SIMPLE", "en-US");
+    expect(logSpy).toHaveBeenCalledWith("intl get hook error: ", expect.any(Error));
+
+    logSpy.mockRestore();
+  });
+
+  test("formatting errors call warningHandler and return the raw message", () => {
+    const innerIntl = new ReactIntlUniversal();
+    const warningHandler = jest.fn();
+    const brokenLocales = {
+      "en-US": {
+        BROKEN: "Hello, {name",
+      },
+    };
+
+    innerIntl.init({ locales: brokenLocales, currentLocale: "en-US", warningHandler });
+
+    expect(innerIntl.get("BROKEN", { name: "Tony" })).toBe("Hello, {name");
+    expect(warningHandler).toHaveBeenCalledWith(
+      "react-intl-universal format message failed for key='BROKEN'.",
+      expect.any(String)
+    );
+  });
+
+  test("changeCurrentLocale warns and keeps current locale when target locale is missing", () => {
+    const innerIntl = new ReactIntlUniversal();
+    const warningHandler = jest.fn();
+
+    innerIntl.init({ locales, currentLocale: "en-US", warningHandler });
+    innerIntl.changeCurrentLocale("fr-FR");
+
+    expect(warningHandler).toHaveBeenCalledWith('react-intl-universal locales data "fr-FR" not exists.');
+    expect(innerIntl.getInitOptions().currentLocale).toBe("en-US");
+    expect(innerIntl.get("SIMPLE")).toBe("Simple");
+  });
+
+  test("get warns when currentLocale has no locale data", () => {
+    const innerIntl = new ReactIntlUniversal();
+    const warningHandler = jest.fn();
+
+    innerIntl.init({ locales, currentLocale: "fr-FR", warningHandler });
+
+    expect(innerIntl.get("SIMPLE")).toBe("");
+    expect(warningHandler).toHaveBeenCalledWith('react-intl-universal locales data "fr-FR" not exists.');
+  });
+
+  test("init validates required currentLocale and locales options", () => {
+    const innerIntl = new ReactIntlUniversal();
+
+    expect(() => innerIntl.init()).toThrow("options.currentLocale is required");
+    expect(() => innerIntl.init({ currentLocale: "en-US" })).toThrow("options.locales is required");
+  });
+
+  test("formatList returns an empty array for non-array input", () => {
+    intl.init({ locales, currentLocale: "en-US" });
+    expect(intl.formatList("not an array")).toEqual([]);
+  });
+
+  test("getLocaleFromURL returns undefined when the URL has no query string", () => {
+    window.history.pushState({}, "", "/no-query");
+    expect(intl.getLocaleFromURL({ urlLocaleKey: "lang" })).toBeUndefined();
+  });
+
+  test("getLocaleFromBrowser falls back to userLanguage", () => {
+    const languageDescriptor = Object.getOwnPropertyDescriptor(window.navigator, "language");
+    const userLanguageDescriptor = Object.getOwnPropertyDescriptor(window.navigator, "userLanguage");
+
+    Object.defineProperty(window.navigator, "language", {
+      configurable: true,
+      value: undefined,
+    });
+    Object.defineProperty(window.navigator, "userLanguage", {
+      configurable: true,
+      value: "en-GB",
+    });
+
+    expect(intl.getLocaleFromBrowser()).toBe("en-GB");
+
+    if (languageDescriptor) {
+      Object.defineProperty(window.navigator, "language", languageDescriptor);
+    } else {
+      delete window.navigator.language;
+    }
+    if (userLanguageDescriptor) {
+      Object.defineProperty(window.navigator, "userLanguage", userLanguageDescriptor);
+    } else {
+      delete window.navigator.userLanguage;
+    }
+  });
+
+  test("variable escaping handles String object values", () => {
+    intl.init({ locales, currentLocale: "en-US" });
+    const reactEl = intl.getHTML("TIP_VAR", {
+      message: new String("<strong>wrapped</strong>"),
+    });
+
+    expect(reactEl.props.dangerouslySetInnerHTML.__html).toBe(
+      "This is<span>&lt;strong&gt;wrapped&lt;/strong&gt;</span>"
+    );
+  });
+
+  test("formatNumber returns original value when Intl.NumberFormat throws", () => {
+    const numberFormatDescriptor = Object.getOwnPropertyDescriptor(Intl, "NumberFormat");
+    const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+
+    Object.defineProperty(Intl, "NumberFormat", {
+      configurable: true,
+      value: function NumberFormat() {
+        throw new Error("number format failed");
+      },
+    });
+
+    try {
+      intl.init({ locales, currentLocale: "en-US" });
+      expect(intl.formatNumber(1234)).toBe(1234);
+      expect(errorSpy).toHaveBeenCalledWith("Error formatting number:", expect.any(Error));
+    } finally {
+      Object.defineProperty(Intl, "NumberFormat", numberFormatDescriptor);
+      errorSpy.mockRestore();
+    }
+  });
+});
 
 test("Set specific locale", () => {
   intl.init({ locales, currentLocale: "zh-CN" });
@@ -29,6 +284,469 @@ test("Change specific locale", () => {
 test("Message with variables", () => {
   intl.init({ locales, currentLocale: "en-US" });
   expect(intl.get("HELLO", { name: "Tony" })).toBe("Hello, Tony");
+});
+
+describe("Rich text interpolation", () => {
+  let innerIntl;
+  const richLocales = {
+    "en-US": {
+      RICH_RED_TAGS: "There are {number} <tag>Red Tags</tag>.",
+      RICH_NESTED: "Open <link><strong>{label}</strong></link> now.",
+      RICH_ONLY_TAG: "<tag>Red Tags</tag>",
+      RICH_LINK: "Open <link>{label}</link>",
+      RICH_MULTI_CHUNK: "Please read <link>{name} <strong>document</strong></link>.",
+    },
+  };
+
+  beforeEach(() => {
+    innerIntl = new ReactIntlUniversal();
+    innerIntl.init({ locales: richLocales, currentLocale: "en-US" });
+  });
+
+  test("get formats locale messages with rich tag formatter functions", () => {
+    const result = innerIntl.get("RICH_RED_TAGS", {
+      number: 3,
+      tag: chunks => React.createElement("strong", { className: "red" }, chunks),
+    });
+
+    expect(Array.isArray(result)).toBe(true);
+    expect(result[0]).toBe("There are 3 ");
+    expect(result[1].type).toBe("strong");
+    expect(result[1].props.className).toBe("red");
+    expect(result[1].props.children).toEqual(["Red Tags"]);
+    expect(result[2]).toBe(".");
+  });
+
+  test("get formats nested rich tags", () => {
+    const result = innerIntl.get("RICH_NESTED", {
+      label: "docs",
+      link: chunks => React.createElement("a", { href: "/docs" }, chunks),
+      strong: chunks => React.createElement("strong", null, chunks),
+    });
+
+    expect(result[0]).toBe("Open ");
+    expect(result[1].type).toBe("a");
+    expect(result[1].props.href).toBe("/docs");
+    expect(result[1].props.children[0].type).toBe("strong");
+    expect(result[1].props.children[0].props.children).toEqual(["docs"]);
+    expect(result[2]).toBe(" now.");
+  });
+
+  test("rich formatter receives multiple chunks from tagged content", () => {
+    const link = jest.fn(chunks => React.createElement("a", { href: "/docs" }, chunks));
+
+    const result = innerIntl.get("RICH_MULTI_CHUNK", {
+      name: "Tony",
+      link,
+      strong: chunks => React.createElement("strong", null, chunks),
+    });
+
+    expect(link).toHaveBeenCalledTimes(1);
+    const chunks = link.mock.calls[0][0];
+    expect(chunks).toHaveLength(2);
+    expect(chunks[0]).toBe("Tony ");
+    expect(chunks[1].type).toBe("strong");
+    expect(chunks[1].props.children).toEqual(["document"]);
+    expect(result[0]).toBe("Please read ");
+    expect(result[1].type).toBe("a");
+    expect(result[1].props.children).toBe(chunks);
+    expect(result[2]).toBe(".");
+  });
+
+  test("single element rich output is normalized to a chunks array with helpers", () => {
+    const result = innerIntl.get("RICH_ONLY_TAG", {
+      tag: chunks => React.createElement("strong", null, chunks),
+    });
+
+    expect(Array.isArray(result)).toBe(true);
+    expect(result).toHaveLength(1);
+    expect(result[0].type).toBe("strong");
+    expect(result[0].props.children).toEqual(["Red Tags"]);
+    expect(typeof result.defaultMessage).toBe("function");
+    expect(typeof result.d).toBe("function");
+    expect(Object.keys(result)).not.toContain("defaultMessage");
+    expect(Object.keys(result)).not.toContain("d");
+    expect(result.d("Fallback")).toBe(result);
+  });
+
+  test("missing-key fallback messages use the same rich formatting path", () => {
+    const result = innerIntl.get("MISSING_RICH", {
+      number: 3,
+      tag: chunks => React.createElement("strong", { className: "red" }, chunks),
+    }).d("There are {number} <tag>Red Tags</tag>.");
+
+    expect(Array.isArray(result)).toBe(true);
+    expect(result[0]).toBe("There are 3 ");
+    expect(result[1].type).toBe("strong");
+    expect(result[1].props.className).toBe("red");
+    expect(result[1].props.children).toEqual(["Red Tags"]);
+    expect(result[2]).toBe(".");
+  });
+
+  test("formatMessage follows rich locale message behavior", () => {
+    const result = innerIntl.formatMessage(
+      { id: "RICH_LINK", defaultMessage: "Fallback <link>{label}</link>" },
+      {
+        label: "docs",
+        link: chunks => React.createElement("a", { href: "/docs" }, chunks),
+      }
+    );
+
+    expect(Array.isArray(result)).toBe(true);
+    expect(result[0]).toBe("Open ");
+    expect(result[1].type).toBe("a");
+    expect(result[1].props.href).toBe("/docs");
+    expect(result[1].props.children).toEqual(["docs"]);
+  });
+
+  test("formatMessage formats descriptor defaultMessage through rich fallback", () => {
+    const result = innerIntl.formatMessage(
+      { id: "MISSING_RICH", defaultMessage: "Fallback <link>{label}</link>" },
+      {
+        label: "docs",
+        link: chunks => React.createElement("a", { href: "/docs" }, chunks),
+      }
+    );
+
+    expect(Array.isArray(result)).toBe(true);
+    expect(result[0]).toBe("Fallback ");
+    expect(result[1].type).toBe("a");
+    expect(result[1].props.href).toBe("/docs");
+    expect(result[1].props.children).toEqual(["docs"]);
+  });
+
+  test("rich string variables are passed as React text without HTML pre-escaping", () => {
+    const result = innerIntl.get("RICH_LINK", {
+      label: "<b>docs</b>",
+      link: chunks => React.createElement("a", { href: "/docs" }, chunks),
+    });
+
+    expect(result[1].type).toBe("a");
+    expect(result[1].props.children).toEqual(["<b>docs</b>"]);
+    expect(result[1].props.dangerouslySetInnerHTML).toBeUndefined();
+  });
+});
+
+describe("String and legacy compatibility", () => {
+  test("plain get calls still return strings and legacy HTML-like text stays literal", () => {
+    const innerIntl = new ReactIntlUniversal();
+    innerIntl.init({
+      currentLocale: "en-US",
+      locales: {
+        "en-US": {
+          HELLO: "Hello, {name}",
+          LEGACY_HTML: "This is <span>{message}</span>",
+        },
+      },
+    });
+
+    const plain = innerIntl.get("HELLO", { name: "Tony" });
+    const legacyHtml = innerIntl.get("LEGACY_HTML", { message: "your message" });
+
+    expect(typeof plain).toBe("string");
+    expect(plain).toBe("Hello, Tony");
+    expect(typeof legacyHtml).toBe("string");
+    expect(legacyHtml).toBe("This is <span>your message</span>");
+  });
+
+  test("getHTML keeps legacy span wrapper and debug data key behavior", () => {
+    const innerIntl = new ReactIntlUniversal();
+    innerIntl.init({
+      currentLocale: "en-US",
+      debug: true,
+      locales: {
+        "en-US": {
+          LEGACY_HTML: "This is <span>{message}</span>",
+        },
+      },
+    });
+
+    const result = innerIntl.getHTML("LEGACY_HTML", { message: "your message" });
+
+    expect(result.type).toBe("span");
+    expect(result.props[dataKey]).toBe("LEGACY_HTML");
+    expect(result.props.dangerouslySetInnerHTML.__html).toBe("This is <span>your message</span>");
+  });
+
+  test("plain missing-key fallback messages format ICU placeholders", () => {
+    const innerIntl = new ReactIntlUniversal();
+    innerIntl.init({ currentLocale: "en-US", locales: { "en-US": {} } });
+
+    expect(innerIntl.get("MISSING_BOOKS", { num: 3 }).d("There are {num} books")).toBe(
+      "There are 3 books"
+    );
+    expect(innerIntl.get("MISSING_GREETING", { username: "Tony" }).d("Hello, {username}!")).toBe(
+      "Hello, Tony!"
+    );
+    const num = 3;
+    expect(innerIntl.get("MISSING_TEMPLATE", { num }).d(`There are ${num} books`)).toBe(
+      "There are 3 books"
+    );
+    expect(innerIntl.get("MISSING_TEMPLATE_ICU", { username: "Tony" }).d(`Hello, {username}!`)).toBe(
+      "Hello, Tony!"
+    );
+  });
+
+  test("fallback formatting failures warn and return the original fallback string", () => {
+    const warningHandler = jest.fn();
+    const innerIntl = new ReactIntlUniversal();
+    innerIntl.init({
+      currentLocale: "en-US",
+      locales: { "en-US": {} },
+      warningHandler,
+    });
+
+    expect(innerIntl.get("MISSING_BROKEN", { name: "Tony" }).d("Broken {name")).toBe(
+      "Broken {name"
+    );
+    expect(warningHandler).toHaveBeenCalledWith(
+      "react-intl-universal format default message failed for key='MISSING_BROKEN'.",
+      expect.any(String)
+    );
+  });
+
+  test("literal fallback syntax without variables returns the original fallback string", () => {
+    const warningHandler = jest.fn();
+    const innerIntl = new ReactIntlUniversal();
+    innerIntl.init({
+      currentLocale: "en-US",
+      locales: { "en-US": {} },
+      warningHandler,
+    });
+
+    expect(
+      innerIntl
+        .get("MISSING_LITERAL_SCHEDULER_SYNTAX")
+        .d("Use ${bizdate} and tableName_{yyyymmdd} as scheduler placeholders")
+    ).toBe("Use ${bizdate} and tableName_{yyyymmdd} as scheduler placeholders");
+    expect(warningHandler.mock.calls).not.toContainEqual([
+      "react-intl-universal format default message failed for key='MISSING_LITERAL_SCHEDULER_SYNTAX'.",
+      expect.any(String),
+    ]);
+  });
+
+  test("literal fallback syntax with unrelated variables warns and returns the original fallback string", () => {
+    const warningHandler = jest.fn();
+    const innerIntl = new ReactIntlUniversal();
+    innerIntl.init({
+      currentLocale: "en-US",
+      locales: { "en-US": {} },
+      warningHandler,
+    });
+
+    expect(
+      innerIntl
+        .get("MISSING_LITERAL_SCHEDULER_SYNTAX_WITH_VALUES", { name: "Tony" })
+        .d("Use ${bizdate} and tableName_{yyyymmdd} as scheduler placeholders")
+    ).toBe("Use ${bizdate} and tableName_{yyyymmdd} as scheduler placeholders");
+    expect(warningHandler).toHaveBeenCalledWith(
+      "react-intl-universal format default message failed for key='MISSING_LITERAL_SCHEDULER_SYNTAX_WITH_VALUES'.",
+      expect.any(String)
+    );
+  });
+
+  test("fallback locale remains authoritative over default messages", () => {
+    const innerIntl = new ReactIntlUniversal();
+    innerIntl.init({
+      currentLocale: "zh-CN",
+      fallbackLocale: "en-US",
+      locales: {
+        "zh-CN": {},
+        "en-US": {
+          BOOKS: "There are {num} books",
+        },
+      },
+    });
+
+    expect(innerIntl.get("BOOKS", { num: 3 }).d("Fallback {num}")).toBe("There are 3 books");
+  });
+
+  test("locale formatting failures do not switch to default messages", () => {
+    const warningHandler = jest.fn();
+    const innerIntl = new ReactIntlUniversal();
+    innerIntl.init({
+      currentLocale: "en-US",
+      locales: {
+        "en-US": {
+          BROKEN: "Broken {name",
+        },
+      },
+      warningHandler,
+    });
+
+    expect(innerIntl.get("BROKEN", { name: "Tony" }).d("Fallback {name}")).toBe("Broken {name");
+    expect(warningHandler).toHaveBeenCalledWith(
+      "react-intl-universal format message failed for key='BROKEN'.",
+      expect.any(String)
+    );
+  });
+
+  test("function values without matching rich tags stay on the legacy string path", () => {
+    const warningHandler = jest.fn();
+    const innerIntl = new ReactIntlUniversal();
+    innerIntl.init({
+      currentLocale: "en-US",
+      locales: {
+        "en-US": {
+          NO_TAG: "Hello, {name}",
+          SELF_CLOSING: "Open <link/>",
+        },
+      },
+      warningHandler,
+    });
+
+    expect(innerIntl.get("NO_TAG", {
+      name: "Tony",
+      unused: chunks => React.createElement("strong", null, chunks),
+    })).toBe("Hello, Tony");
+    expect(warningHandler).not.toHaveBeenCalled();
+
+    expect(innerIntl.get("SELF_CLOSING", {
+      link: chunks => React.createElement("a", null, chunks),
+    })).toBe("Open <link/>");
+    expect(warningHandler).not.toHaveBeenCalled();
+  });
+
+  test("unmatched, mixed, and unsupported rich tags fall back to legacy strings", () => {
+    const warningHandler = jest.fn();
+    const innerIntl = new ReactIntlUniversal();
+    innerIntl.init({
+      currentLocale: "en-US",
+      locales: {
+        "en-US": {
+          CASE_MISMATCH: "Open <Tag>docs</Tag>",
+          MIXED_TAGS: "Open <link>docs</link> <span>now</span>",
+          ATTRIBUTE_TAG: "Open <link href=\"/docs\">docs</link>",
+        },
+      },
+      warningHandler,
+    });
+
+    expect(innerIntl.get("CASE_MISMATCH", {
+      tag: chunks => React.createElement("a", null, chunks),
+    })).toBe("Open <Tag>docs</Tag>");
+    expect(warningHandler).toHaveBeenCalledWith(
+      "react-intl-universal rich text message contains unmatched tag(s) for key='CASE_MISMATCH'.",
+      "Tag"
+    );
+
+    warningHandler.mockClear();
+    expect(innerIntl.get("MIXED_TAGS", {
+      link: chunks => React.createElement("a", null, chunks),
+    })).toBe("Open <link>docs</link> <span>now</span>");
+    expect(warningHandler).toHaveBeenCalledWith(
+      "react-intl-universal rich text message contains unmatched tag(s) for key='MIXED_TAGS'.",
+      "span"
+    );
+
+    warningHandler.mockClear();
+    expect(innerIntl.get("ATTRIBUTE_TAG", {
+      link: chunks => React.createElement("a", null, chunks),
+    })).toBe("Open <link href=\"/docs\">docs</link>");
+    expect(warningHandler).toHaveBeenCalledWith(
+      "react-intl-universal rich format message failed for key='ATTRIBUTE_TAG'.",
+      expect.any(String)
+    );
+  });
+});
+
+describe("Rich debug and failure paths", () => {
+  test("debug mode wraps rich output inside a chunks array and keeps helpers on the array", () => {
+    const innerIntl = new ReactIntlUniversal();
+    innerIntl.init({
+      currentLocale: "en-US",
+      debug: true,
+      locales: {
+        "en-US": {
+          RICH_LINK: "Open <link>{label}</link>",
+        },
+      },
+    });
+
+    const result = innerIntl.get("RICH_LINK", {
+      label: "docs",
+      link: chunks => React.createElement("a", { href: "/docs" }, chunks),
+    });
+
+    expect(Array.isArray(result)).toBe(true);
+    expect(result).toHaveLength(1);
+    expect(typeof result.defaultMessage).toBe("function");
+    expect(typeof result.d).toBe("function");
+    expect(result[0].type).toBe("span");
+    expect(result[0].props[dataKey]).toBe("RICH_LINK");
+    expect(result[0].props.children[0]).toBe("Open ");
+    expect(result[0].props.children[1].type).toBe("a");
+    expect(result[0].props.children[1].props.children).toEqual(["docs"]);
+  });
+
+  test("malformed rich tags warn and return legacy plain formatting", () => {
+    const warningHandler = jest.fn();
+    const innerIntl = new ReactIntlUniversal();
+    innerIntl.init({
+      currentLocale: "en-US",
+      locales: {
+        "en-US": {
+          MALFORMED_RICH: "Open <link>{label}</strong>",
+        },
+      },
+      warningHandler,
+    });
+
+    expect(innerIntl.get("MALFORMED_RICH", {
+      label: "docs",
+      link: chunks => React.createElement("a", null, chunks),
+    })).toBe("Open <link>docs</strong>");
+    expect(warningHandler).toHaveBeenCalledWith(
+      "react-intl-universal rich format message failed for key='MALFORMED_RICH'.",
+      expect.any(String)
+    );
+  });
+
+  test("rich formatter failures warn and return legacy plain formatting", () => {
+    const warningHandler = jest.fn();
+    const innerIntl = new ReactIntlUniversal();
+    innerIntl.init({
+      currentLocale: "en-US",
+      locales: {
+        "en-US": {
+          THROWING_RICH: "Open <link>docs</link>",
+        },
+      },
+      warningHandler,
+    });
+
+    expect(innerIntl.get("THROWING_RICH", {
+      link: () => {
+        throw new Error("formatter failed");
+      },
+    })).toBe("Open <link>docs</link>");
+    expect(warningHandler).toHaveBeenCalledWith(
+      "react-intl-universal rich format message failed for key='THROWING_RICH'.",
+      expect.any(String)
+    );
+  });
+
+  test("key-present formatting failures stay on the locale message path", () => {
+    const warningHandler = jest.fn();
+    const innerIntl = new ReactIntlUniversal();
+    innerIntl.init({
+      currentLocale: "en-US",
+      locales: {
+        "en-US": {
+          BROKEN_LOCALE: "Broken {name",
+        },
+      },
+      warningHandler,
+    });
+
+    expect(innerIntl.get("BROKEN_LOCALE", { name: "Tony" }).defaultMessage("Fallback {name}")).toBe(
+      "Broken {name"
+    );
+    expect(warningHandler).toHaveBeenCalledWith(
+      "react-intl-universal format message failed for key='BROKEN_LOCALE'.",
+      expect.any(String)
+    );
+  });
 });
 
 test("Message with brace", () => {
@@ -117,6 +835,23 @@ test("HTML Message with variables", () => {
   });
   expect(reactEl.props.dangerouslySetInnerHTML.__html).toBe(
     "This is<span>your message</span>"
+  );
+});
+
+test("HTML Message with variables in tag attributes", () => {
+  intl.init({ locales, currentLocale: "en-US" });
+  let reactEl = intl.getHTML("TIP_VAR_ATTR", {
+    message: "your message"
+  });
+  expect(reactEl.props.dangerouslySetInnerHTML.__html).toBe(
+    "This is <span style='color:red'>your message</span>"
+  );
+
+  reactEl = intl.getHTML("TIP_VAR_ATTR", {
+    message: "<script>alert(1)</script>"
+  });
+  expect(reactEl.props.dangerouslySetInnerHTML.__html).toBe(
+    "This is <span style='color:red'>&lt;script&gt;alert(1)&lt;/script&gt;</span>"
   );
 });
 
@@ -258,7 +993,7 @@ test("Should call handler when message is not defined", () => {
     warningHandler
   });
   intl.get("not-exist-key");
-  expect(warningHandler).lastCalledWith('react-intl-universal key \"not-exist-key\" not defined in en-US');
+  expect(warningHandler).toHaveBeenLastCalledWith('react-intl-universal key \"not-exist-key\" not defined in en-US');
 });
 
 test("Default message", () => {
@@ -753,18 +1488,16 @@ describe("Test for formatParentheses", () => {
 
 describe("Test for formatNumber", () => {
 
-  test("should format number correctly for en-US locale", () => {
-    intl.init({ locales, currentLocale: "en-US" });
-    expect(intl.formatNumber(1234567)).toBe("1,234,567");
-    expect(intl.formatNumber(1234.567)).toBe("1,234.567");
-    expect(intl.formatNumber(0)).toBe("0");
-  });
-
-  test("should format number correctly for zh-CN locale", () => {
-    intl.init({ locales, currentLocale: "zh-CN" });
-    expect(intl.formatNumber(1234567)).toBe("1,234,567");
-    expect(intl.formatNumber(1234.567)).toBe("1,234.567");
-    expect(intl.formatNumber(0)).toBe("0");
+  test.each([
+    ["en-US", "1,234,567", "1,234.567", "0"],
+    ["zh-CN", "1,234,567", "1,234.567", "0"],
+    ["zh-TW", "1,234,567", "1,234.567", "0"],
+    ["ja-JP", "1,234,567", "1,234.567", "0"],
+  ])("should format number correctly for %s locale", (currentLocale, expectedInteger, expectedDecimal, expectedZero) => {
+    intl.init({ locales, currentLocale });
+    expect(intl.formatNumber(1234567)).toBe(expectedInteger);
+    expect(intl.formatNumber(1234.567)).toBe(expectedDecimal);
+    expect(intl.formatNumber(0)).toBe(expectedZero);
   });
 
   test("should format number correctly for de-DE locale", () => {
@@ -792,4 +1525,64 @@ describe("Test for formatNumber", () => {
     intl.init({ locales, currentLocale: "en-US" });
     expect(intl.formatNumber(1e15)).toBe("1,000,000,000,000,000");
   });
+
+});
+
+describe("Test for date and time formatters", () => {
+  const date = new Date(2026, 0, 2, 15, 30, 45);
+
+  test.each([
+    "en-US",
+    "zh-CN",
+    "zh-TW",
+    "ja-JP",
+  ])("formatDate should use stable ISO 8601 date when format token is omitted for %s", async (currentLocale) => {
+    await intl.init({ locales, currentLocale });
+    expect(intl.formatDate(date)).toBe("2026-01-02");
+  });
+
+  test("formatDate should format timestamp values", () => {
+    intl.init({ locales, currentLocale: "zh-CN" });
+    expect(intl.formatDate(date.getTime())).toBe("2026-01-02");
+  });
+
+  test.each([
+    "en-US",
+    "zh-CN",
+    "zh-TW",
+    "ja-JP",
+  ])("formatTime should use stable 24-hour time with seconds when format token is omitted for %s", async (currentLocale) => {
+    await intl.init({ locales, currentLocale });
+    expect(intl.formatTime(date)).toBe("15:30:45");
+  });
+
+  test("formatTime should format timestamp values", () => {
+    intl.init({ locales, currentLocale: "en-US" });
+    expect(intl.formatTime(date.getTime())).toBe("15:30:45");
+  });
+
+  test.each([
+    "en-US",
+    "zh-CN",
+    "zh-TW",
+    "ja-JP",
+  ])("formatDateTime should use stable ISO 8601 date and 24-hour time when format token is omitted for %s", async (currentLocale) => {
+    await intl.init({ locales, currentLocale });
+    expect(intl.formatDateTime(date)).toBe("2026-01-02 15:30:45");
+  });
+
+  test("formatDateTime should format timestamp values", () => {
+    intl.init({ locales, currentLocale: "de-DE" });
+    expect(intl.formatDateTime(date.getTime())).toBe("2026-01-02 15:30:45");
+  });
+
+  test("date and time formatters should return unsupported values unchanged", () => {
+    intl.init({ locales, currentLocale: "en-US" });
+    const invalidDate = new Date("invalid");
+    expect(intl.formatDate("2026-01-02")).toBe("2026-01-02");
+    expect(intl.formatTime(null)).toBeNull();
+    expect(intl.formatDateTime(undefined)).toBeUndefined();
+    expect(intl.formatDate(invalidDate)).toBe(invalidDate);
+  });
+
 });

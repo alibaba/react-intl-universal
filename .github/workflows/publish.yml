@@ -1,0 +1,134 @@
+name: Publish react-intl-universal
+
+on:
+  push:
+    branches:
+      - beta
+      - master
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: npm-publish-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: packages/react-intl-universal
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org/
+          cache: npm
+          cache-dependency-path: packages/react-intl-universal/package-lock.json
+
+      - name: Use npm version with trusted publishing support
+        run: |
+          npm install --global npm@latest
+          node --version
+          npm --version
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Release rules:
+      # - beta branch publishes <package.json version>-beta.N with the npm "beta" dist-tag.
+      # - master branch publishes package.json version unchanged with the npm "latest" dist-tag.
+      # Keep package.json version as the stable base version, for example 2.14.0.
+      - name: Prepare release version
+        id: release
+        run: |
+          set -euo pipefail
+
+          PACKAGE_NAME="$(node -p "require('./package.json').name")"
+          SOURCE_VERSION="$(node -p "require('./package.json').version")"
+          BRANCH_NAME="${GITHUB_REF_NAME}"
+
+          if [[ ! "${SOURCE_VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "package.json should keep the stable base version, but it has ${SOURCE_VERSION}."
+            exit 1
+          fi
+
+          if [[ "${BRANCH_NAME}" == "beta" ]]; then
+            DIST_TAG="beta"
+            BASE_VERSION="${SOURCE_VERSION}"
+
+            if npm view "${PACKAGE_NAME}@${BASE_VERSION}" version >/dev/null 2>&1; then
+              echo "${PACKAGE_NAME}@${BASE_VERSION} is already published as a stable version. Bump package.json before publishing a new beta."
+              exit 1
+            fi
+
+            PUBLISHED_VERSIONS_JSON="$(npm view "${PACKAGE_NAME}" versions --json)"
+            NEXT_BETA_NUMBER="$(
+              PUBLISHED_VERSIONS_JSON="${PUBLISHED_VERSIONS_JSON}" BASE_VERSION="${BASE_VERSION}" node <<'NODE'
+          const versions = JSON.parse(process.env.PUBLISHED_VERSIONS_JSON || '[]');
+          const baseVersion = process.env.BASE_VERSION;
+          const escapedBaseVersion = baseVersion.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const betaPattern = new RegExp(`^${escapedBaseVersion}-beta\\.(\\d+)$`);
+          let maxBetaNumber = -1;
+
+          for (const version of versions) {
+            const match = betaPattern.exec(version);
+            if (match) {
+              maxBetaNumber = Math.max(maxBetaNumber, Number(match[1]));
+            }
+          }
+
+          process.stdout.write(String(maxBetaNumber + 1));
+          NODE
+            )"
+            PACKAGE_VERSION="${BASE_VERSION}-beta.${NEXT_BETA_NUMBER}"
+          elif [[ "${BRANCH_NAME}" == "master" ]]; then
+            DIST_TAG="latest"
+            PACKAGE_VERSION="${SOURCE_VERSION}"
+          else
+            echo "Unsupported release branch: ${BRANCH_NAME}"
+            exit 1
+          fi
+
+          if npm view "${PACKAGE_NAME}@${PACKAGE_VERSION}" version >/dev/null 2>&1; then
+            echo "${PACKAGE_NAME}@${PACKAGE_VERSION} already exists on npm."
+            exit 1
+          fi
+
+          PACKAGE_VERSION="${PACKAGE_VERSION}" node <<'NODE'
+          const fs = require('fs');
+          const packagePath = './package.json';
+          const pkg = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+          pkg.version = process.env.PACKAGE_VERSION;
+          fs.writeFileSync(packagePath, `${JSON.stringify(pkg, null, 2)}\n`);
+          NODE
+
+          echo "Prepared ${PACKAGE_NAME}@${PACKAGE_VERSION} for ${DIST_TAG} release."
+          echo "package-name=${PACKAGE_NAME}" >> "${GITHUB_OUTPUT}"
+          echo "package-version=${PACKAGE_VERSION}" >> "${GITHUB_OUTPUT}"
+          echo "dist-tag=${DIST_TAG}" >> "${GITHUB_OUTPUT}"
+
+      - name: Test
+        run: npm test -- --runInBand
+
+      - name: Build
+        run: npm run build
+
+      - name: Type test
+        run: npm run test:types
+
+      - name: Publish beta package to npm
+        if: github.ref_name == 'beta'
+        run: npm publish --tag "${{ steps.release.outputs.dist-tag }}"
+
+      - name: Stage publish package to npm
+        if: github.ref_name == 'master'
+        run: npm stage publish

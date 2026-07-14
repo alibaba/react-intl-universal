@@ -3,6 +3,8 @@ lib/
 coverage/
 node_modules/
 tool/
+.specify/
 .idea
 npm-debug.log
 README.md
+tmp

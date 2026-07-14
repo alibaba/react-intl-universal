@@ -1,27 +1,52 @@
 # react-intl-universal
 [react-intl-universal](https://github.com/alibaba/react-intl-universal) is a React internationalization package developed by [Alibaba Group](http://www.alibabagroup.com).
 
+[![react-intl-universal downloads](https://img.shields.io/npm/dw/react-intl-universal.svg)](https://npm-compare.com/react-intl-universal) [![react-intl-universal version](https://img.shields.io/npm/v/react-intl-universal.svg)](https://www.npmjs.com/package/react-intl-universal) [![npm](https://img.shields.io/npm/l/react-intl-universal.svg)](https://github.com/alibaba/react-intl-universal/blob/master/LICENSE.md)
 
-
-[![npm](https://img.shields.io/npm/dt/react-intl-universal.svg)](https://www.npmjs.com/package/react-intl-universal) [![npm](https://img.shields.io/npm/v/react-intl-universal.svg)](https://www.npmjs.com/package/react-intl-universal) [![npm](https://img.shields.io/npm/l/react-intl-universal.svg)](https://github.com/alibaba/react-intl-universal/blob/master/LICENSE.md)
-
-## Features
+## ✨ Features
 - Can be used not only in React component but also in Vanilla JS.
-- Simple. Only three main API and one optional helper.
-- Display numbers, currency, dates and times for different locales.
+- Simple API surface centered around `intl.get`.
+- Display locale-aware numbers.
+- Stable date/time helpers: `formatDate`, `formatTime`, and `formatDateTime` return deterministic `YYYY-MM-DD`, `HH:mm:ss`, and `YYYY-MM-DD HH:mm:ss`. This avoids native `Intl` output drift across runtimes, which has caused SSR and CI issues in [tc39/ecma402#1028](https://github.com/tc39/ecma402/issues/1028), [nodejs/node#44454](https://github.com/nodejs/node/issues/44454), [nodejs/node#46123](https://github.com/nodejs/node/issues/46123), and [formatjs/formatjs#1319](https://github.com/formatjs/formatjs/issues/1319).
 - Pluralize labels in strings.
 - Support variables in message.
-- Support HTML in message.
+- Support [React rich text component interpolation in message](https://alibaba.github.io/react-intl-universal#intl-usage).
 - Support for 150+ languages.
 - Runs in the browser and Node.js.
 - Message format is strictly implemented by [ICU standards](http://userguide.icu-project.org/formatparse/messages).
-- Locale data in [nested JSON format](https://github.com/alibaba/react-intl-universal/releases/tag/1.4.3) are supported.
-- [react-intl-universal-extract](https://github.com/alibaba/react-intl-universal/tree/master/packages/react-intl-universal-extract) helps you generate a locale file easily.
+- Locale data in nested JSON format are supported.
+- [react-intl-universal-extract](https://alibaba.github.io/react-intl-universal/#extract-usage) helps you generate a locale file easily.
+- [use-react-intl-universal skill](https://alibaba.github.io/react-intl-universal/#skill-usage) helps AI coding agents produce natural translations, stable localized UI, and reviewable locale updates.
 
-## Live Demo
-[react-intl-universal example](https://fe-tool.com/react-intl-universal)
+## ⚡ New in react-intl-universal@2.14+: Support Rich React Components with `intl.get`
 
-## Why Another Internationalization Solution for React?
+Upgrade to react-intl-universal@2.14+ to use `intl.get(...)` as the recommended unified API for plain text, ICU variables, and rich React components.
+
+See the [live demo](https://alibaba.github.io/react-intl-universal/#intl-usage) for runnable examples. You can keep one complete sentence in the locale message, while React code controls the actual component, props, and event handlers:
+
+<a href="https://alibaba.github.io/react-intl-universal/#intl-usage">
+  <img width="1200" src="https://img.alicdn.com/imgextra/i2/O1CN017uP7zd1h1tkr54P1z_!!6000000004218-2-tps-2280-1462.png" />
+</a>
+
+## ⚡ New: Let AI Agents Ship Better Internationalized UI
+
+Use the [use-react-intl-universal skill](https://alibaba.github.io/react-intl-universal/#skill-usage) to give AI coding agents a practical i18n workflow, not just API hints.
+
+<a href="https://alibaba.github.io/react-intl-universal/#skill-usage">
+  <img width="1200" alt="use-react-intl-universal Agent Skill workflow" src="https://img.alicdn.com/imgextra/i1/O1CN01bMmYFt21ZbDPDQxJT_!!6000000006999-2-tps-1536-1024.png" />
+</a>
+
+It helps agents:
+
+- write high-quality localized copy that preserves the real product meaning, not word-for-word translations;
+- keep product terms and UI wording consistent across modules;
+- avoid broken localized UI, such as text truncation, overflow, overlap, or misalignment;
+- keep ICU variables, rich tags, default messages, and locale files aligned;
+- review translation quality with [Multidimensional Quality Metrics (MQM)](https://www.w3.org/community/mqmcg), one of the most professional and comprehensive translation quality assessment frameworks widely recognized in the localization industry;
+- inspect running localized pages by URL, click through interactions, capture screenshots, and generate a process-and-findings report;
+- produce smaller, more reviewable locale changes.
+
+## 💡 Why Another Internationalization Solution for React?
 In case of internationalizing React apps, [react-intl](https://github.com/yahoo/react-intl) is one of most popular package in industry.  [react-intl](https://github.com/yahoo/react-intl) decorate your React.Component with wrapped component which is injected internationalized message dynamically so that the locale data is able to be loaded dynamically without reloading page. The following is the example code using  [react-intl](https://github.com/yahoo/react-intl).
 
 ```js
@@ -79,168 +104,11 @@ Furthermore, your React.Component's properties are not inherited in subclass sin
 
 Due to the problem above, we create [react-intl-universal](https://www.npmjs.com/package/react-intl-universal) to internationalize React app using simple but powerful API.
 
-## Get Started
-
-### App Examples
-- [Next.js Apps](https://github.com/alibaba/react-intl-universal/blob/master/packages/react-intl-universal/examples/nextjs-example/pages/index.tsx)
-- [Component](https://github.com/alibaba/react-intl-universal/blob/master/packages/react-intl-universal/examples/component-example/src/index.tsx)
-
-
-### Message With Variables
-If the message contains variables the `{variable_name}` is substituted directly into the string. In the example below, there are two variables `{name}` and `{where}`,  the second argument representing the variables in `get` method are substituted into the string.
-
-Locale data:
-```json
-{ "HELLO": "Hello, {name}. Welcome to {where}!" }
-```
-
-JS code:
-```js
-intl.get('HELLO', { name: 'Tony', where: 'Alibaba' }) // "Hello, Tony. Welcome to Alibaba!"
-```
-
-### Plural Form and Number Thousands Separators
-
-Locale data:
-```json
-{ "PHOTO": "You have {num, plural, =0 {no photos.} =1 {one photo.} other {# photos.}}" }
-```
-JS code:
-```js
-intl.get('PHOTO', { num: 0 }); // "You have no photos."
-intl.get('PHOTO', { num: 1 }); // "You have one photo."
-intl.get('PHOTO', { num: 1000000 }); // "You have 1,000,000 photos."
-```
-Plural label supports standard [ICU Message syntax](http://userguide.icu-project.org/formatparse/messages).
-
-Number thousands separators also varies according to the user's locale. According to this  [document](https://docs.oracle.com/cd/E19455-01/806-0169/overview-9/index.html), United States use a period to indicate the decimal place. Many other countries use a comma instead.
-
-### Display Currency
-Locale data:
-```json
-{ "SALE_PRICE": "The price is {price, number, USD}" }
-```
-JS code:
-```js
-intl.get('SALE_PRICE', { price: 123456.78 }); // The price is $123,456.78
-```
-As mentioned, the locale data is in [ICU Message format](http://userguide.icu-project.org/formatparse/messages).
-
-The syntax is {name, type, format}. Here is description:
-
-- name is the variable name in the message. In this case, it's `price`.
-- type is the type of value such as `number`, `date`, and `time`.
-- format is optional, and is additional information for the displaying format of the value. In this case, it's `USD`.
-
-if `type` is `number` and `format` is omitted, the result is formatted number with [thousands separators](https://docs.oracle.com/cd/E19455-01/806-0169/overview-9/index.html). If `format` is one of [currency code](https://www.currency-iso.org/en/home/tables/table-a1.html), it will show in corresponding currency format.
-
-### Display Dates
-Locale data:
-```json
-{
-  "SALE_START": "Sale begins {start, date}",
-  "SALE_END": "Sale ends {end, date, long}"
-}
-```
-JS code:
-```js
-intl.get('SALE_START', {start:new Date()}); // Sale begins 4/19/2017
-intl.get('SALE_END', {end:new Date()}); // Sale ends April 19, 2017
-```
-If `type` is `date`, `format` has the following values:
-- `short` shows date as shortest as possible
-- `medium` shows short textual representation of the month
-- `long` shows long textual representation of the month
-- `full` shows dates with the most detail
-
-### Display Times
-Locale data:
-```json
-{
-  "COUPON": "Coupon expires at {expires, time, medium}"
-}
-```
-JS code:
-```js
-intl.get('COUPON', {expires:new Date()}); // Coupon expires at 6:45:44 PM
-```
-if `type` is `time`, `format` has the following values:
-- `short` shows times with hours and minutes
-- `medium` shows times with hours, minutes, and seconds
-- `long` shows times with hours, minutes, seconds, and timezone
-
-### Default Message
-When the specific key does't exist in current locale, you may want to make it return a default message. Use `defaultMessage` method after `get` method. For example,
-
-Locale data:
-```json
-{ "HELLO": "Hello, {name}" }
-```
-
-
-JS code:
-```jsx
-const name = 'Tony';
-intl.get('HELLO', { name }).defaultMessage(`Hello, ${name}`); // "Hello, Tony"
-```
-
-Or using `d` for short:
-```jsx
-const name = 'Tony';
-intl.get('HELLO', { name }).d(`Hello, ${name}`); // "Hello, Tony"
-```
-
-And `getHTML` also supports default message.
-```jsx
-const name = 'Tony';
-intl.getHTML('HELLO', { name }).d(<div>Hello, {name}</div>) // React.Element with "<div>Hello, Tony</div>"
-```
-
-
-### HTML Message
-The `get` method returns string message. For HTML message, use `getHTML` instead. For example,
-
-Locale data:
-```json
-{ "TIP": "This is <span style='color:red'>HTML</span>" }
-```
-JS code:
-```js
-intl.getHTML('TIP'); // {React.Element}
-```
-
-### Helper
-[react-intl-universal](https://www.npmjs.com/package/react-intl-universal) provides a utility helping developer determine the user's `currentLocale`. As the running examples, when user select a new locale, it redirect user new location like `http://localhost:3000?lang=en-US`. Then, we can use `intl.determineLocale` to get the locale from URL. It can also support determine user's locale via cookie, localStorage, and browser default language. Refer to the APIs section for more detail.
-
-
-## Debugger mode
-When developing a website with multiple languages (i18n), translators are usually responsible for translating the content instead of the web developer. However, translators often struggle to find the specific message they need to edit on the webpage because they don't know its key. This leads to them having to ask the developer for the key, resulting in a lot of time wasted on communication.
-
-To solve this issue, a solution is proposed: When the debugger mode in `react-intl-universal` is enabled, each message on the webpage will be wrapped in a special span element with the key "data-i18n-key". This way, translators can easily see the key of the message and make the necessary edits themselves using some message management system, without needing to ask the developer.
-
-Enabling debugger mode:
-
-```js
-intl.init({
-  // ...
-  debug: true
-})
-```
-
-Message will be wrapped in a span element with the key "data-i18n-key":
-
-![debugger mode](https://github.com/alibaba/react-intl-universal/assets/3455798/172723f0-c241-4aee-9691-9abe4001b0f5)
-
-
-## Component Internationalization
-When internationalizing a React component, you don't need to `intl.init` again.
-You could make it as [peerDependency](https://github.com/alibaba/react-intl-universal/blob/master/packages/react-intl-universal/examples/component-example/package.json#L34), then just [load](https://github.com/alibaba/react-intl-universal/tree/master/packages/react-intl-universal/examples/component-example/src/index.tsx#L16) the locale data in the compoent.
-
-## APIs Definition
+## 📚 APIs Definition
 
 ```js
   /**
-   * Initialize properties and load CLDR locale data according to currentLocale
+   * Initialize properties and load locale data according to currentLocale
    * @param {Object} options
    * @param {string} options.escapeHtml To escape html. Default value is true.
    * @param {string} options.currentLocale Current locale such as 'en-US'
@@ -262,15 +130,19 @@ You could make it as [peerDependency](https://github.com/alibaba/react-intl-univ
 
 
   /**
-   * Get the formatted message by key
+   * Get the formatted message by key.
+   * Returns string for plain messages.
+   * Returns React-renderable chunks array when variables contain rich tag formatter functions
+   * and every parsed rich tag has a matching formatter.
    * @param {string} key The string representing key in locale data file
    * @param {Object} variables Variables in message
-   * @returns {string} message
+   * @returns {string|React.ReactNode[]} message
    */
   get(key, variables)
 
   /**
-   * Get the formatted html message by key.
+   * Legacy API: get the formatted html message by key.
+   * Prefer get(key, variables) with rich tag formatter functions for new React code.
    * @param {string} key The string representing key in locale data file
    * @param {Object} variables Variables in message
    * @returns {React.Element} message
@@ -333,6 +205,36 @@ You could make it as [peerDependency](https://github.com/alibaba/react-intl-univ
   getColon()
 
   /**
+   * Formats a Date or timestamp as a stable ISO 8601 date: YYYY-MM-DD.
+   * @param {Date|number} value - The Date or timestamp to format.
+   * @returns {string} The formatted date.
+   *
+   * @example
+   * formatDate(new Date(2026, 0, 2)) => Returns "2026-01-02"
+   */
+  formatDate(value)
+
+  /**
+   * Formats a Date or timestamp as stable 24-hour time with seconds: HH:mm:ss.
+   * @param {Date|number} value - The Date or timestamp to format.
+   * @returns {string} The formatted time.
+   *
+   * @example
+   * formatTime(new Date(2026, 0, 2, 15, 30, 45)) => Returns "15:30:45"
+   */
+  formatTime(value)
+
+  /**
+   * Formats a Date or timestamp as stable ISO 8601 date plus 24-hour time: YYYY-MM-DD HH:mm:ss.
+   * @param {Date|number} value - The Date or timestamp to format.
+   * @returns {string} The formatted date and time.
+   *
+   * @example
+   * formatDateTime(new Date(2026, 0, 2, 15, 30, 45)) => Returns "2026-01-02 15:30:45"
+   */
+  formatDateTime(value)
+
+   /**
    * Formats a number according to the current locale.
    * @param {number} number - The number to format.
    * @returns {string} The formatted number.
@@ -347,7 +249,7 @@ You could make it as [peerDependency](https://github.com/alibaba/react-intl-univ
 ```
 
 
-## Compatibility with react-intl
+## 🔄 Compatibility with react-intl
 As mentioned in the issue [Mirror react-intl API](https://github.com/alibaba/react-intl-universal/issues/2), to make people switch their existing React projects from [react-intl](https://github.com/yahoo/react-intl) to [react-intl-universal](https://www.npmjs.com/package/react-intl-universal). We provide two compatible APIs as following.
 
 ```js
@@ -357,13 +259,13 @@ As mentioned in the issue [Mirror react-intl API](https://github.com/alibaba/rea
    * @param {string} options.id 
    * @param {string} options.defaultMessage
    * @param {Object} variables Variables in message
-   * @returns {string} message
+   * @returns {string|React.ReactNode[]} message
   */
   formatMessage(options, variables)
 ```
 ```js
   /**
-   * As same as getHTML(...) API
+   * Legacy API: as same as getHTML(...) API
    * @param {Object} options 
    * @param {string} options.id 
    * @param {React.Element} options.defaultMessage
@@ -377,17 +279,17 @@ For example, the `formatMessage` API
 
 ```js
 const name = 'Tony';
-intl.formatMessage({ id:'hello', defaultMessage: `Hello, ${name}`}, {name});
+intl.formatMessage({ id:'hello', defaultMessage: 'Hello, {name}'}, {name});
 ```
  
  is equivalent to `get` API
  
 ```js
 const name = 'Tony';
-intl.get('hello', {name}).d(`Hello, ${name}`);
+intl.get('hello', {name}).d('Hello, {name}');
 ```
 
-And the `formatHTMLMessage` API
+And the legacy `formatHTMLMessage` API
 ```js
 const name = 'Tony';
 intl.formatHTMLMessage({ id:'hello', defaultMessage: <div>Hello</div>}, {name});
@@ -400,8 +302,38 @@ const name = 'Tony';
 intl.getHTML('hello', {name}).d(<div>Hello</div>);
 ```
  
-## FAQ
-### 1. How to Internationalize Message in Constants Object
+## ❓ FAQ
+### 1. How Do I Determine the User's Locale?
+
+[react-intl-universal](https://www.npmjs.com/package/react-intl-universal) provides a helper to determine the user's `currentLocale`. In the running examples, when a user selects a new locale, the page is redirected to a URL like `http://localhost:3000?lang=en-US`. Then you can use `intl.determineLocale` to read the locale from the URL.
+
+It can also determine the user's locale from cookies, localStorage, or the browser's default language. Refer to the APIs section for more detail.
+
+### 2. How Do I Internationalize a Reusable React Component?
+
+When internationalizing a React component, you don't need to call `intl.init` again.
+You can make `react-intl-universal` a [peerDependency](https://github.com/alibaba/react-intl-universal/blob/master/packages/react-intl-universal/examples/component-example/package.json#L34), then just [load](https://github.com/alibaba/react-intl-universal/tree/master/packages/react-intl-universal/examples/component-example/src/index.tsx#L16) the locale data in the component.
+
+### 3. How Do I Enable Debugger Mode?
+
+When developing a website with multiple languages (i18n), translators are usually responsible for translating the content instead of the web developer. However, translators often struggle to find the specific message they need to edit on the webpage because they don't know its key. This leads to them having to ask the developer for the key, resulting in a lot of time wasted on communication.
+
+To solve this issue, enable debugger mode in `react-intl-universal`. Each message on the webpage will be wrapped in a special span element with the key `data-i18n-key`. This way, translators can easily see the key of the message and make the necessary edits themselves using some message management system, without needing to ask the developer.
+
+Enabling debugger mode:
+
+```js
+intl.init({
+  // ...
+  debug: true
+})
+```
+
+Message will be wrapped in a span element with the key `data-i18n-key`:
+
+![debugger mode](https://github.com/alibaba/react-intl-universal/assets/3455798/172723f0-c241-4aee-9691-9abe4001b0f5)
+
+### 4. How to Internationalize Message in Constants Object?
 
 If constants are defined outside of a React component, the message in `constants.fruits` may get loaded before `intl.init(...)`. This can cause a warning to be displayed, such as `react-intl-universal locales data "null" not exists`.
 
@@ -464,31 +396,9 @@ function MyComponent() {
 }
 ```
 
+## 📈 Usage Trend
 
-### 2. How to Bind Event Handlers to an Internationalized Message
+[Usage Trend of react-intl-universal](https://npm-compare.com/react-intl-universal)
 
-```jsx
-const MyComp = (props) => {
-  const onClick = (e) => {
-    if (e.target.tagName === 'A') {
-      // event handler for "A" tag in the message
-    }
-  };
-  return (
-    // Wrap the message in a container and listen for the children's events.
-    <span onClick={onClick}>
-      {intl.getHTML('more_detail').d(<span>Please refer to the <a>document</a> for more detail.</span>)}
-    </span>
-  )
-}
-```
-
-## Other Frontend Tools
-- [react-intl-universal-extract](https://github.com/alibaba/react-intl-universal/tree/master/packages/react-intl-universal-extract): Extract default messages in application. This package will generate a json file which contains the extracted messages.
-- [react-intl-universal-pseudo-converter](https://github.com/ceszare/react-intl-universal-pseudo-converter): A  [pseudo-localization](https://en.wikipedia.org/wiki/Pseudolocalization) tool for testing internationalization.
-- [JSON5 Editor](https://json-5.com): JSON for Humans.
-- [Compare NPM Packages](https://npm-compare.com): Find the Best npm Package for Your Project.
-
-
-## License
+## 📄 License
 This software is free to use under the BSD license.

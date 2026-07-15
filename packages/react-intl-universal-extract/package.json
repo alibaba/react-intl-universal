@@ -36,7 +36,7 @@
     "parse-git-config": "2.0.3",
     "path": "0.12.7",
     "pify": "3.0.0",
-    "request": "2.81.0",
+    "request": "2.88.2",
     "request-promise": "4.2.1",
     "sort-keys": "2.0.0"
   },

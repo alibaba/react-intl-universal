@@ -2,14 +2,17 @@
 
 'use strict';
 const program = require('commander');
-const script = require('../src/index.js');
+const { extractWithResult } = require('../src/extract');
 
 const runScript = (cmd, options) => {
-  const result = script[cmd](options);
   if (cmd === 'extract') {
-    const count = (result && result.length) || 0;
-    console.log(`${count} messages extracted.`);
+    const result = extractWithResult(options);
+    if (result.ok) {
+      console.log(`${result.messages.length} messages extracted.`);
+    }
+    return result;
   }
+  return null;
 };
 
 function parseCmd(argv) {
@@ -19,19 +22,43 @@ function parseCmd(argv) {
     .option('--output-path [optional]', 'The output path for extracted messages. Example: "./src/locales"')
     .option('--verbose [optional]', 'Show detail message')
     .parse(argv);
-  return program;
+  return {
+    cmd: program.cmd,
+    sourcePath: program.sourcePath,
+    outputPath: program.outputPath,
+    verbose: program.verbose,
+  };
 }
 
-function execute() {
-  const cmd = process.argv[3];
-  const options = parseCmd(process.argv);
+function execute(argv = process.argv) {
+  const parsed = parseCmd(argv);
+  const cmd = parsed.cmd;
+  const options = {};
+  ['sourcePath', 'outputPath', 'verbose'].forEach((name) => {
+    if (parsed[name] !== undefined) {
+      options[name] = parsed[name];
+    }
+  });
+
   switch (cmd) {
-    case 'extract':
-      runScript(cmd, options);
-      break;
+    case 'extract': {
+      const result = runScript(cmd, options);
+      process.exitCode = result.ok ? 0 : 1;
+      return process.exitCode;
+    }
     default:
-      console.log(`Unkown cmd ${cmd}.`);
+      console.error(`Unknown command ${cmd || '<missing>'}.`);
+      process.exitCode = 1;
+      return process.exitCode;
   }
 }
 
-execute();
+if (require.main === module) {
+  execute();
+}
+
+module.exports = {
+  execute,
+  parseCmd,
+  runScript,
+};

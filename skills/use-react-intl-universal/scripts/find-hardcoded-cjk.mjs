@@ -33,6 +33,7 @@ const DEFAULT_IGNORE = [
   ".snap",
 ];
 
+/** Prints command-line usage information. */
 function printHelp() {
   console.log(`Usage:
   node skills/use-react-intl-universal/scripts/find-hardcoded-cjk.mjs --source src
@@ -51,10 +52,12 @@ Options:
 `);
 }
 
+/** Normalizes a source path before applying ignore patterns. */
 function normalizePathForIgnore(filePath) {
   return `/${relativePath(filePath).split(path.sep).join("/")}`;
 }
 
+/** Checks whether the input is ignored by default. */
 function isIgnoredByDefault(filePath, includeLocales) {
   if (includeLocales) {
     return false;
@@ -64,12 +67,14 @@ function isIgnoredByDefault(filePath, includeLocales) {
   return DEFAULT_IGNORE.some((pattern) => normalized.includes(pattern));
 }
 
+/** Returns neighboring source lines around a scan candidate. */
 function getContext(lines, index, radius = 3) {
   const start = Math.max(0, index - radius);
   const end = Math.min(lines.length, index + radius + 1);
   return lines.slice(start, end).join("\n");
 }
 
+/** Checks whether a source line contains only a comment. */
 function isCommentOnlyLine(trimmedLine, inBlockComment) {
   return inBlockComment
     || trimmedLine.startsWith("//")
@@ -81,7 +86,7 @@ function isCommentOnlyLine(trimmedLine, inBlockComment) {
 // Remove simple inline comments for triage classification. This is deliberately
 // not a full JavaScript lexer; it targets the common case that produced noisy
 // false positives in large codebases:
-//   const value = "Plan"; // 中文注释
+//   const value = "Plan"; // Chinese-language comment
 // The original line is still printed when a real candidate remains.
 function stripSimpleInlineComments(line) {
   const slashIndex = line.indexOf("//");
@@ -96,6 +101,7 @@ function stripSimpleInlineComments(line) {
   return line.slice(0, Math.min(...candidates));
 }
 
+/** Tracks whether scanning has entered or exited a block comment. */
 function updateBlockCommentState(line, inBlockComment) {
   let next = inBlockComment;
   let index = 0;
@@ -125,6 +131,7 @@ function updateBlockCommentState(line, inBlockComment) {
   return next;
 }
 
+/** Classifies a CJK hit by likely UI relevance and remediation priority. */
 function classifyHit(line, context) {
   const trimmed = line.trim();
   const lowerContext = context.toLowerCase();
@@ -185,10 +192,12 @@ function classifyHit(line, context) {
   };
 }
 
+/** Returns the numeric sorting rank for a priority. */
 function priorityRank(priority) {
   return { high: 0, medium: 1, low: 2 }[priority] ?? 3;
 }
 
+/** Scans one source file for actionable hardcoded CJK text. */
 function scanFile(filePath, options) {
   const text = fs.readFileSync(filePath, "utf8");
   const lines = text.split(/\r?\n/);
@@ -245,6 +254,7 @@ function scanFile(filePath, options) {
   return results;
 }
 
+/** Prints the hardcoded-CJK scan findings as a text report. */
 function printTextReport(report) {
   console.log(`Source: ${relativePath(report.sourcePath)}`);
   console.log(`Files scanned: ${report.fileCount}`);
@@ -273,6 +283,7 @@ function printTextReport(report) {
   }
 }
 
+/** Runs this script's command-line workflow. */
 function main() {
   const args = parseCliArgs(process.argv.slice(2));
 
@@ -336,9 +347,6 @@ function main() {
     candidateCount: candidates.length,
     priorityCounts,
     kindCounts,
-    // Backward-compatible field for older callers. New callers should use
-    // priorityCounts and kindCounts because mixing both dimensions is noisy.
-    counts: priorityCounts,
     candidates,
   };
 

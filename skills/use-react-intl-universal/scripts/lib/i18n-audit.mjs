@@ -1,24 +1,14 @@
+/*
+ * Purpose:
+ * Provide dependency-free shared helpers for source discovery, locale JSON
+ * inspection, message-contract analysis, and translation audit workflows.
+ */
+
 import fs from "node:fs";
 import path from "node:path";
 import { estimateDisplayWidth } from "./display-width.mjs";
 
 export { estimateDisplayWidth, stripRichTags } from "./display-width.mjs";
-
-/*
- * Purpose:
- * Shared helper library for the use-react-intl-universal skill scripts.
- *
- * This file uses only Node.js standard library modules so the skill can run
- * inside arbitrary application repositories without installing extra
- * dependencies. The helpers cover:
- * - CLI argument parsing and file discovery
- * - locale JSON reading with key line-number lookup
- * - intl.get(...).d(...) source scanning
- * - ICU variable and rich-tag contract extraction
- * - default-locale inference
- * - translation display-width risk estimation
- * - safe JSON message merge/delete helpers
- */
 
 const DEFAULT_IGNORED_DIRS = new Set([
   ".git",
@@ -32,6 +22,7 @@ const DEFAULT_IGNORED_DIRS = new Set([
 
 export const DEFAULT_SOURCE_EXTENSIONS = [".js", ".jsx", ".ts", ".tsx"];
 
+/** Stores a parsed command-line option. */
 function setCliArg(args, name, value) {
   if (args[name] === undefined) {
     args[name] = value;
@@ -79,6 +70,7 @@ export function parseCliArgs(argv) {
   return args;
 }
 
+/** Resolves a path relative to the current working directory. */
 export function resolveFromCwd(inputPath) {
   return path.resolve(process.cwd(), inputPath);
 }
@@ -95,6 +87,7 @@ export function splitCsv(value, fallback = []) {
     .filter(Boolean);
 }
 
+/** Recursively collects files that satisfy a caller-provided predicate. */
 export function collectFiles(rootPath, predicate, ignoredDirs = DEFAULT_IGNORED_DIRS) {
   if (!fs.existsSync(rootPath)) {
     return [];
@@ -126,15 +119,18 @@ export function collectFiles(rootPath, predicate, ignoredDirs = DEFAULT_IGNORED_
   return files.sort((a, b) => a.localeCompare(b));
 }
 
+/** Collects locale JSON files below a locale directory. */
 export function collectLocaleFiles(localesPath) {
   return collectFiles(localesPath, (filePath) => path.extname(filePath) === ".json");
 }
 
+/** Collects source files whose extensions are enabled for scanning. */
 export function collectSourceFiles(sourcePath, extensions = DEFAULT_SOURCE_EXTENSIONS) {
   const extensionSet = new Set(extensions);
   return collectFiles(sourcePath, (filePath) => extensionSet.has(path.extname(filePath)));
 }
 
+/** Removes files whose normalized paths match configured ignore patterns. */
 export function filterIgnoredFiles(filePaths, ignorePatterns) {
   if (!ignorePatterns || ignorePatterns.length === 0) {
     return filePaths;
@@ -146,6 +142,7 @@ export function filterIgnoredFiles(filePaths, ignorePatterns) {
   });
 }
 
+/** Returns the line and column for a source offset. */
 export function getLineColumn(text, index) {
   const safeIndex = Math.max(0, Math.min(index, text.length));
   let line = 1;
@@ -215,6 +212,7 @@ function parseJsonStringToken(text, startIndex) {
   throw new Error("Unterminated JSON string");
 }
 
+/** Advances a source offset past contiguous whitespace. */
 function skipWhitespace(text, index) {
   while (index < text.length && /\s/.test(text[index])) {
     index += 1;
@@ -252,6 +250,7 @@ function scanJsonValue(text, index, pathSegments, locations, duplicates) {
   return skipPrimitive(text, index);
 }
 
+/** Scans a JSON array while recording nested property locations. */
 function scanJsonArray(text, index, pathSegments, locations, duplicates) {
   index += 1;
   let itemIndex = 0;
@@ -275,6 +274,7 @@ function scanJsonArray(text, index, pathSegments, locations, duplicates) {
   return index;
 }
 
+/** Scans a JSON object while recording keys and duplicate properties. */
 function scanJsonObject(text, index, pathSegments, locations, duplicates) {
   index += 1;
   const seenKeys = new Map();
@@ -330,6 +330,7 @@ function scanJsonObject(text, index, pathSegments, locations, duplicates) {
   return index;
 }
 
+/** Returns property locations and duplicate keys discovered in JSON source. */
 export function scanJsonProperties(text) {
   const locations = [];
   const duplicates = [];
@@ -371,11 +372,13 @@ export function readLocaleFile(filePath) {
   }
 }
 
+/** Derives a locale identifier from a locale file's relative path. */
 export function getLocaleName(filePath, localesRootPath) {
   const relative = path.relative(localesRootPath, filePath);
   return relative.replace(/\.json$/i, "").split(path.sep).join("/");
 }
 
+/** Checks whether an object owns the requested property. */
 function hasOwn(object, key) {
   return Object.prototype.hasOwnProperty.call(object, key);
 }
@@ -416,6 +419,7 @@ export function findLocation(propertyLocations, pathSegments) {
   ));
 }
 
+/** Finds the closing brace that matches an opening brace. */
 function findMatchingBrace(message, openIndex, endIndex = message.length) {
   let depth = 0;
 
@@ -451,6 +455,7 @@ function readIdentifier(input, index = 0) {
   };
 }
 
+/** Reads the next comma-delimited ICU argument segment. */
 function readCommaPart(input, index) {
   index = skipWhitespace(input, index);
   if (input[index] !== ",") {
@@ -503,6 +508,7 @@ function scanIcuOptionBodies(content, variables, startIndex) {
   }
 }
 
+/** Extracts variables and nested option bodies from one ICU argument. */
 function scanIcuArgument(content, variables) {
   const variable = readIdentifier(content, 0);
   if (!variable) {
@@ -531,6 +537,7 @@ function scanIcuArgument(content, variables) {
   }
 }
 
+/** Returns every variable referenced by an ICU message. */
 export function extractIcuVariables(message) {
   const variables = new Set();
   scanIcuMessageSegment(String(message), variables);
@@ -570,6 +577,7 @@ export function getMessageContract(message) {
   };
 }
 
+/** Compares source and translated placeholders and rich-text tags. */
 export function compareMessageContracts(expected, actual) {
   const expectedVariables = new Set(expected.variables);
   const actualVariables = new Set(actual.variables);
@@ -584,6 +592,7 @@ export function compareMessageContracts(expected, actual) {
   };
 }
 
+/** Checks whether two message contracts have meaningful differences. */
 export function hasContractDiff(diff) {
   return (
     diff.missingVariables.length > 0
@@ -593,24 +602,29 @@ export function hasContractDiff(diff) {
   );
 }
 
+/** Formats a list of values as readable prose. */
 export function formatList(items) {
   return items.length > 0 ? items.join(", ") : "-";
 }
 
+/** Converts JavaScript template placeholders into ICU placeholder syntax. */
 export function transformTemplateVariables(message) {
   return String(message).replace(/\$\{\s*([A-Za-z_$][\w$]*)\s*\}/g, "{$1}");
 }
 
+/** Converts a character offset into its one-based source line number. */
 export function getSourceLine(text, index) {
   return getLineColumn(text, index).line;
 }
 
+/** Returns the trimmed source line containing a character offset. */
 export function getSourceLineText(text, index) {
   const lineStart = text.lastIndexOf("\n", index) + 1;
   const lineEnd = text.indexOf("\n", index);
   return text.slice(lineStart, lineEnd >= 0 ? lineEnd : text.length).trim();
 }
 
+/** Collapses a source call into a bounded single-line diagnostic snippet. */
 export function summarizeSourceCall(text, maxLength = 260) {
   const summary = String(text).replace(/\s+/g, " ").trim();
   if (summary.length <= maxLength) {
@@ -754,6 +768,7 @@ export function extractIntlMessagesFromSource(text, filePath) {
   return messages;
 }
 
+/** Finds deprecated intl.getHTML call sites in source text. */
 export function findGetHTMLUsages(text, filePath) {
   const usages = [];
   const pattern = /(?:intl|IntlUtils)\s*\.\s*getHTML\s*\(/g;
@@ -769,10 +784,12 @@ export function findGetHTMLUsages(text, filePath) {
   return usages;
 }
 
+/** Returns a normalized path relative to the current working directory. */
 export function relativePath(filePath) {
   return path.relative(process.cwd(), filePath) || ".";
 }
 
+/** Loads locale JSON files with message values and source locations. */
 export function loadLocaleData(localesPath, ignorePatterns = []) {
   return filterIgnoredFiles(collectLocaleFiles(localesPath), ignorePatterns).map((filePath) => {
     const localeFile = readLocaleFile(filePath);
@@ -980,6 +997,7 @@ export function classifyUiCopyRisk(key, sourceMessage = {}) {
   return "medium";
 }
 
+/** Detects the grouped control visual integrity risk. */
 export function detectGroupedControlVisualIntegrityRisk(sourceMessage = {}) {
   const context = [
     sourceMessage.lineText,
@@ -1150,6 +1168,7 @@ export function deleteMessageValue(localeJson, key) {
   return false;
 }
 
+/** Serializes formatted JSON and creates its parent directory when needed. */
 export function writeJsonFile(filePath, json) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   fs.writeFileSync(filePath, `${JSON.stringify(json, null, 2)}\n`);

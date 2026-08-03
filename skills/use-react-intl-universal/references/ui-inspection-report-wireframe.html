@@ -3,26 +3,25 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="ui-inspection-report-template" content="copy-edit-in-place" />
   <title>UI Inspection Report</title>
   <link rel="stylesheet" href="https://g.alicdn.com/code/lib/bootstrap/4.5.3/css/bootstrap.min.css" />
   <style>
     :root {
       color-scheme: light;
-      --page: #f3f6f9;
-      --surface: #ffffff;
-      --surface-soft: #f7f9fc;
-      --ink: #111827;
-      --muted: #64748b;
-      --line: #d7dee8;
-      --line-strong: #b9c5d4;
-      --accent: #2563eb;
-      --accent-soft: #e8f0ff;
-      --success: #16845f;
-      --danger: #d9364c;
-      --warning: #b86b00;
-      --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05), 0 8px 24px rgba(15, 23, 42, 0.05);
-      --shadow-lg: 0 22px 70px rgba(2, 6, 23, 0.28);
+      --report-page: #eef2f6;
+      --report-surface: #ffffff;
+      --report-soft: #f7f9fc;
+      --report-ink: #172033;
+      --report-muted: #657289;
+      --report-line: #d5dde8;
+      --report-line-strong: #b9c5d4;
+      --report-primary: #2457a7;
+      --report-primary-soft: #edf3fc;
+      --report-danger: #c73546;
+      --report-warning: #9a6400;
+      --report-success: #217a55;
+      --report-shadow: 0 8px 24px rgba(30, 42, 62, 0.08);
+      --report-overlay-shadow: 0 24px 72px rgba(8, 15, 29, 0.34);
     }
 
     * {
@@ -36,205 +35,188 @@
     body {
       min-width: 1280px;
       margin: 0;
-      background: var(--page);
-      color: var(--ink);
+      background: var(--report-page);
+      color: var(--report-ink);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
       font-size: 14px;
       line-height: 1.5;
     }
 
+    body.report-overlay-open {
+      overflow: hidden;
+    }
+
     a {
-      color: var(--accent);
-      text-decoration: none;
+      color: var(--report-primary);
       text-underline-offset: 3px;
     }
 
     a:hover {
-      text-decoration: underline;
+      color: #173f80;
     }
 
     code,
     pre {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
     }
 
     code {
       padding: 1px 5px;
-      border: 1px solid #e2e8f0;
+      border: 1px solid #dfe6ef;
       border-radius: 4px;
-      background: #f8fafc;
-      color: #1f2937;
+      background: #f5f7fa;
+      color: #24324a;
+      white-space: normal;
+      overflow-wrap: anywhere;
+      word-break: break-word;
     }
 
     .report-shell {
       width: 1220px;
       max-width: none;
       margin: 0 auto;
-      padding: 30px 0 80px;
+      padding: 28px 0 84px;
     }
 
     .report-main {
       width: 100%;
+      min-width: 0;
+    }
+
+    .report-zero {
+      margin-top: 0;
+      padding: 38px 40px;
+    }
+
+    .report-zero h1 {
+      margin: 0 0 7px;
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: 0;
     }
 
     .hero-card,
     .report-card,
     .finding-card,
+    .evidence-card,
     .observation-card {
-      border: 1px solid var(--line);
+      border: 1px solid var(--report-line);
       border-radius: 8px;
-      background: var(--surface);
-      box-shadow: var(--shadow-sm);
+      background: var(--report-surface);
+      box-shadow: var(--report-shadow);
     }
 
     .hero-card {
-      position: relative;
-      overflow: hidden;
-      padding: 32px 34px 30px;
-      border-top: 3px solid var(--accent);
+      padding: 30px 32px 28px;
+      border-top: 3px solid var(--report-primary);
     }
 
     .hero-grid {
       display: grid;
       grid-template-columns: minmax(0, 1fr) 360px;
-      column-gap: 54px;
-      row-gap: 28px;
+      gap: 26px 48px;
       align-items: start;
-    }
-
-    .hero-kicker,
-    .section-kicker {
-      margin-bottom: 8px;
-      color: var(--accent);
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
     }
 
     .hero-card h1 {
       margin: 0;
-      color: #0f172a;
-      font-size: 34px;
-      font-weight: 820;
-      line-height: 1.15;
+      font-size: 32px;
+      font-weight: 700;
+      line-height: 1.2;
       letter-spacing: 0;
     }
 
     .hero-card p {
-      margin: 12px 0 0;
-      color: var(--muted);
-      max-width: 650px;
+      max-width: 700px;
+      margin: 10px 0 0;
+      color: var(--report-muted);
     }
 
     .report-meta-row {
       display: grid;
-      grid-template-columns: 1fr;
-      gap: 0;
-      margin-top: 0;
-      max-width: none;
+      grid-template-columns: minmax(0, 1fr);
+      margin: 0;
     }
 
-    .report-meta-row div {
+    .report-meta-row > div {
       display: grid;
-      grid-template-columns: 130px minmax(0, 1fr);
-      align-items: baseline;
+      grid-template-columns: 125px minmax(0, 1fr);
       gap: 18px;
-      padding: 2px 0 14px;
-      border-bottom: 1px solid #e6edf5;
-      background: transparent;
+      align-items: baseline;
+      padding: 10px 0;
+      border-bottom: 1px solid #e5eaf1;
     }
 
-    .report-meta-row div + div {
-      padding-top: 14px;
+    .report-meta-row > div:first-child {
+      padding-top: 0;
     }
 
-    .report-meta-row div:last-child {
+    .report-meta-row > div:last-child {
       padding-bottom: 0;
       border-bottom: 0;
     }
 
-    .report-meta-row span {
-      display: block;
-      flex: 0 0 auto;
-      color: var(--muted);
+    .report-meta-row span,
+    .finding-meta dt,
+    .appendix-meta dt {
+      color: var(--report-muted);
       font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 0.04em;
+      font-weight: 700;
+      letter-spacing: 0;
       text-transform: uppercase;
     }
 
     .report-meta-row strong {
-      display: block;
-      color: #0f172a;
-      font-size: 15px;
+      min-width: 0;
       text-align: right;
+      overflow-wrap: anywhere;
     }
 
     .metric-strip {
       display: grid;
       grid-column: 1 / -1;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 0;
-      margin-top: 4px;
-      padding-top: 22px;
-      border-top: 1px solid #e5ebf2;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      margin-top: 2px;
+      border-top: 1px solid #e1e7ef;
     }
 
     .metric-card {
-      position: relative;
-      min-height: 88px;
-      padding: 2px 28px 0 0;
-      border: 0;
-      border-radius: 0;
-      background: transparent;
+      min-width: 0;
+      padding: 20px 26px 0 0;
     }
 
     .metric-card + .metric-card {
-      padding-left: 28px;
-      border-left: 1px solid #e6edf5;
-    }
-
-    .metric-card::before {
-      content: "";
-      display: inline-block;
-      width: 8px;
-      height: 8px;
-      margin-right: 8px;
-      border-radius: 999px;
-      vertical-align: 1px;
-      background: var(--accent);
-    }
-
-    .metric-card[data-tone="danger"]::before {
-      background: var(--danger);
-    }
-
-    .metric-card[data-tone="success"]::before {
-      background: var(--success);
-    }
-
-    .metric-card[data-tone="warning"]::before {
-      background: var(--warning);
+      padding-left: 26px;
+      border-left: 1px solid #e1e7ef;
     }
 
     .metric-card span {
-      display: inline;
-      color: var(--muted);
+      color: var(--report-muted);
       font-size: 12px;
-      font-weight: 750;
+      font-weight: 700;
     }
 
     .metric-card strong {
       display: block;
-      margin: 8px 0 6px;
-      color: #0f172a;
-      font-size: 36px;
+      margin: 7px 0 5px;
+      font-size: 34px;
       line-height: 1;
     }
 
     .metric-card small {
-      color: var(--muted);
+      color: var(--report-muted);
+    }
+
+    .metric-card[data-tone="danger"] strong {
+      color: var(--report-danger);
+    }
+
+    .metric-card[data-tone="warning"] strong {
+      color: var(--report-warning);
+    }
+
+    .metric-card[data-tone="success"] strong {
+      color: var(--report-success);
     }
 
     .quick-nav {
@@ -243,40 +225,37 @@
       z-index: 30;
       display: flex;
       align-items: center;
-      gap: 8px;
-      margin-top: 16px;
-      padding: 10px;
-      border: 1px solid var(--line);
+      gap: 4px;
+      margin-top: 14px;
+      padding: 8px;
+      border: 1px solid var(--report-line);
       border-radius: 8px;
-      background: rgba(255, 255, 255, 0.94);
-      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.07);
+      background: rgba(255, 255, 255, 0.96);
+      box-shadow: var(--report-shadow);
     }
 
     .quick-nav .nav-link {
-      display: inline-flex;
-      align-items: center;
       min-height: 34px;
       padding: 7px 12px;
-      border-radius: 6px;
-      color: #334155;
-      font-weight: 700;
-      line-height: 1;
+      border-radius: 5px;
+      color: #35435a;
+      font-weight: 600;
     }
 
     .quick-nav .nav-link:hover,
     .quick-nav .nav-link.active {
-      background: var(--accent-soft);
-      color: var(--accent);
+      background: var(--report-primary-soft);
+      color: var(--report-primary);
       text-decoration: none;
     }
 
     section[id],
     article[id] {
-      scroll-margin-top: 86px;
+      scroll-margin-top: 82px;
     }
 
     .report-card {
-      margin-top: 22px;
+      margin-top: 20px;
       padding: 24px;
     }
 
@@ -284,42 +263,45 @@
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      gap: 18px;
+      gap: 20px;
       margin-bottom: 18px;
       padding-bottom: 14px;
-      border-bottom: 1px solid #edf2f7;
+      border-bottom: 1px solid #e8edf3;
     }
 
-    .section-head h2 {
+    .section-head h2,
+    .findings-title {
       margin: 0;
-      color: #0f172a;
       font-size: 22px;
-      font-weight: 790;
+      font-weight: 700;
+      line-height: 1.3;
       letter-spacing: 0;
     }
 
     .section-head p {
-      margin: 6px 0 0;
-      color: var(--muted);
+      margin: 5px 0 0;
+      color: var(--report-muted);
     }
 
     .feedback-actions {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       margin-bottom: 14px;
     }
 
     .copy-fallback {
       display: none;
+      margin: 0 0 16px;
     }
 
     .copy-fallback.open {
       display: block;
     }
 
-    .feedback-cell {
-      min-width: 330px;
+    .copy-fallback textarea {
+      min-height: 110px;
+      resize: vertical;
     }
 
     textarea[data-feedback-id] {
@@ -328,475 +310,549 @@
     }
 
     .table-wrap {
-      overflow: hidden;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: #fff;
+      width: 100%;
+      overflow: auto;
+      border: 1px solid var(--report-line);
+      border-radius: 7px;
+      background: var(--report-surface);
     }
 
-    .table {
+    .table-wrap .table,
+    .acceptance-table {
       margin-bottom: 0;
-      color: var(--ink);
+      color: var(--report-ink);
       font-size: 13px;
     }
 
-    .table thead th {
+    .table-wrap .table thead th,
+    .acceptance-table thead th {
       border-top: 0;
-      border-bottom: 1px solid var(--line-strong);
-      background: #f1f5f9;
-      color: #334155;
+      border-bottom: 1px solid var(--report-line-strong);
+      background: #f0f3f7;
+      color: #334057;
       font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0;
       text-transform: uppercase;
-      letter-spacing: 0.03em;
     }
 
-    .table td,
-    .table th {
+    .table-wrap .table td,
+    .table-wrap .table th,
+    .acceptance-table td,
+    .acceptance-table th {
+      padding: 10px 11px;
       vertical-align: top;
-      padding: 9px 8px;
     }
 
-    .overview-title {
-      max-width: 330px;
-    }
-
-    .overview-title a[data-finding-modal] {
-      font-weight: 750;
-      cursor: pointer;
-    }
-
-    .risk-note {
-      margin-top: 6px;
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.4;
+    .acceptance-table tbody th {
+      width: 210px;
+      color: #3d4a60;
     }
 
     .badge-row {
       display: flex;
       flex-wrap: wrap;
+      gap: 7px;
       align-items: flex-start;
-      align-content: flex-start;
-      gap: 8px;
     }
 
     .badge-row .badge {
-      flex: 0 0 auto;
       display: inline-flex;
       align-items: center;
-      justify-content: center;
-      min-height: 24px;
+      min-height: 23px;
       padding: 5px 9px;
-      border-radius: 999px;
-      line-height: 1.2;
+      border-radius: 12px;
+      font-weight: 600;
+      line-height: 1;
       white-space: nowrap;
     }
 
     .findings-title {
       margin: 28px 0 14px;
-      color: #0f172a;
-      font-size: 26px;
-      font-weight: 820;
+      font-size: 24px;
     }
 
     .finding-card {
-      margin-bottom: 22px;
-      overflow: hidden;
+      margin-bottom: 20px;
+      overflow: visible;
     }
 
     .finding-head {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(420px, 520px);
+      grid-template-columns: minmax(0, 1fr) minmax(360px, 500px);
       gap: 20px;
       align-items: start;
-      padding: 20px 24px;
-      border-bottom: 1px solid var(--line);
-      background: #fbfdff;
+      padding: 19px 22px;
+      border-bottom: 1px solid var(--report-line);
+      border-radius: 8px 8px 0 0;
+      background: #fafbfd;
+    }
+
+    .finding-head h3 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1.35;
+      letter-spacing: 0;
+    }
+
+    .finding-head p {
+      margin: 4px 0 0;
+      color: var(--report-muted);
     }
 
     .finding-head .badge-row {
       justify-content: flex-end;
     }
 
-    .finding-head h3 {
-      margin: 0;
-      color: #0f172a;
-      font-size: 19px;
-      font-weight: 790;
-      letter-spacing: 0;
-    }
-
-    .finding-head p {
-      margin: 4px 0 0;
-    }
-
     .finding-meta {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 12px;
       margin: 0;
-      padding: 18px 24px;
-      border-bottom: 1px solid var(--line);
-      background: #ffffff;
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--report-line);
     }
 
-    .finding-meta div {
-      min-height: 74px;
-      padding: 12px;
-      border: 1px solid #e1e7ef;
-      border-radius: 8px;
-      background: var(--surface-soft);
-    }
-
-    .finding-meta dt {
-      color: var(--muted);
-      font-size: 11px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
+    .finding-meta > div {
+      min-width: 0;
+      padding: 11px 12px;
+      border: 1px solid #e0e6ee;
+      border-radius: 6px;
+      background: var(--report-soft);
     }
 
     .finding-meta dd {
       margin: 4px 0 0;
+      overflow-wrap: anywhere;
     }
 
-    .shot-grid {
-      padding: 22px 24px;
-      border-bottom: 1px solid var(--line);
-    }
-
-    .shot-grid-row {
+    .evidence-list,
+    .shot-grid,
+    .shot-grid-row,
+    .observation-grid,
+    .appendix-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: minmax(0, 1fr);
       gap: 18px;
+    }
+
+    .evidence-list,
+    .shot-grid {
+      padding: 20px 22px;
+      border-bottom: 1px solid var(--report-line);
+    }
+
+    .finding-evidence-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      border-bottom: 1px solid var(--report-line);
+      background: #f7f9fc;
+    }
+
+    .finding-evidence-column {
+      min-width: 0;
+      padding: 18px;
+    }
+
+    .finding-evidence-column + .finding-evidence-column {
+      border-left: 1px solid var(--report-line);
+    }
+
+    .evidence-column-title {
+      margin: 0 0 12px;
+      color: #26334a;
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    .finding-evidence-stack {
+      display: grid;
+      gap: 14px;
+    }
+
+    .evidence-empty {
+      min-height: 180px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      border: 1px dashed #cbd4e0;
+      border-radius: 7px;
+      background: var(--report-surface);
+      color: var(--report-muted);
+      text-align: center;
+    }
+
+    .evidence-card {
+      min-width: 0;
+      padding: 16px;
+      box-shadow: none;
+    }
+
+    .finding-evidence-grid .evidence-card {
+      padding: 13px;
+      border-radius: 7px;
     }
 
     .evidence-title {
       margin: 0 0 10px;
-      color: #0f172a;
       font-size: 14px;
-      font-weight: 780;
+      font-weight: 700;
+      line-height: 1.35;
     }
 
     .annotated-shot {
+      min-width: 0;
       margin: 0;
-      overflow: hidden;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: #fff;
+      overflow: visible;
+      border: 1px solid var(--report-line);
+      border-radius: 7px;
+      background: var(--report-surface);
+    }
+
+    .shot-scroll {
+      width: 100%;
+      max-width: 100%;
+      max-height: 640px;
+      overflow-x: auto;
+      overflow-y: auto;
+      background: #e7ecf2;
+      overscroll-behavior: contain;
     }
 
     .annotated-stage {
       position: relative;
       display: block;
-      min-height: 250px;
       color: inherit;
-      background: #eef2f7;
-      transition: background 120ms ease, filter 120ms ease;
+      background: #e7ecf2;
     }
 
-    .annotated-stage:hover {
-      background: #e6edf5;
-      filter: saturate(1.04);
+    a.annotated-stage {
+      cursor: zoom-in;
     }
 
-    .mock-shot {
-      position: relative;
-      display: grid;
-      grid-template-columns: 142px 1fr;
-      min-height: 250px;
+    .annotated-stage.with-image {
+      width: max-content;
+      min-height: 0;
+      line-height: 0;
+    }
+
+    .real-shot {
+      display: block;
+      width: auto;
+      max-width: none;
+      height: auto;
+    }
+
+    .finding-evidence-grid .shot-scroll {
+      max-height: none;
       overflow: hidden;
-      background: #f3f6fa;
     }
 
-    .mock-sidebar {
-      padding: 18px;
-      border-right: 1px solid #cbd5e1;
-      background: #ffffff;
+    .finding-evidence-grid .annotated-stage.with-image {
+      width: 100%;
+      max-width: 100%;
     }
 
-    .mock-content {
-      padding: 18px;
+    .finding-evidence-grid .real-shot {
+      width: 100%;
+      max-width: 100%;
+      height: auto;
     }
 
-    .mock-row {
-      height: 22px;
-      margin-bottom: 10px;
-      border-radius: 5px;
-      background: #d8e2ef;
+    .lightbox-stage .annotated-stage.with-image {
+      width: max-content;
+      max-width: none;
     }
 
-    .mock-row.short {
-      width: 50%;
-    }
-
-    .mock-row.medium {
-      width: 72%;
-    }
-
-    .mock-table {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin-top: 18px;
-    }
-
-    .mock-cell {
-      min-height: 48px;
-      border: 1px solid #cbd5e1;
-      border-radius: 5px;
-      background: #fff;
+    .lightbox-stage .real-shot {
+      width: auto;
+      max-width: none;
+      height: auto;
     }
 
     .redbox {
       position: absolute;
       box-sizing: border-box;
-      border: 2px solid var(--danger);
-      border-radius: 4px;
-      background: rgba(217, 54, 76, 0.05);
+      border: 2px solid var(--report-danger);
+      border-radius: 3px;
+      background: rgba(199, 53, 70, 0.06);
       pointer-events: none;
     }
 
-    .redbox em {
+    .redbox em,
+    .redbox span {
       position: absolute;
-      left: 0;
-      top: -25px;
-      max-width: 320px;
-      border-radius: 5px;
-      padding: 3px 7px;
-      background: rgba(166, 24, 45, 0.94);
-      color: #fff;
+      top: -26px;
+      left: -2px;
+      max-width: 360px;
+      padding: 4px 7px;
+      border-radius: 4px;
+      background: #a92336;
+      color: #ffffff;
       font-size: 12px;
       font-style: normal;
+      font-weight: 600;
       line-height: 1.2;
+      white-space: nowrap;
     }
 
-    figcaption {
+    .redbox.label-inside em,
+    .redbox.label-inside span {
+      top: 3px;
+      left: 3px;
+    }
+
+    .annotated-shot figcaption,
+    .evidence-review,
+    .appendix-meta {
       padding: 11px 13px;
-      border-top: 1px solid #edf2f7;
-      background: #fff;
-      color: var(--muted);
+      border-top: 1px solid #e5eaf1;
+      background: var(--report-surface);
+      color: var(--report-muted);
       font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .evidence-review {
+      color: #344157;
+    }
+
+    .evidence-claims {
+      margin-top: 12px;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .evidence-claim {
+      scroll-margin-top: 82px;
+      background: var(--report-surface);
+    }
+
+    .evidence-claim + .evidence-claim {
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .evidence-claim-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 11px 0;
+    }
+
+    .evidence-claim-head h5 {
+      margin: 0;
+      color: #26334a;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    .evidence-claim > p {
+      margin: 0;
+      padding: 8px 11px 11px;
+      color: #344157;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .evidence-claim .evidence-review {
+      border-top: 1px solid #e8edf3;
+      font-size: 12px;
     }
 
     .finding-body {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 18px;
-      padding: 22px 24px 24px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      padding: 20px 22px 22px;
     }
 
-    .finding-body section {
-      padding: 16px;
-      border: 1px solid #e1e7ef;
-      border-radius: 8px;
-      background: #fbfdff;
+    .finding-body > section,
+    .risk-panel {
+      min-width: 0;
+      padding: 15px;
+      border: 1px solid #dfe6ee;
+      border-radius: 6px;
+      background: var(--report-soft);
     }
 
     .finding-body h4,
-    .fix-diff h4 {
-      margin: 0 0 8px;
-      color: #0f172a;
+    .risk-panel h4 {
+      margin: 0 0 7px;
       font-size: 14px;
-      font-weight: 790;
-    }
-
-    .finding-body p {
-      margin: 0;
-      color: #344256;
-    }
-
-    .fix-diff {
-      margin: 0 24px 22px;
-      padding: 16px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: #f8fafc;
-    }
-
-    .diff-file {
-      overflow: hidden;
-      margin-top: 12px;
-      border: 1px solid #d8dee9;
-      border-radius: 8px;
-      background: #fff;
-    }
-
-    .diff-title {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 10px 12px;
-      border-bottom: 1px solid #d8dee9;
-      background: #f1f5f9;
-    }
-
-    .diff-scroll {
-      overflow-x: auto;
-    }
-
-    .diff-table {
-      min-width: 760px;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-      font-size: 12px;
-      line-height: 1.45;
-    }
-
-    .diff-table th {
-      width: 50%;
-    }
-
-    .diff-table td {
-      width: 50%;
-      padding: 2px 8px;
-      border-bottom: 0;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-
-    .diff-table .del td:first-child {
-      background: #fff1f2;
-    }
-
-    .diff-table .add td:last-child {
-      background: #ecfdf5;
-    }
-
-    .diff-table .hunk td {
-      background: #eff6ff;
-      color: #1e40af;
       font-weight: 700;
     }
 
-    .observation-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 18px;
+    .finding-body p,
+    .risk-panel p {
+      margin: 0;
+      color: #344157;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    .risk-panel {
+      border-left: 4px solid var(--report-warning);
+      background: #fffbf1;
+    }
+
+    .fix-diff {
+      margin: 14px 0;
+      overflow: hidden;
+      border: 1px solid #d7dee8;
+      border-radius: 6px;
+      background: #fff;
+    }
+
+    .fix-diff summary {
+      padding: 10px 12px;
+      cursor: pointer;
+      color: #172033;
+      font-size: 13px;
+      font-weight: 700;
+      background: #f5f7fa;
+    }
+
+    .fix-diff-toolbar {
+      padding: 8px 12px;
+      border-top: 1px solid #e3e8ef;
+      border-bottom: 1px solid #e3e8ef;
+      color: var(--report-muted);
+      font-size: 12px;
+    }
+
+    .fix-diff pre {
+      max-height: 420px;
+      margin: 0;
+      padding: 12px;
+      overflow: auto;
+      color: #e6edf3;
+      background: #0d1117;
+      font-size: 12px;
+      line-height: 1.55;
+      white-space: pre;
+    }
+
+    .fix-diff pre code {
+      color: inherit;
+      background: transparent;
+      white-space: inherit;
+    }
+
+    .fix-diff-limit {
+      padding: 9px 12px;
+      border-top: 1px solid #e3e8ef;
+      color: #704c00;
+      background: #fff8e1;
+      font-size: 12px;
+    }
+
+    .finding-acceptance {
+      margin: 0 22px 22px;
+    }
+
+    .finding-acceptance h4 {
+      margin: 0 0 9px;
+      font-size: 14px;
+      font-weight: 700;
     }
 
     .observation-card {
-      overflow: hidden;
+      min-width: 0;
+      overflow: visible;
+      box-shadow: none;
     }
 
-    .observation-head {
+    .observation-card > header {
       padding: 16px 18px;
-      border-bottom: 1px solid var(--line);
-      background: #fbfdff;
+      border-bottom: 1px solid var(--report-line);
+      border-radius: 8px 8px 0 0;
+      background: #fafbfd;
     }
 
-    .observation-head h3 {
-      margin: 0 0 9px;
-      color: #0f172a;
+    .observation-card > header h3 {
+      margin: 0 0 8px;
       font-size: 17px;
-      font-weight: 790;
+      font-weight: 700;
     }
 
-    .observation-body {
+    .observation-card > div {
       padding: 18px;
-    }
-
-    .observation-body .annotated-shot {
-      margin-bottom: 14px;
-    }
-
-    .evidence-table th {
-      width: 170px;
-      text-transform: none;
-      letter-spacing: 0;
-    }
-
-    .appendix-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 18px;
-    }
-
-    .appendix-meta {
-      padding: 10px 13px 13px;
-      border-top: 1px solid #edf2f7;
-      background: #fff;
     }
 
     .appendix-meta dl {
       display: grid;
-      grid-template-columns: 86px minmax(0, 1fr);
-      gap: 5px 10px;
+      grid-template-columns: 100px minmax(0, 1fr);
+      gap: 6px 12px;
       margin: 0;
-      color: #334155;
-      font-size: 12px;
-      line-height: 1.35;
-    }
-
-    .appendix-meta dt {
-      color: var(--muted);
-      font-weight: 800;
     }
 
     .appendix-meta dd {
       min-width: 0;
       margin: 0;
+      color: #344157;
       overflow-wrap: anywhere;
     }
 
     .shot-time {
       display: block;
       margin-top: 4px;
-      color: var(--muted);
+      color: var(--report-muted);
       font-size: 12px;
     }
 
     .lightbox {
       position: fixed;
       inset: 0;
-      z-index: 10000;
+      z-index: 1060;
       display: none;
-      align-items: center;
-      justify-content: center;
       padding: 32px;
-      background: rgba(4, 10, 23, 0.88);
+      background: rgba(7, 13, 25, 0.9);
     }
 
     .lightbox.open {
-      display: flex;
+      display: block;
     }
 
     .lightbox-inner {
-      max-width: 96vw;
-      max-height: 92vh;
+      width: 100%;
+      height: 100%;
     }
 
     .lightbox-stage {
-      position: relative;
-      display: inline-block;
-      width: min(1120px, 92vw);
-      max-height: 88vh;
-      overflow: auto;
-      border-radius: 8px;
-      background: #eef2f7;
-      box-shadow: var(--shadow-lg);
-    }
-
-    .lightbox-stage .annotated-stage {
-      min-height: 620px;
+      width: 100%;
+      height: 100%;
+      overflow-x: auto;
+      overflow-y: auto;
+      border: 1px solid #536078;
+      border-radius: 7px;
+      background: #dfe5ec;
+      box-shadow: var(--report-overlay-shadow);
+      overscroll-behavior: contain;
     }
 
     .lightbox-close {
       position: fixed;
-      top: 16px;
-      right: 18px;
-      z-index: 10001;
+      top: 10px;
+      right: 14px;
+      z-index: 1062;
     }
 
     .finding-modal {
       position: fixed;
       inset: 0;
-      z-index: 9500;
+      z-index: 1050;
       display: none;
       align-items: flex-start;
       justify-content: center;
-      overflow: auto;
-      padding: 36px 24px;
-      background: rgba(15, 23, 42, 0.66);
+      overflow: hidden;
+      padding: 24px;
+      background: rgba(18, 27, 43, 0.72);
     }
 
     .finding-modal.open {
@@ -804,29 +860,40 @@
     }
 
     .finding-modal-panel {
-      width: 1120px;
-      max-height: calc(100vh - 72px);
-      overflow: auto;
+      width: 1180px;
+      max-width: calc(100vw - 48px);
+      max-height: calc(100vh - 48px);
+      overflow-x: hidden;
+      overflow-y: auto;
+      border: 1px solid var(--report-line-strong);
       border-radius: 8px;
-      background: var(--surface);
-      box-shadow: var(--shadow-lg);
+      background: var(--report-surface);
+      box-shadow: var(--report-overlay-shadow);
     }
 
     .finding-modal-toolbar {
       position: sticky;
       top: 0;
-      z-index: 1;
+      z-index: 3;
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      gap: 12px;
+      justify-content: space-between;
+      gap: 16px;
       padding: 12px 16px;
-      border-bottom: 1px solid var(--line);
-      background: #fbfdff;
+      border-bottom: 1px solid var(--report-line);
+      background: #fafbfd;
     }
 
     .finding-modal-toolbar strong {
+      min-width: 0;
+      overflow: hidden;
       font-size: 16px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .finding-modal-content {
+      min-width: 0;
     }
 
     .finding-modal-content .finding-card {
@@ -836,483 +903,49 @@
       box-shadow: none;
     }
 
-    #backTop {
+    .backTop {
       position: fixed;
       top: 50%;
-      right: 20px;
-      z-index: 9000;
+      right: 24px;
+      z-index: 1040;
       display: none;
+      width: 100px;
       transform: translateY(-50%);
-      min-width: 74px;
-      border-color: #cbd5e1;
-      background: #ffffff;
-      box-shadow: 0 8px 22px rgba(15, 23, 42, 0.18);
-      font-weight: 750;
+      border-color: var(--report-line-strong);
+      background: var(--report-surface);
+      color: #344157;
+      box-shadow: var(--report-shadow);
+      font-weight: 600;
     }
 
-    #backTop.show {
+    .backTop.show {
       display: block;
     }
 
     button:focus-visible,
     a:focus-visible,
     textarea:focus-visible {
-      outline: 2px solid rgba(37, 99, 235, 0.35);
+      outline: 2px solid rgba(36, 87, 167, 0.38);
       outline-offset: 2px;
     }
   </style>
 </head>
 <body>
-  <main class="container-fluid report-shell" id="top" data-report-template="ui-inspection-report-wireframe" data-template-sample="true">
+  <main class="report-shell" id="top">
     <div class="report-main">
-      <header class="card hero-card">
-        <div class="hero-grid">
-          <div>
-            <div class="hero-kicker">Inspection report</div>
-            <h1>UI Inspection Report</h1>
-            <p>English-locale inspection for the DQC overview workflow. Findings, fixes, and human-attention items are summarized with screenshot evidence and follow-up guidance.</p>
-          </div>
-          <div class="report-meta-row" aria-label="Report metadata">
-            <div><span>Target locale</span><strong>en_US</strong></div>
-            <div><span>Workflow</span><strong>DQC overview</strong></div>
-            <div><span>Report status</span><strong>completedWithIssues</strong></div>
-          </div>
-          <div class="metric-strip" aria-label="Summary dashboard">
-            <div class="metric-card" data-tone="danger">
-              <span>Issues found</span>
-              <strong>3</strong>
-              <small>Confirmed and candidate i18n issues</small>
-            </div>
-            <div class="metric-card" data-tone="success">
-              <span>Issues fixed</span>
-              <strong>2</strong>
-              <small>Re-inspected with after-fix evidence</small>
-            </div>
-            <div class="metric-card" data-tone="warning">
-              <span>Need attention</span>
-              <strong>1</strong>
-              <small>Open, blocked, or confirmation-required</small>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <nav class="nav quick-nav" aria-label="Report sections">
-        <a class="nav-link active" href="#finding-overview">Overview</a>
-        <a class="nav-link" href="#findings">Findings</a>
-        <a class="nav-link" href="#blockers">Blockers</a>
-        <a class="nav-link" href="#appendix">Screenshots</a>
-      </nav>
-
-      <section class="card report-card" id="finding-overview" aria-labelledby="overview-title">
-        <div class="section-head">
-          <div>
-            <div class="section-kicker">Triage desk</div>
-            <h2 id="overview-title">Finding overview and feedback</h2>
-            <p>Use this table to scan accepted findings and collect reviewer feedback.</p>
-          </div>
-        </div>
-        <div class="feedback-actions">
-          <button class="btn btn-primary" id="copyFeedback" type="button">Copy findings and feedback</button>
-          <span class="text-muted" id="copyStatus" aria-live="polite"></span>
-        </div>
-        <div class="alert alert-warning copy-fallback" id="copyFallback" aria-live="polite">
-          <label for="copyFallbackText">Copy fallback text</label>
-          <p class="mb-2">Clipboard access is unavailable in this browser context. Select the generated text below and copy it manually.</p>
-          <textarea class="form-control" id="copyFallbackText" readonly></textarea>
-        </div>
-        <div class="table-responsive table-wrap">
-          <table class="table table-sm table-hover">
-            <thead class="thead-light">
-              <tr>
-                <th>ID</th>
-                <th>Title</th>
-                <th>Fix risk</th>
-                <th>Status</th>
-                <th>Verification</th>
-                <th>Reviewer feedback</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><a href="#I18N-001">I18N-001</a></td>
-                <td class="overview-title">
-                  <a href="#I18N-001" data-finding-modal="I18N-001">Filter placeholder is truncated in English</a>
-                  <div class="risk-note">Small local width adjustment only; no shared layout behavior changed.</div>
-                </td>
-                <td><span class="badge badge-pill badge-success">low</span></td>
-                <td><span class="badge badge-pill badge-success">verifiedFixed</span></td>
-                <td><span class="badge badge-pill badge-success">high</span></td>
-                <td class="feedback-cell"><textarea class="form-control" data-feedback-id="I18N-001" placeholder="Example: accepted, no further action."></textarea></td>
-              </tr>
-              <tr>
-                <td><a href="#I18N-002">I18N-002</a></td>
-                <td class="overview-title">
-                  <a href="#I18N-002" data-finding-modal="I18N-002">Table action group is crowded after translation</a>
-                  <div class="risk-note">Broad action-column layout change; scope to affected locale if unavoidable.</div>
-                </td>
-                <td><span class="badge badge-pill badge-danger">high</span></td>
-                <td><span class="badge badge-pill badge-success">verifiedFixed</span></td>
-                <td><span class="badge badge-pill badge-success">high</span></td>
-                <td class="feedback-cell"><textarea class="form-control" data-feedback-id="I18N-002" placeholder="Example: please also check adjacent table actions."></textarea></td>
-              </tr>
-              <tr>
-                <td><a href="#I18N-003">I18N-003</a></td>
-                <td class="overview-title">
-                  <a href="#I18N-003" data-finding-modal="I18N-003">Header product separator is mojibake</a>
-                  <div class="risk-note">Likely shared shell/header ownership; current repo may not own the fix.</div>
-                </td>
-                <td><span class="badge badge-pill badge-warning">medium</span></td>
-                <td><span class="badge badge-pill badge-danger">open</span></td>
-                <td><span class="badge badge-pill badge-danger">low</span></td>
-                <td class="feedback-cell"><textarea class="form-control" data-feedback-id="I18N-003" placeholder="Example: route to shared header owner."></textarea></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+      <!-- UI_INSPECTION_REPORT_CONTENT_START -->
+      <section class="report-card report-zero" role="status" aria-live="polite">
+        <h1>UI Inspection Report</h1>
+        <p class="mb-0 text-muted">No report data is available.</p>
       </section>
-
-      <section id="findings" aria-labelledby="findings-title">
-        <h2 class="findings-title" id="findings-title">Finding details</h2>
-
-        <article class="card finding-card" id="I18N-001">
-          <header class="finding-head">
-            <div>
-              <h3>I18N-001 Filter placeholder is truncated in English</h3>
-              <p class="text-muted">Category: truncation / filter toolbar</p>
-            </div>
-            <div class="badge-row" aria-label="Finding status badges">
-              <span class="badge badge-pill badge-warning">severity: medium</span>
-              <span class="badge badge-pill badge-success">status: verifiedFixed</span>
-              <span class="badge badge-pill badge-success">risk: low</span>
-              <span class="badge badge-pill badge-success">verification: high</span>
-            </div>
-          </header>
-          <dl class="finding-meta">
-            <div><dt>State</dt><dd><code>#/rules</code>, English, 1280px viewport</dd></div>
-            <div><dt>i18n relevance</dt><dd>i18n-related</dd></div>
-            <div><dt>Owner</dt><dd>current repository</dd></div>
-            <div><dt>Expected</dt><dd>Placeholder remains fully readable.</dd></div>
-            <div><dt>Actual</dt><dd>Translated placeholder is clipped.</dd></div>
-            <div><dt>Acceptance</dt><dd>Reopen page and capture replacement screenshot.</dd></div>
-          </dl>
-          <div class="shot-grid">
-            <div class="shot-grid-row">
-              <div>
-                <h4 class="evidence-title">Before / issue evidence</h4>
-                <figure class="annotated-shot">
-                  <a class="annotated-stage" id="shot-before-001" href="#shot-before-001" data-preview-stage="shot-before-001" aria-label="Open before screenshot preview">
-                    <div class="mock-shot">
-                      <div class="mock-sidebar">
-                        <div class="mock-row"></div>
-                        <div class="mock-row medium"></div>
-                        <div class="mock-row short"></div>
-                      </div>
-                      <div class="mock-content">
-                        <div class="mock-row medium"></div>
-                        <div class="mock-row"></div>
-                        <div class="mock-table">
-                          <div class="mock-cell"></div>
-                          <div class="mock-cell"></div>
-                          <div class="mock-cell"></div>
-                        </div>
-                      </div>
-                    </div>
-                    <span class="redbox" style="left:48%;top:18%;width:28%;height:10%"><em>truncated placeholder</em></span>
-                  </a>
-                  <figcaption>Before screenshot: red box marks the clipped English placeholder.</figcaption>
-                </figure>
-              </div>
-              <div>
-                <h4 class="evidence-title">After / verification evidence</h4>
-                <figure class="annotated-shot">
-                  <a class="annotated-stage" id="shot-after-001" href="#shot-after-001" data-preview-stage="shot-after-001" aria-label="Open after screenshot preview">
-                    <div class="mock-shot">
-                      <div class="mock-sidebar">
-                        <div class="mock-row"></div>
-                        <div class="mock-row medium"></div>
-                        <div class="mock-row short"></div>
-                      </div>
-                      <div class="mock-content">
-                        <div class="mock-row"></div>
-                        <div class="mock-row medium"></div>
-                        <div class="mock-table">
-                          <div class="mock-cell"></div>
-                          <div class="mock-cell"></div>
-                          <div class="mock-cell"></div>
-                        </div>
-                      </div>
-                    </div>
-                    <span class="redbox" style="left:48%;top:18%;width:36%;height:10%"><em>verified full label</em></span>
-                  </a>
-                  <figcaption>After screenshot: the same area is readable after the fix.</figcaption>
-                </figure>
-              </div>
-            </div>
-          </div>
-          <section class="fix-diff" aria-label="Fix diff">
-            <h4>Code change summary</h4>
-            <div class="diff-file">
-              <div class="diff-title">
-                <strong>src/pages/ExampleToolbar.tsx</strong>
-                <span>Widen the local select only where the translated label needs space.</span>
-              </div>
-              <div class="diff-scroll">
-                <table class="table table-sm diff-table">
-                  <thead class="thead-light"><tr><th>Before</th><th>After</th></tr></thead>
-                  <tbody>
-                    <tr class="hunk"><td colspan="2">@@ toolbar select width @@</td></tr>
-                    <tr class="del"><td>style={{ width: 200 }}</td><td></td></tr>
-                    <tr class="add"><td></td><td>style={{ width: isEnglish ? 260 : 200 }}</td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </section>
-          <div class="finding-body">
-            <section><h4>Issue explanation</h4><p>The English label is longer than the default-locale text and the control has a fixed width.</p></section>
-            <section><h4>Fix explanation</h4><p>The fix increases local width after reusing the repository locale helper. It does not shorten source copy for layout.</p></section>
-            <section><h4>Human attention</h4><p>No human follow-up required beyond normal review.</p></section>
-            <section><h4>Retest</h4><p>Open the same URL, locale, and viewport; confirm the placeholder is not clipped; capture a replacement screenshot.</p></section>
-          </div>
-        </article>
-
-        <article class="card finding-card" id="I18N-002">
-          <header class="finding-head">
-            <div>
-              <h3>I18N-002 Table action group is crowded after translation</h3>
-              <p class="text-muted">Category: component visual integrity / table action group</p>
-            </div>
-            <div class="badge-row">
-              <span class="badge badge-pill badge-danger">severity: high</span>
-              <span class="badge badge-pill badge-success">status: verifiedFixed</span>
-              <span class="badge badge-pill badge-danger">risk: high</span>
-              <span class="badge badge-pill badge-success">verification: high</span>
-              <span class="badge badge-pill badge-warning">human review</span>
-            </div>
-          </header>
-          <dl class="finding-meta">
-            <div><dt>State</dt><dd><code>#/monitor</code>, table action column</dd></div>
-            <div><dt>i18n relevance</dt><dd>i18n-related</dd></div>
-            <div><dt>Owner</dt><dd>current repository</dd></div>
-          </dl>
-          <div class="shot-grid">
-            <div class="shot-grid-row">
-              <div><h4 class="evidence-title">Before</h4><figure class="annotated-shot"><a class="annotated-stage" id="shot-before-002" href="#shot-before-002" data-preview-stage="shot-before-002"><div class="mock-shot"><div class="mock-sidebar"></div><div class="mock-content"><div class="mock-row"></div><div class="mock-row"></div><div class="mock-table"><div class="mock-cell"></div><div class="mock-cell"></div><div class="mock-cell"></div></div></div></div><span class="redbox" style="left:76%;top:32%;width:20%;height:12%"><em>crowded actions</em></span></a><figcaption>Action group is technically visible but visually broken.</figcaption></figure></div>
-              <div><h4 class="evidence-title">After</h4><figure class="annotated-shot"><a class="annotated-stage" id="shot-after-002" href="#shot-after-002" data-preview-stage="shot-after-002"><div class="mock-shot"><div class="mock-sidebar"></div><div class="mock-content"><div class="mock-row medium"></div><div class="mock-row"></div><div class="mock-table"><div class="mock-cell"></div><div class="mock-cell"></div><div class="mock-cell"></div></div></div></div><span class="redbox" style="left:72%;top:32%;width:24%;height:12%"><em>stable action group</em></span></a><figcaption>Action group remains readable after layout adjustment.</figcaption></figure></div>
-            </div>
-          </div>
-          <div class="finding-body">
-            <section><h4>Issue explanation</h4><p>Translated action text is longer and the locked action column no longer reads as one stable control group.</p></section>
-            <section><h4>Fix explanation</h4><p>Prefer shorter natural action copy first. If a broad action-column change is unavoidable, scope it to the affected locale and verify neighboring rows.</p></section>
-          </div>
-        </article>
-
-        <article class="card finding-card" id="I18N-003">
-          <header class="finding-head">
-            <div>
-              <h3>I18N-003 Header product separator is mojibake</h3>
-              <p class="text-muted">Category: language quality / external dependency</p>
-            </div>
-            <div class="badge-row">
-              <span class="badge badge-pill badge-warning">severity: medium</span>
-              <span class="badge badge-pill badge-danger">status: open</span>
-              <span class="badge badge-pill badge-warning">risk: medium</span>
-              <span class="badge badge-pill badge-danger">verification: low</span>
-              <span class="badge badge-pill badge-warning">needs owner</span>
-            </div>
-          </header>
-          <dl class="finding-meta">
-            <div><dt>State</dt><dd>Global shell header</dd></div>
-            <div><dt>i18n relevance</dt><dd>i18n-related</dd></div>
-            <div><dt>Owner</dt><dd>shared component package</dd></div>
-          </dl>
-          <div class="shot-grid">
-            <div class="shot-grid-row">
-              <div><h4 class="evidence-title">Issue evidence</h4><figure class="annotated-shot"><a class="annotated-stage" id="shot-open-003" href="#shot-open-003" data-preview-stage="shot-open-003"><div class="mock-shot"><div class="mock-sidebar"></div><div class="mock-content"><div class="mock-row medium"></div><div class="mock-row short"></div></div></div><span class="redbox" style="left:16%;top:6%;width:32%;height:9%"><em>mojibake separator</em></span></a><figcaption>Open issue: route to the shared header owner instead of hiding it locally.</figcaption></figure></div>
-              <div><h4 class="evidence-title">Follow-up status</h4><div class="alert alert-light mb-0"><p class="mb-0">No local code diff should be shown when no local source/style/config/locale change was made.</p></div></div>
-            </div>
-          </div>
-          <div class="finding-body">
-            <section><h4>Recommendation</h4><p>Assign to the shared shell/header owner and keep this separate from normal current-repository UI-fit fixes.</p></section>
-            <section><h4>Acceptance criteria</h4><p>Open any inspected page in the target locale and confirm the header separator renders correctly.</p></section>
-          </div>
-        </article>
-
-        <article class="card finding-card" id="I18N-004">
-          <header class="finding-head">
-            <div>
-              <h3>I18N-004 Toolbar action remains Chinese in English</h3>
-              <p class="text-muted">Category: untranslated text / unexpected language origin</p>
-            </div>
-            <div class="badge-row">
-              <span class="badge badge-pill badge-warning">severity: medium</span>
-              <span class="badge badge-pill badge-danger">status: open</span>
-              <span class="badge badge-pill badge-success">risk: low</span>
-              <span class="badge badge-pill badge-warning">verification: medium</span>
-            </div>
-          </header>
-          <dl class="finding-meta">
-            <div><dt>State</dt><dd><code>#/rules</code>, toolbar, English locale</dd></div>
-            <div><dt>i18n relevance</dt><dd>i18n-related</dd></div>
-            <div><dt>Owner</dt><dd>current repository</dd></div>
-            <div><dt>Expected</dt><dd>Toolbar actions use English product copy.</dd></div>
-            <div><dt>Actual</dt><dd>The action label shows <code>保存</code>.</dd></div>
-            <div><dt>Acceptance</dt><dd>Source search or locale diff proves the label is localized, then re-inspect the same toolbar.</dd></div>
-          </dl>
-          <div class="shot-grid">
-            <div class="shot-grid-row">
-              <div><h4 class="evidence-title">Issue evidence</h4><figure class="annotated-shot"><a class="annotated-stage" id="shot-open-004" href="#shot-open-004" data-preview-stage="shot-open-004"><div class="mock-shot"><div class="mock-sidebar"></div><div class="mock-content"><div class="mock-row medium"></div><div class="mock-row"></div><div class="mock-table"><div class="mock-cell"></div><div class="mock-cell"></div><div class="mock-cell"></div></div></div></div><span class="redbox" style="left:62%;top:16%;width:14%;height:8%"><em>Chinese action label</em></span></a><figcaption>English toolbar shows a Chinese action label.</figcaption></figure></div>
-              <div><h4 class="evidence-title">Follow-up status</h4><div class="alert alert-light mb-0"><p class="mb-0">The report should include a replacement screenshot after the label is localized or the source/fallback issue is fixed.</p></div></div>
-            </div>
-          </div>
-          <section class="fix-diff" aria-label="Unexpected language origin evidence">
-            <h4>Unexpected language origin evidence</h4>
-            <div class="table-responsive table-wrap">
-              <table class="table table-sm">
-                <tbody>
-                  <tr><th>Observed text</th><td><code>保存</code> in an English UI</td></tr>
-                  <tr><th>Source search</th><td>Searched <code>保存</code> and nearby action labels. Matched <code>src/pages/rules/actions.tsx:42</code> as a local button label.</td></tr>
-                  <tr><th>Origin</th><td><code>frontend-source</code>; command/action labels are frontend-leaning unless runtime evidence proves server-provided configuration.</td></tr>
-                  <tr><th>Ownership rationale</th><td>The label is a local toolbar action, not row data or an API-returned user-created value, so it is counted as normal i18n debt.</td></tr>
-                </tbody>
-              </table>
-            </div>
-          </section>
-          <div class="finding-body">
-            <section><h4>Recommendation</h4><p>Replace the hardcoded label with the repository's normal message API or repair the missing target-locale key, depending on the source-search result.</p></section>
-            <section><h4>Human attention</h4><p>No backend ownership should be assigned unless runtime evidence shows this action label is server-provided or remote-module metadata.</p></section>
-          </div>
-        </article>
-      </section>
-
-      <section class="card report-card" id="blockers" aria-labelledby="blockers-title">
-        <div class="section-head">
-          <div>
-            <div class="section-kicker">Blocked coverage</div>
-            <h2 id="blockers-title">Blockers</h2>
-            <p>Coverage blockers are kept separate from accepted i18n findings.</p>
-          </div>
-        </div>
-        <div class="observation-grid">
-          <article class="card observation-card" id="BLOCKER-001">
-            <header class="observation-head">
-              <h3>BLOCKER-001 External report route stayed blank</h3>
-              <div class="badge-row">
-                <span class="badge badge-pill badge-danger">i18n-blocking</span>
-                <span class="badge badge-pill badge-danger">needs investigation</span>
-              </div>
-            </header>
-            <div class="observation-body">
-              <figure class="annotated-shot">
-                <a class="annotated-stage" id="shot-blocker-001" href="#shot-blocker-001" data-preview-stage="shot-blocker-001">
-                  <div class="mock-shot"><div class="mock-sidebar"></div><div class="mock-content"><div class="mock-row short"></div></div></div>
-                  <span class="redbox" style="left:25%;top:18%;width:66%;height:56%"><em>blank content area</em></span>
-                </a>
-                <figcaption>Route stayed blank after wait and same-tab browser reload.</figcaption>
-              </figure>
-              <div class="table-responsive table-wrap">
-                <table class="table table-sm evidence-table">
-                  <tbody>
-                    <tr><th>URL/state</th><td><code>#/external-report</code>, after reload</td></tr>
-                    <tr><th>Diagnostics</th><td>Record wait window, reload attempt, console/network clues, and body text summary.</td></tr>
-                    <tr><th>Classification</th><td>Coverage blocker, not a confirmed i18n defect.</td></tr>
-                    <tr><th>Human follow-up</th><td>Route/API/runtime owner should investigate the blank state before i18n coverage can be completed.</td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </article>
-        </div>
-      </section>
-
-      <section class="card report-card" id="non-i18n" aria-labelledby="non-i18n-title">
-        <div class="section-head">
-          <div>
-            <div class="section-kicker">Excluded observations</div>
-            <h2 id="non-i18n-title">Non-i18n observations</h2>
-            <p>Visually observable exclusions are documented with screenshots and kept out of normal i18n finding counts.</p>
-          </div>
-        </div>
-        <div class="observation-grid">
-          <article class="card observation-card" id="NONI18N-001">
-            <header class="observation-head">
-              <h3>NONI18N-001 Custom name uses a different language</h3>
-              <div class="badge-row">
-                <span class="badge badge-pill badge-secondary">user-created data</span>
-                <span class="badge badge-pill badge-success">excluded</span>
-              </div>
-            </header>
-            <div class="observation-body">
-              <figure class="annotated-shot">
-                <a class="annotated-stage" id="shot-non-i18n-001" href="#shot-non-i18n-001" data-preview-stage="shot-non-i18n-001">
-                  <div class="mock-shot"><div class="mock-sidebar"></div><div class="mock-content"><div class="mock-row"></div><div class="mock-table"><div class="mock-cell"></div><div class="mock-cell"></div><div class="mock-cell"></div></div></div></div>
-                  <span class="redbox" style="left:24%;top:32%;width:34%;height:12%"><em>user-created name</em></span>
-                </a>
-                <figcaption>The visible value was entered by a user; system labels around it are localized.</figcaption>
-              </figure>
-              <div class="table-responsive table-wrap">
-                <table class="table table-sm evidence-table">
-                  <tbody>
-                    <tr><th>Source assessment</th><td>User-created/custom entity field.</td></tr>
-                    <tr><th>Classification</th><td>Non-i18n observation; do not create an <code>I18N-xxx</code> finding.</td></tr>
-                    <tr><th>Evidence required</th><td>Record the creation/edit flow or source/API context that proves user ownership.</td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </article>
-        </div>
-      </section>
-
-      <section class="card report-card" id="appendix" aria-labelledby="appendix-title">
-        <div class="section-head">
-          <div>
-            <div class="section-kicker">Screenshot ledger</div>
-            <h2 id="appendix-title">Screenshot appendix</h2>
-            <p>A real report lists every screenshot captured during coverage, fixing, and re-inspection. Each screenshot includes capture time, URL/state, action, status, and notes.</p>
-          </div>
-        </div>
-        <div class="appendix-grid">
-          <figure class="annotated-shot">
-            <a class="annotated-stage" id="shot-coverage-001" href="#shot-coverage-001" data-preview-stage="shot-coverage-001">
-              <div class="mock-shot"><div class="mock-sidebar"></div><div class="mock-content"><div class="mock-row"></div><div class="mock-row medium"></div><div class="mock-table"><div class="mock-cell"></div><div class="mock-cell"></div><div class="mock-cell"></div></div></div></div>
-            </a>
-            <figcaption>001-rules-list.png - coverage screenshot for Rules list.<span class="shot-time">Captured: 2026-07-08 10:00 Asia/Shanghai</span></figcaption>
-            <div class="appendix-meta">
-              <dl>
-                <dt>Scope</dt><dd>Rules list</dd>
-                <dt>URL/state</dt><dd><code>#/rules</code></dd>
-                <dt>Action</dt><dd>Opened from left navigation.</dd>
-                <dt>Status</dt><dd><span class="badge badge-pill badge-success">covered</span></dd>
-                <dt>Notes</dt><dd>Filter toolbar and table visible.</dd>
-              </dl>
-            </div>
-          </figure>
-          <figure class="annotated-shot">
-            <a class="annotated-stage" href="#shot-before-001" data-preview-stage="shot-before-001">
-              <div class="mock-shot"><div class="mock-sidebar"></div><div class="mock-content"><div class="mock-row medium"></div><div class="mock-row"></div></div></div>
-            </a>
-            <figcaption>002-before.png - issue evidence screenshot.<span class="shot-time">Captured: 2026-07-08 10:05 Asia/Shanghai</span></figcaption>
-            <div class="appendix-meta">
-              <dl>
-                <dt>Scope</dt><dd>Create detail</dd>
-                <dt>URL/state</dt><dd><code>#/rules/create</code></dd>
-                <dt>Action</dt><dd>Clicked safe create entry, did not submit.</dd>
-                <dt>Status</dt><dd><span class="badge badge-pill badge-success">covered</span></dd>
-                <dt>Notes</dt><dd>Form label and validation states checked.</dd>
-              </dl>
-            </div>
-          </figure>
-        </div>
-      </section>
+      <!-- UI_INSPECTION_REPORT_CONTENT_END -->
     </div>
   </main>
 
-  <button class="btn btn-light" id="backTop" type="button" aria-label="Back to top" title="Back to top">Top</button>
+  <button class="btn btn-outline-secondary btn-sm backTop" id="backTop" type="button" aria-label="Back to top">Back to top</button>
 
-  <div class="lightbox" id="lightbox" aria-hidden="true" tabindex="-1">
-    <button class="btn btn-outline-light lightbox-close" type="button">Close</button>
+  <div class="lightbox" id="lightbox" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Screenshot preview" tabindex="-1">
+    <button class="btn btn-outline-light btn-sm lightbox-close" type="button">Close</button>
     <div class="lightbox-inner" id="lightboxInner"></div>
   </div>
 
@@ -1328,87 +961,133 @@
 
   <script>
     (function () {
-      const feedbackInputs = Array.from(document.querySelectorAll("textarea[data-feedback-id]"));
-      const copyButton = document.getElementById("copyFeedback");
-      const copyStatus = document.getElementById("copyStatus");
-      const copyFallback = document.getElementById("copyFallback");
-      const copyFallbackText = document.getElementById("copyFallbackText");
-      const storageKey = "ui-inspection-report-wireframe-feedback";
-
-      try {
-        const saved = JSON.parse(localStorage.getItem(storageKey) || "{}");
-        feedbackInputs.forEach((input) => {
-          if (saved[input.dataset.feedbackId]) {
-            input.value = saved[input.dataset.feedbackId];
-          }
-        });
-      } catch (error) {
-        // Keep the report usable when storage is unavailable.
-      }
-
-      feedbackInputs.forEach((input) => {
-        input.addEventListener("input", () => {
-          try {
-            const data = {};
-            feedbackInputs.forEach((item) => {
-              if (item.value.trim()) {
-                data[item.dataset.feedbackId] = item.value;
-              }
-            });
-            localStorage.setItem(storageKey, JSON.stringify(data));
-          } catch (error) {
-            // Ignore storage errors in local file previews.
-          }
-        });
-      });
-
-      function hideCopyFallback() {
-        copyFallback.classList.remove("open");
-        copyFallbackText.value = "";
-      }
-
-      function showCopyFallback(text, count) {
-        copyFallbackText.value = text;
-        copyFallback.classList.add("open");
-        copyFallbackText.focus();
-        copyFallbackText.select();
-        copyStatus.textContent = "Clipboard unavailable. Generated " + count + " feedback item(s) for manual copy.";
-      }
-
-      copyButton.addEventListener("click", () => {
-        hideCopyFallback();
-        const copiedItems = feedbackInputs
-          .map((input) => ({ id: input.dataset.feedbackId, text: input.value.trim() }))
-          .filter((item) => item.text)
-          .map((item) => "Finding " + item.id + ": " + item.text);
-
-        if (!copiedItems.length) {
-          copyStatus.textContent = "No feedback to copy.";
-          return;
-        }
-
-        const text = copiedItems.join(String.fromCharCode(10) + String.fromCharCode(10));
-        if (navigator.clipboard && window.isSecureContext) {
-          navigator.clipboard.writeText(text).then(
-            () => {
-              copyStatus.textContent = "Copied " + copiedItems.length + " finding(s) with feedback.";
-            },
-            () => showCopyFallback(text, copiedItems.length)
-          );
-        } else {
-          showCopyFallback(text, copiedItems.length);
-        }
-      });
+      "use strict";
 
       const lightbox = document.getElementById("lightbox");
       const lightboxInner = document.getElementById("lightboxInner");
-      const lightboxClose = lightbox.querySelector(".lightbox-close");
+      const lightboxClose = lightbox ? lightbox.querySelector(".lightbox-close") : null;
       const findingModal = document.getElementById("findingModal");
       const findingModalTitle = document.getElementById("findingModalTitle");
       const findingModalContent = document.getElementById("findingModalContent");
-      const findingModalClose = findingModal.querySelector(".finding-modal-close");
+      const findingModalClose = findingModal ? findingModal.querySelector(".finding-modal-close") : null;
+      const backTop = document.getElementById("backTop");
       let lastFindingTrigger = null;
       let lastPreviewTrigger = null;
+
+      function feedbackInputs() {
+        return Array.from(document.querySelectorAll("textarea[data-feedback-id]"));
+      }
+
+      function copyStatusNode(button) {
+        let status = document.getElementById("copyStatus");
+        if (!status && button && button.parentNode) {
+          status = document.createElement("span");
+          status.id = "copyStatus";
+          status.className = "text-muted";
+          status.setAttribute("aria-live", "polite");
+          button.insertAdjacentElement("afterend", status);
+        }
+        return status;
+      }
+
+      function setCopyStatus(button, message) {
+        const status = copyStatusNode(button);
+        if (status) {
+          status.textContent = message;
+        }
+      }
+
+      function ensureCopyFallback(button) {
+        let fallback = document.getElementById("copyFallback");
+        let field = document.getElementById("copyFallbackText");
+        if (fallback && field) {
+          return { fallback, field };
+        }
+
+        const anchor = button ? button.closest(".feedback-actions") || button : null;
+        const host = button ? button.closest(".report-card") || document.querySelector(".report-main") : null;
+        if (!anchor || !host) {
+          return { fallback: null, field: null };
+        }
+
+        fallback = document.createElement("div");
+        fallback.id = "copyFallback";
+        fallback.className = "alert alert-warning copy-fallback";
+        fallback.setAttribute("aria-live", "polite");
+
+        const label = document.createElement("label");
+        label.setAttribute("for", "copyFallbackText");
+        label.textContent = "Copy feedback manually";
+
+        const message = document.createElement("p");
+        message.className = "mb-2";
+        message.textContent = "Clipboard access is unavailable. Select the text below and copy it.";
+
+        field = document.createElement("textarea");
+        field.id = "copyFallbackText";
+        field.className = "form-control";
+        field.readOnly = true;
+
+        fallback.appendChild(label);
+        fallback.appendChild(message);
+        fallback.appendChild(field);
+        anchor.insertAdjacentElement("afterend", fallback);
+        return { fallback, field };
+      }
+
+      function hideCopyFallback() {
+        const fallback = document.getElementById("copyFallback");
+        const field = document.getElementById("copyFallbackText");
+        if (fallback) {
+          fallback.classList.remove("open");
+        }
+        if (field) {
+          field.value = "";
+        }
+      }
+
+      function showCopyFallback(button, text, count) {
+        const controls = ensureCopyFallback(button);
+        if (controls.field) {
+          controls.field.value = text;
+        }
+        if (controls.fallback) {
+          controls.fallback.classList.add("open");
+        }
+        if (controls.field) {
+          controls.field.focus();
+          controls.field.select();
+        }
+        setCopyStatus(button, "Clipboard unavailable. Generated " + count + " feedback item(s) for manual copy.");
+      }
+
+      async function copyFeedback(button) {
+        hideCopyFallback();
+        const copiedItems = feedbackInputs()
+          .map((input) => ({
+            id: input.dataset.feedbackId,
+            text: input.value.trim()
+          }))
+          .filter((item) => item.id && item.text)
+          .map((item) => "Finding " + item.id + ": " + item.text);
+
+        if (!copiedItems.length) {
+          setCopyStatus(button, "No feedback to copy.");
+          return;
+        }
+
+        const text = copiedItems.join("\n\n");
+        if (navigator.clipboard && window.isSecureContext) {
+          try {
+            await navigator.clipboard.writeText(text);
+            setCopyStatus(button, "Copied " + copiedItems.length + " finding(s) with feedback.");
+            return;
+          } catch (error) {
+            // Fall through to the visible manual-copy control.
+          }
+        }
+        showCopyFallback(button, text, copiedItems.length);
+      }
 
       function focusElement(element) {
         if (!element || typeof element.focus !== "function") {
@@ -1421,131 +1100,133 @@
         }
       }
 
-      function openPreview(stageId, fallbackSource) {
-        let source = stageId ? document.getElementById(stageId) : null;
-        if (!source && fallbackSource) {
-          source = fallbackSource;
+      function isPreviewOpen() {
+        return Boolean(lightbox && lightbox.classList.contains("open"));
+      }
+
+      function isFindingModalOpen() {
+        return Boolean(findingModal && findingModal.classList.contains("open"));
+      }
+
+      function syncOverlayState() {
+        document.body.classList.toggle("report-overlay-open", isPreviewOpen() || isFindingModalOpen());
+      }
+
+      function previewSource(stageId, trigger) {
+        const sourceById = stageId ? document.getElementById(stageId) : null;
+        if (sourceById) {
+          return sourceById;
         }
+        if (!trigger) {
+          return null;
+        }
+        return trigger.matches(".annotated-stage") ? trigger : trigger.closest(".annotated-stage");
+      }
+
+      function openPreview(stageId, trigger) {
+        if (!lightbox || !lightboxInner) {
+          return;
+        }
+        const source = previewSource(stageId, trigger);
         if (!source) {
           return;
         }
-        const wrapper = document.createElement("div");
-        wrapper.className = "lightbox-stage";
-        wrapper.appendChild(source.cloneNode(true));
-        lightboxInner.innerHTML = "";
-        lightboxInner.appendChild(wrapper);
+
+        const clone = source.cloneNode(true);
+        clone.removeAttribute("id");
+        clone.removeAttribute("href");
+        clone.removeAttribute("data-preview-stage");
+        clone.querySelectorAll("[id]").forEach((node) => node.removeAttribute("id"));
+        clone.querySelectorAll("[data-preview-stage]").forEach((node) => node.removeAttribute("data-preview-stage"));
+
+        const viewport = document.createElement("div");
+        viewport.className = "lightbox-stage";
+        viewport.appendChild(clone);
+        lightboxInner.replaceChildren(viewport);
+        lastPreviewTrigger = trigger || document.activeElement;
         lightbox.classList.add("open");
         lightbox.setAttribute("aria-hidden", "false");
-        lastPreviewTrigger = fallbackSource || document.activeElement;
+        syncOverlayState();
         focusElement(lightboxClose || lightbox);
       }
 
       function closePreview() {
+        if (!lightbox || !lightboxInner || !isPreviewOpen()) {
+          return;
+        }
         lightbox.classList.remove("open");
         lightbox.setAttribute("aria-hidden", "true");
-        lightboxInner.innerHTML = "";
-        focusElement(isFindingModalOpen() ? findingModalClose : lastPreviewTrigger);
+        lightboxInner.replaceChildren();
+        syncOverlayState();
+        focusElement(isFindingModalOpen() ? findingModalClose || findingModal : lastPreviewTrigger);
       }
 
       function openFindingModal(findingId, trigger) {
+        if (!findingId || !findingModal || !findingModalContent || !findingModalTitle) {
+          return;
+        }
         const source = document.getElementById(findingId);
         if (!source) {
           return;
         }
+
         const clone = source.cloneNode(true);
         clone.removeAttribute("id");
         clone.querySelectorAll("[id]").forEach((node) => node.removeAttribute("id"));
-        findingModalTitle.textContent = source.querySelector("h3") ? source.querySelector("h3").textContent : findingId;
-        findingModalContent.innerHTML = "";
-        findingModalContent.appendChild(clone);
+        const title = source.querySelector("[data-finding-title], h3, h2");
+        findingModalTitle.textContent = title ? title.textContent.trim() : findingId;
+        findingModalContent.replaceChildren(clone);
+        lastFindingTrigger = trigger || document.activeElement;
         findingModal.classList.add("open");
         findingModal.setAttribute("aria-hidden", "false");
-        lastFindingTrigger = trigger || document.activeElement;
+        syncOverlayState();
         focusElement(findingModalClose || findingModal);
       }
 
       function closeFindingModal() {
+        if (!findingModal || !findingModalContent || !isFindingModalOpen()) {
+          return;
+        }
         findingModal.classList.remove("open");
         findingModal.setAttribute("aria-hidden", "true");
-        findingModalContent.innerHTML = "";
+        findingModalContent.replaceChildren();
+        syncOverlayState();
         focusElement(lastFindingTrigger);
       }
 
-      function isPreviewOpen() {
-        return lightbox.classList.contains("open");
-      }
-
-      function isFindingModalOpen() {
-        return findingModal.classList.contains("open");
-      }
-
-      function closeTopmostModal(event) {
+      function closeTopmostOverlay(event) {
         if (isPreviewOpen()) {
-          event?.preventDefault();
-          event?.stopPropagation();
+          event.preventDefault();
+          event.stopPropagation();
           closePreview();
           return true;
         }
         if (isFindingModalOpen()) {
-          event?.preventDefault();
-          event?.stopPropagation();
+          event.preventDefault();
+          event.stopPropagation();
           closeFindingModal();
           return true;
         }
         return false;
       }
 
-      document.addEventListener("click", (event) => {
-        const findingTarget = event.target.closest("[data-finding-modal]");
-        if (findingTarget) {
-          event.preventDefault();
-          openFindingModal(findingTarget.getAttribute("data-finding-modal"), findingTarget);
-          return;
-        }
-        const previewTarget = event.target.closest("[data-preview-stage]");
-        if (previewTarget) {
-          event.preventDefault();
-          openPreview(previewTarget.getAttribute("data-preview-stage"), previewTarget);
-          return;
-        }
-        if (event.target === lightbox || event.target.classList.contains("lightbox-close")) {
-          closePreview();
-          return;
-        }
-        if (event.target === findingModal || event.target.classList.contains("finding-modal-close")) {
-          closeFindingModal();
-        }
-      });
-
-      document.addEventListener("keydown", (event) => {
-        if (event.key === "Escape" && !event.repeat) {
-          closeTopmostModal(event);
-        }
-      }, true);
-
-      const backTop = document.getElementById("backTop");
-      const navLinks = Array.from(document.querySelectorAll(".quick-nav .nav-link[href^='#']"));
-      const navTargets = navLinks
-        .map((link) => ({ link, target: document.querySelector(link.getAttribute("href")) }))
-        .filter((item) => item.target);
-
-      function setActiveNav(hash) {
-        navLinks.forEach((link) => {
-          link.classList.toggle("active", link.getAttribute("href") === hash);
-        });
+      function navItems() {
+        return Array.from(document.querySelectorAll(".quick-nav .nav-link[href^='#']"))
+          .map((link) => ({ link, target: document.querySelector(link.getAttribute("href")) }))
+          .filter((item) => item.target);
       }
 
       function updateActiveNav() {
-        const offset = 120;
-        let active = navTargets[0];
-        navTargets.forEach((item) => {
-          if (item.target.getBoundingClientRect().top <= offset) {
+        const items = navItems();
+        let active = items[0] || null;
+        items.forEach((item) => {
+          if (item.target.getBoundingClientRect().top <= 120) {
             active = item;
           }
         });
-        if (active) {
-          setActiveNav(active.link.getAttribute("href"));
-        }
+        items.forEach((item) => {
+          item.link.classList.toggle("active", Boolean(active && item.link === active.link));
+        });
       }
 
       function scrollTopValue() {
@@ -1553,47 +1234,76 @@
         return Math.max(window.pageYOffset || 0, scroller.scrollTop || 0, document.body.scrollTop || 0);
       }
 
-      function scrollableContainers() {
-        return Array.from(document.querySelectorAll("*")).filter((element) => {
-          const style = window.getComputedStyle(element);
-          return /(auto|scroll|overlay)/.test(style.overflowY) && element.scrollHeight > element.clientHeight + 8;
-        });
-      }
-
       function updateBackTop() {
-        backTop.classList.toggle("show", scrollTopValue() > 120);
+        if (backTop) {
+          backTop.classList.toggle("show", scrollTopValue() > 160);
+        }
         updateActiveNav();
       }
 
       function forceTop() {
-        if (location.hash) {
-          history.replaceState(null, document.title, location.pathname + location.search);
+        if (window.location.hash) {
+          window.history.replaceState(null, document.title, window.location.pathname + window.location.search);
         }
-        const targets = [document.scrollingElement, document.documentElement, document.body].concat(scrollableContainers()).filter(Boolean);
         window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
-        targets.forEach((target) => {
-          try {
-            target.scrollTop = 0;
-          } catch (error) {
-            // Ignore read-only scroll containers.
-          }
-        });
-        requestAnimationFrame(() => {
-          window.scrollTo(0, 0);
-          targets.forEach((target) => {
-            try {
-              target.scrollTop = 0;
-            } catch (error) {
-              // Ignore read-only scroll containers.
-            }
-          });
+        document.querySelectorAll(".shot-scroll, .finding-modal-panel, .lightbox-stage").forEach((container) => {
+          container.scrollTop = 0;
+          container.scrollLeft = 0;
         });
       }
 
-      backTop.addEventListener("click", forceTop);
+      document.addEventListener("click", (event) => {
+        const target = event.target instanceof Element ? event.target : null;
+        if (!target) {
+          return;
+        }
+
+        const copyButton = target.closest("#copyFeedback");
+        if (copyButton) {
+          event.preventDefault();
+          copyFeedback(copyButton);
+          return;
+        }
+
+        if (target.closest(".lightbox-close") || target === lightbox || target === lightboxInner) {
+          event.preventDefault();
+          closePreview();
+          return;
+        }
+
+        if (target.closest(".finding-modal-close") || target === findingModal) {
+          event.preventDefault();
+          closeFindingModal();
+          return;
+        }
+
+        const findingTarget = target.closest("[data-finding-modal]");
+        if (findingTarget) {
+          event.preventDefault();
+          openFindingModal(findingTarget.getAttribute("data-finding-modal"), findingTarget);
+          return;
+        }
+
+        const previewTarget = target.closest("[data-preview-stage]");
+        if (previewTarget) {
+          event.preventDefault();
+          openPreview(previewTarget.getAttribute("data-preview-stage"), previewTarget);
+        }
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && !event.repeat) {
+          closeTopmostOverlay(event);
+        }
+      }, true);
+
+      if (backTop) {
+        backTop.addEventListener("click", forceTop);
+      }
       window.addEventListener("scroll", updateBackTop, { passive: true });
       window.addEventListener("hashchange", updateActiveNav);
       document.addEventListener("scroll", updateBackTop, true);
+
       updateBackTop();
     })();
   </script>

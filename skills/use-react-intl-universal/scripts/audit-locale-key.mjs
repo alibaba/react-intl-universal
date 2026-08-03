@@ -24,6 +24,7 @@ import {
   resolveFromCwd,
 } from "./lib/i18n-audit.mjs";
 
+/** Prints command-line usage information. */
 function printHelp() {
   console.log(`Usage:
   node skills/use-react-intl-universal/scripts/audit-locale-key.mjs --key KEY --locales src/locales
@@ -60,6 +61,7 @@ function chooseBaseline(results, defaultLocale) {
   return results.find((result) => result.exists && typeof result.value === "string") ?? null;
 }
 
+/** Prints the locale-key audit as a human-readable text report. */
 function printTextReport(report) {
   console.log(`Key: ${report.key}`);
   console.log(`Locales: ${relativePath(report.localesPath)}`);
@@ -108,6 +110,7 @@ function printTextReport(report) {
   }
 }
 
+/** Runs this script's command-line workflow. */
 function main() {
   const args = parseCliArgs(process.argv.slice(2));
 

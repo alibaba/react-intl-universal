@@ -37,7 +37,7 @@ npm install --save-dev react-intl-universal-extract
 In `package.json`, add a script:
 ```json
 "scripts": {
-  "intl:extract": "npx react-intl-universal-extract --cmd extract --source-path ./src --output-path ./src/locales/en_US.json --verbose",
+  "intl:extract": "npx react-intl-universal-extract --cmd extract --source-path ./src --output-path ./src/locales/en_US.json",
 }
 ```
 Then run `npm run intl:extract`.
@@ -46,6 +46,25 @@ Parameters:
 - `cmd`: only "extract" is supported currently.
 - `source-path`: The source code directory path such as "./src"
 - `output-path`: The extracted json file path such as "./src/locales/en_US.json"
+- `verbose`: Show per-file and per-message details. Stage summaries are always shown.
+
+The CLI prints concise Extract, Verify, and Write stages by default. Validation errors include the key and `file:line` location. Each conflicting default-message occurrence is printed on its own line:
+
+```text
+Extracting messages from ./src
+Found 128 messages. Verifying...
+❌ Missing default message for key="USER_NAME" - src/User.tsx:42
+❌ Conflicting default message for key="SUBMIT": "Submit" - src/Form.tsx:18
+❌ Conflicting default message for key="SUBMIT": "Save" - src/Dialog.tsx:27
+Validation failed: 2 problems found.
+```
+
+### Exit status
+
+- `0`: scanning, validation, and optional output writing all succeeded. A valid source directory with zero messages also returns `0`.
+- `1`: scanning, message validation, output writing, or CLI command selection failed.
+
+This makes the command suitable for CI checks. Failure output does not include the final `messages extracted` success summary.
 
 ### Programmable
 ```js
@@ -58,11 +77,14 @@ console.log(result);
 [{
   key: 'hello2',
   path: 'test-files/App.js',
+  line: 5,
   originalDefaultMessage: 'Hello ${name}',
   transformedDefaultMessage: 'Hello {name}'
 }]
 */
 ```
+
+`extract(options)` continues to return an array and does not modify `process.exitCode`. CLI exit status handling is isolated to the executable command.
 
 ## License
 This software is free to use under the BSD license.

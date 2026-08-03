@@ -1,0 +1,1115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://react-intl-universal.local/ui-inspection-report.schema.json",
+  "title": "UI Inspection Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "revision",
+    "run",
+    "targets",
+    "deployments",
+    "validations",
+    "coverage",
+    "captures",
+    "evidenceBindings",
+    "findings",
+    "observations",
+    "reviews"
+  ],
+  "properties": {
+    "revision": { "type": "integer", "minimum": 1 },
+    "run": { "$ref": "#/$defs/run" },
+    "targets": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/target" }
+    },
+    "deployments": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/deployment" }
+    },
+    "validations": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/validation" }
+    },
+    "coverage": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/coverage" }
+    },
+    "coverageInventory": { "$ref": "#/$defs/coverageInventory" },
+    "captures": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/capture" }
+    },
+    "evidenceBindings": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/evidenceBinding" }
+    },
+    "findings": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/finding" }
+    },
+    "observations": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/observation" }
+    },
+    "releaseAssessment": { "$ref": "#/$defs/releaseAssessment" },
+    "reviews": { "$ref": "#/$defs/reviews" }
+  },
+  "$defs": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "gitCommit": {
+      "type": "string",
+      "pattern": "^(?:[a-f0-9]{40}|[a-f0-9]{64})$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "artifactRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": { "$ref": "#/$defs/nonEmptyString" },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "stringArray": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/nonEmptyString" }
+    },
+    "viewport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["width", "height", "deviceScaleFactor", "browserZoom"],
+      "properties": {
+        "width": { "type": "integer", "minimum": 1 },
+        "height": { "type": "integer", "minimum": 1 },
+        "deviceScaleFactor": { "type": "number", "exclusiveMinimum": 0 },
+        "browserZoom": { "type": "number", "exclusiveMinimum": 0 },
+        "screenClass": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "run": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "taskId",
+        "startedAt",
+        "updatedAt",
+        "status",
+        "authorization",
+        "primaryInspectorId",
+        "reportDisplayLanguage",
+        "inspectionLogPath",
+        "reportHtmlPath",
+        "screenshotDirectory",
+        "artifactDirectory",
+        "reportShellSha256",
+        "environmentNotes"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/nonEmptyString" },
+        "taskId": { "$ref": "#/$defs/nonEmptyString" },
+        "repository": { "$ref": "#/$defs/nonEmptyString" },
+        "branch": { "$ref": "#/$defs/nonEmptyString" },
+        "baselineCommit": { "$ref": "#/$defs/gitCommit" },
+        "finalCommit": { "$ref": "#/$defs/gitCommit" },
+        "startedAt": { "$ref": "#/$defs/nonEmptyString" },
+        "updatedAt": { "$ref": "#/$defs/nonEmptyString" },
+        "status": {
+          "enum": ["in-progress", "complete-candidate", "partial", "blocked"]
+        },
+        "authorization": {
+          "enum": ["inspect-only", "fix-local", "release-verify"]
+        },
+        "primaryInspectorId": { "$ref": "#/$defs/nonEmptyString" },
+        "reportDisplayLanguage": { "$ref": "#/$defs/nonEmptyString" },
+        "inspectionLogPath": { "$ref": "#/$defs/nonEmptyString" },
+        "reportHtmlPath": { "$ref": "#/$defs/nonEmptyString" },
+        "screenshotDirectory": { "$ref": "#/$defs/nonEmptyString" },
+        "artifactDirectory": { "$ref": "#/$defs/nonEmptyString" },
+        "reportShellSha256": { "$ref": "#/$defs/sha256" },
+        "environmentNotes": { "$ref": "#/$defs/stringArray" }
+      }
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "url", "locale", "viewport"],
+      "properties": {
+        "id": { "$ref": "#/$defs/nonEmptyString" },
+        "url": { "$ref": "#/$defs/nonEmptyString" },
+        "locale": { "$ref": "#/$defs/nonEmptyString" },
+        "viewport": { "$ref": "#/$defs/viewport" }
+      }
+    },
+    "deploymentEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["command", "resultSummary", "artifact"],
+      "properties": {
+        "command": { "$ref": "#/$defs/nonEmptyString" },
+        "resultSummary": { "$ref": "#/$defs/nonEmptyString" },
+        "artifact": { "$ref": "#/$defs/artifactRef" }
+      }
+    },
+    "deployment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "stage",
+        "provider",
+        "status",
+        "previewUrl",
+        "buildCommit",
+        "publishedAt",
+        "evidence"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/nonEmptyString" },
+        "stage": { "enum": ["baseline", "fix"] },
+        "provider": { "$ref": "#/$defs/nonEmptyString" },
+        "status": { "enum": ["published", "failed"] },
+        "region": { "$ref": "#/$defs/nonEmptyString" },
+        "publishId": { "$ref": "#/$defs/nonEmptyString" },
+        "buildId": { "$ref": "#/$defs/nonEmptyString" },
+        "cdnVersion": { "$ref": "#/$defs/nonEmptyString" },
+        "previewUrl": { "$ref": "#/$defs/nonEmptyString" },
+        "buildCommit": { "$ref": "#/$defs/gitCommit" },
+        "publishedAt": { "$ref": "#/$defs/nonEmptyString" },
+        "evidence": { "$ref": "#/$defs/deploymentEvidence" }
+      }
+    },
+    "validation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "scope", "command", "result", "notes"],
+      "properties": {
+        "id": { "$ref": "#/$defs/nonEmptyString" },
+        "scope": {
+          "enum": ["report", "source", "locale", "test", "build", "git", "runtime", "release"]
+        },
+        "command": { "$ref": "#/$defs/nonEmptyString" },
+        "result": {
+          "enum": ["passed", "failed", "failed-pre-existing", "not-run"]
+        },
+        "executedAt": { "$ref": "#/$defs/nonEmptyString" },
+        "exitCode": { "type": "integer" },
+        "artifact": { "$ref": "#/$defs/artifactRef" },
+        "notes": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "coverageInventory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "generatedAt",
+        "sourceRefs",
+        "methodology",
+        "rootCoverageIds",
+        "discoveredRootCount",
+        "scopedRootCount",
+        "excludedRootCount",
+        "excludedRoots",
+        "artifact",
+        "notes"
+      ],
+      "properties": {
+        "generatedAt": { "$ref": "#/$defs/nonEmptyString" },
+        "sourceRefs": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        },
+        "methodology": { "$ref": "#/$defs/nonEmptyString" },
+        "rootCoverageIds": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        },
+        "discoveredRootCount": { "type": "integer", "minimum": 1 },
+        "scopedRootCount": { "type": "integer", "minimum": 1 },
+        "excludedRootCount": { "type": "integer", "minimum": 0 },
+        "excludedRoots": { "$ref": "#/$defs/stringArray" },
+        "artifact": { "$ref": "#/$defs/artifactRef" },
+        "notes": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "targetId",
+        "label",
+        "kind",
+        "url",
+        "stateKey",
+        "action",
+        "status",
+        "rendererKey",
+        "sourceRefs",
+        "evidenceBindingIds"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/nonEmptyString" },
+        "parentId": { "$ref": "#/$defs/nonEmptyString" },
+        "targetId": { "$ref": "#/$defs/nonEmptyString" },
+        "label": { "$ref": "#/$defs/nonEmptyString" },
+        "kind": {
+          "enum": ["route", "tab", "control", "modal", "drawer", "popover", "state", "scroll", "other"]
+        },
+        "url": { "$ref": "#/$defs/nonEmptyString" },
+        "stateKey": { "$ref": "#/$defs/nonEmptyString" },
+        "action": { "$ref": "#/$defs/nonEmptyString" },
+        "rendererKey": { "$ref": "#/$defs/nonEmptyString" },
+        "status": {
+          "enum": [
+            "pending",
+            "in-progress",
+            "covered",
+            "partial",
+            "blocked",
+            "skipped-risky",
+            "duplicate-sampled",
+            "external-out-of-scope",
+            "not-reached"
+          ]
+        },
+        "sourceRefs": { "$ref": "#/$defs/stringArray" },
+        "reason": { "$ref": "#/$defs/nonEmptyString" },
+        "representativeId": { "$ref": "#/$defs/nonEmptyString" },
+        "equivalenceRationale": { "$ref": "#/$defs/nonEmptyString" },
+        "evidenceBindingIds": { "$ref": "#/$defs/stringArray" }
+      }
+    },
+    "scrollState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["x", "y"],
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "container": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "stateSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "route", "activeSurfaces", "filters", "dataState", "scroll"],
+      "properties": {
+        "key": { "$ref": "#/$defs/nonEmptyString" },
+        "route": { "$ref": "#/$defs/nonEmptyString" },
+        "activeSurfaces": { "$ref": "#/$defs/stringArray" },
+        "filters": { "$ref": "#/$defs/stringArray" },
+        "dataState": { "$ref": "#/$defs/nonEmptyString" },
+        "scroll": { "$ref": "#/$defs/scrollState" }
+      }
+    },
+    "admissionChecks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "correctState",
+        "correctLocale",
+        "ready",
+        "noForeignOverlay",
+        "formatValid",
+        "noCorruption",
+        "targetVisible",
+        "contextSufficient",
+        "savedPixelsOpened"
+      ],
+      "properties": {
+        "correctState": { "type": "boolean" },
+        "correctLocale": { "type": "boolean" },
+        "ready": { "type": "boolean" },
+        "noForeignOverlay": { "type": "boolean" },
+        "formatValid": { "type": "boolean" },
+        "noCorruption": { "type": "boolean" },
+        "targetVisible": { "type": "boolean" },
+        "contextSufficient": { "type": "boolean" },
+        "savedPixelsOpened": { "type": "boolean" }
+      }
+    },
+    "captureAdmission": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "rejectionReasons", "notes"],
+      "properties": {
+        "status": { "enum": ["pending", "admitted", "rejected"] },
+        "reviewedBy": { "$ref": "#/$defs/nonEmptyString" },
+        "reviewedAt": { "$ref": "#/$defs/nonEmptyString" },
+        "reviewAssetSha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "checks": { "$ref": "#/$defs/admissionChecks" },
+        "rejectionReasons": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "wrong-state",
+              "wrong-locale",
+              "not-ready",
+              "loading-state",
+              "foreign-overlay",
+              "format-invalid",
+              "capture-corruption",
+              "target-not-visible",
+              "insufficient-context",
+              "not-pixel-reviewed"
+            ]
+          }
+        },
+        "notes": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "deploymentIdentityProof": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["method", "requestedUrl", "artifact"],
+      "properties": {
+        "method": { "enum": ["loaded-resource-url", "runtime-publication-manifest"] },
+        "requestedUrl": { "$ref": "#/$defs/nonEmptyString" },
+        "observedResourceUrl": { "$ref": "#/$defs/nonEmptyString" },
+        "runtimeIdentity": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["identityEntries", "releaseVersion", "resourceUrls"],
+          "properties": {
+            "identityEntries": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["key", "value"],
+                "properties": {
+                  "key": { "$ref": "#/$defs/nonEmptyString" },
+                  "value": { "$ref": "#/$defs/nonEmptyString" }
+                }
+              }
+            },
+            "releaseVersion": { "$ref": "#/$defs/nonEmptyString" },
+            "resourceUrls": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "$ref": "#/$defs/nonEmptyString" }
+            }
+          }
+        },
+        "artifact": { "$ref": "#/$defs/artifactRef" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "method": { "const": "loaded-resource-url" } } },
+          "then": { "required": ["observedResourceUrl"] }
+        },
+        {
+          "if": { "properties": { "method": { "const": "runtime-publication-manifest" } } },
+          "then": { "required": ["runtimeIdentity"] }
+        }
+      ]
+    },
+    "capture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "path",
+        "sha256",
+        "mimeType",
+        "captureKind",
+        "captureScaleFactor",
+        "byteLength",
+        "pixelWidth",
+        "pixelHeight",
+        "capturedAt",
+        "targetId",
+        "url",
+        "locale",
+        "viewport",
+        "stateSnapshot",
+        "page",
+        "action",
+        "readinessSignals",
+        "intendedUse",
+        "admission"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/nonEmptyString" },
+        "path": { "$ref": "#/$defs/nonEmptyString" },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "mimeType": { "enum": ["image/png", "image/jpeg"] },
+        "captureKind": { "enum": ["full-viewport", "element-clip"] },
+        "captureScaleFactor": { "type": "number", "exclusiveMinimum": 0 },
+        "byteLength": { "type": "integer", "minimum": 1 },
+        "pixelWidth": { "type": "integer", "minimum": 1 },
+        "pixelHeight": { "type": "integer", "minimum": 1 },
+        "capturedAt": { "$ref": "#/$defs/nonEmptyString" },
+        "targetId": { "$ref": "#/$defs/nonEmptyString" },
+        "url": { "$ref": "#/$defs/nonEmptyString" },
+        "locale": { "$ref": "#/$defs/nonEmptyString" },
+        "viewport": { "$ref": "#/$defs/viewport" },
+        "stateSnapshot": { "$ref": "#/$defs/stateSnapshot" },
+        "page": { "$ref": "#/$defs/nonEmptyString" },
+        "action": { "$ref": "#/$defs/nonEmptyString" },
+        "readinessSignals": { "$ref": "#/$defs/stringArray" },
+        "intendedUse": {
+          "enum": ["coverage", "finding", "verification", "verification-failed", "blocker", "non-i18n"]
+        },
+        "deploymentId": { "$ref": "#/$defs/nonEmptyString" },
+        "deploymentIdentityProof": { "$ref": "#/$defs/deploymentIdentityProof" },
+        "admission": { "$ref": "#/$defs/captureAdmission" }
+      }
+    },
+    "annotationBox": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["x", "y", "width", "height", "label"],
+      "properties": {
+        "x": { "type": "number", "minimum": 0, "maximum": 100 },
+        "y": { "type": "number", "minimum": 0, "maximum": 100 },
+        "width": { "type": "number", "exclusiveMinimum": 0, "maximum": 100 },
+        "height": { "type": "number", "exclusiveMinimum": 0, "maximum": 100 },
+        "label": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "annotation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["boxes"],
+      "properties": {
+        "boxes": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/annotationBox" }
+        }
+      }
+    },
+    "evidenceReviewChecks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "targetVisible",
+        "claimMatches",
+        "annotationAccurate",
+        "contextSufficient",
+        "localeCorrect",
+        "stateCorrect"
+      ],
+      "properties": {
+        "targetVisible": { "type": "boolean" },
+        "claimMatches": { "type": "boolean" },
+        "annotationAccurate": { "type": "boolean" },
+        "contextSufficient": { "type": "boolean" },
+        "localeCorrect": { "type": "boolean" },
+        "stateCorrect": { "type": "boolean" }
+      }
+    },
+    "evidenceReview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reviewerId",
+        "reviewerType",
+        "reviewSessionId",
+        "artifact",
+        "reviewedAt",
+        "assetSha256",
+        "verdict",
+        "checks",
+        "rationale"
+      ],
+      "properties": {
+        "reviewerId": { "$ref": "#/$defs/nonEmptyString" },
+        "reviewerType": { "enum": ["subagent", "human"] },
+        "reviewSessionId": { "$ref": "#/$defs/nonEmptyString" },
+        "artifact": { "$ref": "#/$defs/artifactRef" },
+        "reviewedAt": { "$ref": "#/$defs/nonEmptyString" },
+        "assetSha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "verdict": { "enum": ["supports", "does-not-support", "uncertain"] },
+        "observedText": { "type": "string" },
+        "checks": { "$ref": "#/$defs/evidenceReviewChecks" },
+        "rationale": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "evidenceBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "ownerType",
+        "ownerId",
+        "captureId",
+        "role",
+        "claim",
+        "observed",
+        "annotation",
+        "review"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/nonEmptyString" },
+        "ownerType": { "enum": ["finding", "coverage", "observation"] },
+        "ownerId": { "$ref": "#/$defs/nonEmptyString" },
+        "captureId": { "$ref": "#/$defs/nonEmptyString" },
+        "role": {
+          "enum": [
+            "coverage",
+            "issue-context",
+            "issue-detail",
+            "failed-verification",
+            "verification-context",
+            "verification-detail",
+            "regression-check",
+            "blocker",
+            "non-i18n"
+          ]
+        },
+        "claim": { "$ref": "#/$defs/nonEmptyString" },
+        "observed": { "$ref": "#/$defs/nonEmptyString" },
+        "annotation": { "$ref": "#/$defs/annotation" },
+        "admissionReview": { "$ref": "#/$defs/evidenceReview" },
+        "review": { "$ref": "#/$defs/evidenceReview" }
+      }
+    },
+    "sourceMatch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["filePath", "reason"],
+      "properties": {
+        "filePath": { "$ref": "#/$defs/nonEmptyString" },
+        "line": { "type": "integer", "minimum": 1 },
+        "reason": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "sourceAttribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "origin",
+        "owner",
+        "rationale",
+        "searchedTerms",
+        "matches",
+        "userCreatedDataAssessment"
+      ],
+      "properties": {
+        "origin": {
+          "enum": [
+            "frontend-source",
+            "frontend-locale-data",
+            "frontend-locale-fallback",
+            "api-system-copy",
+            "api-user-created-data",
+            "external-module",
+            "unknown"
+          ]
+        },
+        "owner": { "$ref": "#/$defs/nonEmptyString" },
+        "rationale": { "$ref": "#/$defs/nonEmptyString" },
+        "searchedTerms": { "$ref": "#/$defs/stringArray" },
+        "matches": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/sourceMatch" }
+        },
+        "userCreatedDataAssessment": { "enum": ["likely", "unlikely", "unknown"] }
+      }
+    },
+    "acceptanceCheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "statement",
+        "kind",
+        "status",
+        "evidenceBindingIds",
+        "validationIds",
+        "notes"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/nonEmptyString" },
+        "statement": { "$ref": "#/$defs/nonEmptyString" },
+        "kind": { "enum": ["visual", "code", "runtime", "release", "cross-locale"] },
+        "status": { "enum": ["pending", "passed", "failed", "not-applicable"] },
+        "evidenceBindingIds": { "$ref": "#/$defs/stringArray" },
+        "validationIds": { "$ref": "#/$defs/stringArray" },
+        "notes": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "changedFile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "changeKind"],
+      "properties": {
+        "path": { "$ref": "#/$defs/nonEmptyString" },
+        "changeKind": {
+          "enum": [
+            "locale-copy",
+            "leaf-ui-copy",
+            "local-layout",
+            "shared-display-map",
+            "shared-component",
+            "global-css",
+            "dependency",
+            "build-config",
+            "business-logic",
+            "request-contract",
+            "other"
+          ]
+        }
+      }
+    },
+    "fixAssessment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "baseCommit",
+        "fixCommit",
+        "diffSha256",
+        "diffArtifact",
+        "changedFiles",
+        "affectedSurfaces",
+        "riskFactors",
+        "derivedRiskFloor",
+        "claimedRisk",
+        "rationale",
+        "regressionCheckIds"
+      ],
+      "properties": {
+        "baseCommit": { "$ref": "#/$defs/gitCommit" },
+        "fixCommit": { "$ref": "#/$defs/gitCommit" },
+        "diffSha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "diffArtifact": { "$ref": "#/$defs/artifactRef" },
+        "changedFiles": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/changedFile" }
+        },
+        "affectedSurfaces": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        },
+        "riskFactors": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "enum": [
+              "leaf-copy-only",
+              "locale-punctuation-only",
+              "display-only-constant",
+              "local-layout",
+              "table-column-geometry",
+              "multi-consumer-message",
+              "shared-display-copy",
+              "cross-locale-rendering",
+              "shared-component",
+              "global-style",
+              "dependency-change",
+              "lockfile-change",
+              "build-config-change",
+              "business-logic",
+              "request-contract",
+              "cross-module",
+              "unknown-blast-radius"
+            ]
+          }
+        },
+        "derivedRiskFloor": { "enum": ["low", "medium", "high"] },
+        "claimedRisk": { "enum": ["low", "medium", "high"] },
+        "rationale": { "$ref": "#/$defs/nonEmptyString" },
+        "regressionCheckIds": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        }
+      }
+    },
+    "commitEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["hash", "pushedAt"],
+      "properties": {
+        "hash": { "$ref": "#/$defs/gitCommit" },
+        "pushedAt": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "remediation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["disposition", "recommendation", "validationIds"],
+      "properties": {
+        "disposition": {
+          "enum": [
+            "open",
+            "fix-planned",
+            "fixed-locally",
+            "deferred",
+            "needs-human-confirmation",
+            "not-fixable-here",
+            "wont-fix"
+          ]
+        },
+        "recommendation": { "$ref": "#/$defs/nonEmptyString" },
+        "validationIds": { "$ref": "#/$defs/stringArray" },
+        "fixAssessment": { "$ref": "#/$defs/fixAssessment" },
+        "commit": { "$ref": "#/$defs/commitEvidence" }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["result", "notes"],
+      "properties": {
+        "result": { "enum": ["not-run", "passed", "failed"] },
+        "deploymentId": { "$ref": "#/$defs/nonEmptyString" },
+        "verifiedAt": { "$ref": "#/$defs/nonEmptyString" },
+        "verifiedAtCommit": { "$ref": "#/$defs/gitCommit" },
+        "notes": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "releaseAssessment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "baseCommit",
+        "fixCommit",
+        "diffSha256",
+        "diffArtifact",
+        "findingIds",
+        "changedFiles",
+        "affectedSurfaces",
+        "riskFactors",
+        "derivedRiskFloor",
+        "claimedRisk",
+        "rationale",
+        "regressionCheckIds",
+        "validationIds"
+      ],
+      "properties": {
+        "baseCommit": { "$ref": "#/$defs/gitCommit" },
+        "fixCommit": { "$ref": "#/$defs/gitCommit" },
+        "diffSha256": { "$ref": "#/$defs/sha256" },
+        "diffArtifact": { "$ref": "#/$defs/artifactRef" },
+        "findingIds": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        },
+        "changedFiles": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/changedFile" }
+        },
+        "affectedSurfaces": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        },
+        "riskFactors": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "enum": [
+              "leaf-copy-only",
+              "locale-punctuation-only",
+              "display-only-constant",
+              "local-layout",
+              "table-column-geometry",
+              "multi-consumer-message",
+              "shared-display-copy",
+              "cross-locale-rendering",
+              "shared-component",
+              "global-style",
+              "dependency-change",
+              "lockfile-change",
+              "build-config-change",
+              "business-logic",
+              "request-contract",
+              "cross-module",
+              "unknown-blast-radius"
+            ]
+          }
+        },
+        "derivedRiskFloor": { "enum": ["low", "medium", "high"] },
+        "claimedRisk": { "enum": ["low", "medium", "high"] },
+        "rationale": { "$ref": "#/$defs/nonEmptyString" },
+        "regressionCheckIds": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        },
+        "validationIds": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        }
+      }
+    },
+    "lifecycleEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["at", "type", "notes"],
+      "properties": {
+        "at": { "$ref": "#/$defs/nonEmptyString" },
+        "type": {
+          "enum": [
+            "finding-admitted",
+            "fix-planned",
+            "fixed-locally",
+            "committed",
+            "published",
+            "verification-failed",
+            "verified",
+            "deferred",
+            "reopened"
+          ]
+        },
+        "commit": { "$ref": "#/$defs/gitCommit" },
+        "deploymentId": { "$ref": "#/$defs/nonEmptyString" },
+        "notes": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "severity",
+        "category",
+        "targetId",
+        "url",
+        "stateKey",
+        "title",
+        "reproductionSteps",
+        "expected",
+        "actual",
+        "sourceAttribution",
+        "acceptanceChecks",
+        "evidenceBindingIds",
+        "remediation",
+        "verification",
+        "lifecycleEvents"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/nonEmptyString" },
+        "severity": { "enum": ["critical", "high", "medium", "low"] },
+        "category": {
+          "enum": [
+            "language-quality",
+            "truncation",
+            "overflow",
+            "overlap",
+            "misalignment",
+            "component-integrity",
+            "word-break",
+            "form-label-integrity",
+            "untranslated-text",
+            "raw-placeholder-or-tag",
+            "terminology",
+            "interaction"
+          ]
+        },
+        "targetId": { "$ref": "#/$defs/nonEmptyString" },
+        "url": { "$ref": "#/$defs/nonEmptyString" },
+        "stateKey": { "$ref": "#/$defs/nonEmptyString" },
+        "title": { "$ref": "#/$defs/nonEmptyString" },
+        "reproductionSteps": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        },
+        "expected": { "$ref": "#/$defs/nonEmptyString" },
+        "actual": { "$ref": "#/$defs/nonEmptyString" },
+        "sourceAttribution": { "$ref": "#/$defs/sourceAttribution" },
+        "acceptanceChecks": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/acceptanceCheck" }
+        },
+        "evidenceBindingIds": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        },
+        "remediation": { "$ref": "#/$defs/remediation" },
+        "verification": { "$ref": "#/$defs/verification" },
+        "lifecycleEvents": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/lifecycleEvent" }
+        }
+      }
+    },
+    "observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "title",
+        "targetId",
+        "url",
+        "stateKey",
+        "action",
+        "observation",
+        "classificationReason",
+        "evidenceBindingIds",
+        "followUp"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/nonEmptyString" },
+        "kind": { "enum": ["blocker", "non-i18n"] },
+        "title": { "$ref": "#/$defs/nonEmptyString" },
+        "targetId": { "$ref": "#/$defs/nonEmptyString" },
+        "url": { "$ref": "#/$defs/nonEmptyString" },
+        "stateKey": { "$ref": "#/$defs/nonEmptyString" },
+        "action": { "$ref": "#/$defs/nonEmptyString" },
+        "observation": { "$ref": "#/$defs/nonEmptyString" },
+        "classificationReason": { "$ref": "#/$defs/nonEmptyString" },
+        "evidenceBindingIds": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        },
+        "followUp": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "findingReview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["findingId", "verdict", "understandable", "riskAssessable", "notes"],
+      "properties": {
+        "findingId": { "$ref": "#/$defs/nonEmptyString" },
+        "verdict": { "enum": ["approved", "mismatch", "insufficient", "uncertain"] },
+        "understandable": { "type": "boolean" },
+        "riskAssessable": { "type": "boolean" },
+        "notes": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "finalReportReview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "contentSha256",
+        "reportRevision",
+        "reviewerId",
+        "reviewerType",
+        "reviewSessionId",
+        "artifact",
+        "reviewedAt",
+        "verdict",
+        "findingReviews",
+        "coverageAssessable",
+        "artifactUsable",
+        "notes"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/nonEmptyString" },
+        "contentSha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "reportRevision": { "type": "integer", "minimum": 1 },
+        "reviewerId": { "$ref": "#/$defs/nonEmptyString" },
+        "reviewerType": { "enum": ["subagent", "human"] },
+        "reviewSessionId": { "$ref": "#/$defs/nonEmptyString" },
+        "artifact": { "$ref": "#/$defs/artifactRef" },
+        "reviewedAt": { "$ref": "#/$defs/nonEmptyString" },
+        "verdict": { "enum": ["approved", "changes-requested", "uncertain"] },
+        "findingReviews": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/findingReview" }
+        },
+        "coverageAssessable": { "type": "boolean" },
+        "artifactUsable": { "type": "boolean" },
+        "notes": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "codeRiskFinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["severity", "summary", "resolved"],
+      "properties": {
+        "severity": { "enum": ["P0", "P1", "P2", "P3"] },
+        "summary": { "$ref": "#/$defs/nonEmptyString" },
+        "resolved": { "type": "boolean" }
+      }
+    },
+    "codeRiskReview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "scope",
+        "findingIds",
+        "baseCommit",
+        "fixCommit",
+        "diffSha256",
+        "reviewerId",
+        "reviewerType",
+        "reviewSessionId",
+        "artifact",
+        "reviewedAt",
+        "verdict",
+        "findings",
+        "notes"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/nonEmptyString" },
+        "scope": { "enum": ["finding", "release"] },
+        "findingIds": { "$ref": "#/$defs/stringArray" },
+        "baseCommit": { "$ref": "#/$defs/gitCommit" },
+        "fixCommit": { "$ref": "#/$defs/gitCommit" },
+        "diffSha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "reviewerId": { "$ref": "#/$defs/nonEmptyString" },
+        "reviewerType": { "enum": ["subagent", "human"] },
+        "reviewSessionId": { "$ref": "#/$defs/nonEmptyString" },
+        "artifact": { "$ref": "#/$defs/artifactRef" },
+        "reviewedAt": { "$ref": "#/$defs/nonEmptyString" },
+        "verdict": { "enum": ["approved", "changes-requested", "uncertain"] },
+        "findings": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/codeRiskFinding" }
+        },
+        "notes": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "reviews": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["codeRisk"],
+      "properties": {
+        "finalReport": { "$ref": "#/$defs/finalReportReview" },
+        "codeRisk": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/codeRiskReview" }
+        }
+      }
+    }
+  }
+}

@@ -28,6 +28,7 @@ import {
   writeJsonFile,
 } from "./lib/i18n-audit.mjs";
 
+/** Prints command-line usage information. */
 function printHelp() {
   console.log(`Usage:
   node skills/use-react-intl-universal/scripts/apply-translation-deltas.mjs --locales src/locales --deltas tmp/i18n-translation-results --default-locale en-US
@@ -45,6 +46,7 @@ Options:
 `);
 }
 
+/** Returns sorted translation delta JSON files from the configured directory. */
 function readDeltaFiles(deltasPath) {
   const entries = fs.readdirSync(deltasPath, { withFileTypes: true });
   return entries
@@ -75,10 +77,12 @@ function normalizeTranslations(delta) {
   return null;
 }
 
+/** Describes how a translated message violates the source message contract. */
 function createContractMismatchReason(diff) {
   return `contract mismatch: missing vars [${formatList(diff.missingVariables)}], extra vars [${formatList(diff.extraVariables)}], missing tags [${formatList(diff.missingTags)}], extra tags [${formatList(diff.extraTags)}]`;
 }
 
+/** Validates one translated value against its source message contract. */
 function validateDeltaValue({
   key,
   value,
@@ -134,6 +138,7 @@ function validateDeltaValue({
   return { ok: true };
 }
 
+/** Runs this script's command-line workflow. */
 function main() {
   const args = parseCliArgs(process.argv.slice(2));
 

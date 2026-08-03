@@ -52,10 +52,12 @@ const ENGLISH_CASING_GUIDANCE = [
   "- Avoid all-caps except for established acronyms such as API or SQL, product-defined labels, OK, official all-caps proper names, or an explicit design-system convention. Do not use all-caps for emphasis.",
 ];
 
+/** Checks whether a locale identifier represents English. */
 function isEnglishLocale(locale) {
   return /^en(?:[-_]|$)/i.test(String(locale ?? ""));
 }
 
+/** Prints command-line usage information. */
 function printHelp() {
   console.log(`Usage:
   node skills/use-react-intl-universal/scripts/create-translation-tasks.mjs --locales src/locales --default-locale en-US --base-ref origin/master --output tmp/i18n-translation-tasks
@@ -80,6 +82,7 @@ Options:
 `);
 }
 
+/** Reads and parses a JSON file from a specific Git revision. */
 function readJsonFromGit(ref, filePath) {
   if (!ref) {
     return null;
@@ -166,10 +169,12 @@ function getChangedDefaultItems(currentDefaultJson, previousDefaultJson) {
   return items;
 }
 
+/** Finds a locale target by its normalized locale identifier. */
 function findLocale(localeData, localeName) {
   return localeData.find((item) => item.locale === localeName);
 }
 
+/** Creates an empty locale target when the locale file does not yet exist. */
 function createEmptyLocaleTarget(localesPath, locale) {
   return {
     locale,
@@ -201,6 +206,7 @@ function getSourceMessageByKey(sourceMessages) {
   return map;
 }
 
+/** Splits items into fixed-size batches. */
 function chunkItems(items, maxItemsPerTask) {
   if (!Number.isFinite(maxItemsPerTask) || maxItemsPerTask <= 0 || items.length <= maxItemsPerTask) {
     return [items];
@@ -213,6 +219,7 @@ function chunkItems(items, maxItemsPerTask) {
   return chunks;
 }
 
+/** Returns the file-name suffix for a task batch. */
 function getBatchSuffix(batchIndex, batchCount) {
   if (batchCount <= 1) {
     return "";
@@ -221,6 +228,7 @@ function getBatchSuffix(batchIndex, batchCount) {
   return `.part-${String(batchIndex + 1).padStart(3, "0")}`;
 }
 
+/** Compacts source context into a single task-friendly snippet. */
 function summarizeContextSnippet(snippet) {
   if (typeof snippet !== "string") {
     return null;
@@ -234,6 +242,7 @@ function summarizeContextSnippet(snippet) {
   return normalized.length > 360 ? `${normalized.slice(0, 357)}...` : normalized;
 }
 
+/** Parses a value as a positive number or returns a fallback. */
 function getPositiveNumber(value, fallback) {
   if (value == null) {
     return fallback;
@@ -243,6 +252,7 @@ function getPositiveNumber(value, fallback) {
   return Number.isFinite(number) && number > 0 ? number : fallback;
 }
 
+/** Summarizes message counts and estimated workload for a task batch. */
 function createTaskSizeSummary(taskFiles, warningBytes, targetBytes) {
   const markdownFiles = taskFiles.filter((task) => Number.isFinite(task.markdownBytes));
   const totalMarkdownBytes = markdownFiles.reduce((total, task) => total + task.markdownBytes, 0);
@@ -286,6 +296,7 @@ function createTaskSizeSummary(taskFiles, warningBytes, targetBytes) {
   };
 }
 
+/** Sorts translation task items by locale, source location, and key. */
 function sortTaskItems(items, sortMode) {
   if (sortMode === "key") {
     return [...items].sort((a, b) => a.key.localeCompare(b.key));
@@ -426,6 +437,7 @@ function createTaskMarkdown(task) {
   return `${lines.join("\n")}\n`;
 }
 
+/** Runs this script's command-line workflow. */
 function main() {
   const args = parseCliArgs(process.argv.slice(2));
 

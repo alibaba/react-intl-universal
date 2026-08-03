@@ -29,10 +29,12 @@ const ENGLISH_CASING_GUIDANCE = [
   "- For English target locales, verify casing by UI role and surrounding product convention: Sentence case for sentences, descriptions, validation messages, placeholders, tooltips, empty states, table-cell copy, and most inline UI copy; Title Case for page/modal/section/card/tab titles when the surrounding UI uses title style; preserve proper casing for product names, feature names, brand terms, people, places, countries, nationalities, languages, weekdays, months, organizations, acronyms/initialisms, and the pronoun I; avoid all-caps except for established acronyms, OK, product-defined labels, official all-caps proper names, or explicit design-system conventions.",
 ];
 
+/** Checks whether a locale identifier represents English. */
 function isEnglishLocale(locale) {
   return /^en(?:[-_]|$)/i.test(String(locale ?? ""));
 }
 
+/** Prints command-line usage information. */
 function printHelp() {
   console.log(`Usage:
   node skills/use-react-intl-universal/scripts/create-translation-review-tasks.mjs --review tmp/i18n-delta-review.json --tasks tmp/i18n-translation-tasks/manifest.json --deltas tmp/i18n-translation-results --output tmp/i18n-translation-review-tasks
@@ -50,14 +52,17 @@ Options:
 `);
 }
 
+/** Reads and parses a JSON file. */
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
 }
 
+/** Checks whether an object owns the requested property. */
 function hasOwn(object, key) {
   return Object.prototype.hasOwnProperty.call(object, key);
 }
 
+/** Normalizes supported translation-delta shapes into a key/value map. */
 function normalizeTranslations(delta) {
   if (delta.translations && typeof delta.translations === "object" && !Array.isArray(delta.translations)) {
     return delta.translations;
@@ -76,10 +81,12 @@ function normalizeTranslations(delta) {
   return null;
 }
 
+/** Infers a locale identifier from a delta file's relative path. */
 function inferLocaleFromDeltaPath(deltaPath, deltasPath) {
   return path.basename(deltaPath, ".json").replace(/\.part-\d+$/i, "");
 }
 
+/** Returns sorted translation delta files from the configured directory. */
 function readDeltaFiles(deltasPath) {
   if (!fs.existsSync(deltasPath)) {
     return [];
@@ -91,6 +98,7 @@ function readDeltaFiles(deltasPath) {
     .sort((a, b) => a.localeCompare(b));
 }
 
+/** Loads and merges translated values from all delta files by locale. */
 function loadDeltaTranslations(deltasPath) {
   const translationsByLocale = new Map();
 
@@ -115,6 +123,7 @@ function loadDeltaTranslations(deltasPath) {
   return translationsByLocale;
 }
 
+/** Finds generated translation task JSON files below a task directory. */
 function findTaskJsonPaths(inputPath) {
   const resolved = resolveFromCwd(String(inputPath));
   const stat = fs.existsSync(resolved) ? fs.statSync(resolved) : null;
@@ -138,6 +147,7 @@ function findTaskJsonPaths(inputPath) {
   throw new Error("--tasks must point to a task JSON file, manifest.json, or task output directory");
 }
 
+/** Loads translation task items and their source context. */
 function loadTaskItems(tasksPath) {
   const byLocale = new Map();
   const taskJsonPaths = findTaskJsonPaths(tasksPath);
@@ -163,6 +173,7 @@ function loadTaskItems(tasksPath) {
   return { byLocale, taskFiles };
 }
 
+/** Adds a normalized issue or warning to a review signal bucket. */
 function addIssueOrWarning(index, item) {
   if (!item || !item.locale || !item.key) {
     return;
@@ -174,6 +185,7 @@ function addIssueOrWarning(index, item) {
   index.set(id, list);
 }
 
+/** Indexes audit issues and warnings by locale and translation key. */
 function buildReviewSignalIndex(report) {
   const index = new Map();
 
@@ -188,14 +200,17 @@ function buildReviewSignalIndex(report) {
   return index;
 }
 
+/** Builds a stable sort key from a source reference. */
 function sourceSortKey(item) {
   return `${item.source?.filePath ?? "\uffff"}:${String(item.source?.line ?? Number.MAX_SAFE_INTEGER).padStart(8, "0")}:${item.key}`;
 }
 
+/** Returns the numeric sorting rank for a severity. */
 function severityRank(signals) {
   return Math.min(...signals.map((signal) => SEVERITY_ORDER[signal.severity] ?? 99), 99);
 }
 
+/** Compares estimated display widths of a translation and its source message. */
 function getTranslationWidthRatio(defaultMessage, translation) {
   if (typeof defaultMessage !== "string" || typeof translation !== "string" || defaultMessage.length === 0) {
     return null;
@@ -214,6 +229,7 @@ function getTranslationWidthRatio(defaultMessage, translation) {
   };
 }
 
+/** Builds the review reasons for one translated message from deterministic signals. */
 function createReasonList({ signals, taskItem, includeAll, includeUiRisks, translation }) {
   const reasons = [];
 
@@ -237,6 +253,7 @@ function createReasonList({ signals, taskItem, includeAll, includeUiRisks, trans
   return { reasons, width };
 }
 
+/** Joins translations, source task context, and review signals into review items. */
 function createReviewItems({ translationsByLocale, taskItemsByLocale, signalIndex, includeAll, includeUiRisks }) {
   const items = [];
 
@@ -290,6 +307,7 @@ function createReviewItems({ translationsByLocale, taskItemsByLocale, signalInde
   ));
 }
 
+/** Splits items into fixed-size batches. */
 function chunkItems(items, maxItemsPerTask) {
   if (!Number.isFinite(maxItemsPerTask) || maxItemsPerTask <= 0 || items.length <= maxItemsPerTask) {
     return [items];
@@ -302,6 +320,7 @@ function chunkItems(items, maxItemsPerTask) {
   return chunks;
 }
 
+/** Returns the file-name suffix for a task batch. */
 function getBatchSuffix(batchIndex, batchCount) {
   if (batchCount <= 1) {
     return "";
@@ -310,6 +329,7 @@ function getBatchSuffix(batchIndex, batchCount) {
   return `.part-${String(batchIndex + 1).padStart(3, "0")}`;
 }
 
+/** Groups review items by locale for task generation. */
 function groupItems(items) {
   const groups = new Map();
   for (const item of items) {
@@ -324,6 +344,7 @@ function groupItems(items) {
     .sort((a, b) => a.locale.localeCompare(b.locale));
 }
 
+/** Counts review reasons by type across generated task items. */
 function countReasons(items) {
   const counts = {};
   for (const item of items) {
@@ -334,6 +355,7 @@ function countReasons(items) {
   return counts;
 }
 
+/** Renders one locale review batch as an actionable Markdown task. */
 function createTaskMarkdown(task) {
   const lines = [
     `# Translation quality review: ${task.locale}${task.batchCount > 1 ? ` (${task.batchIndex + 1}/${task.batchCount})` : ""}`,
@@ -408,6 +430,7 @@ function createTaskMarkdown(task) {
   return `${lines.join("\n")}\n`;
 }
 
+/** Runs this script's command-line workflow. */
 function main() {
   const args = parseCliArgs(process.argv.slice(2));
 

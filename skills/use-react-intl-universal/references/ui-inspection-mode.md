@@ -1,354 +1,400 @@
 # UI Inspection Mode
 
-Use this mode when the user asks to inspect, patrol, audit, or QA a running localized UI. It is an end-to-end workflow for exploration, source attribution, fixing, release verification, and evidence-backed reporting.
+Use this workflow when the user asks to inspect, patrol, audit, fix, or release-verify a localized UI. It covers runtime exploration, source attribution, low-risk remediation, verification in an authorized deployment, and an evidence-backed report.
+
+This reference owns run initialization, evidence admission, independent evidence/code/report review, report rendering, loop reuse and reverification, and completion gates. Read [UI Inspection Evidence](ui-inspection-evidence.md) before creating `report.json` or accepting a screenshot. The executable schema and validator, not prose or the renderer, decide whether a report is internally valid.
 
 ## Contents
 
-- [Non-negotiable invariants](#non-negotiable-invariants)
-- [Required inputs](#required-inputs)
-- [Phase 0: bootstrap the run](#phase-0-bootstrap-the-run)
+- [Operating modes](#operating-modes)
+- [Hard gates](#hard-gates)
+- [Phase 0: initialize one durable run](#phase-0-initialize-one-durable-run)
 - [Phase 1: build the risk and coverage inventory](#phase-1-build-the-risk-and-coverage-inventory)
 - [Phase 2: inspect depth-first](#phase-2-inspect-depth-first)
-- [Phase 3: admit or reject observations](#phase-3-admit-or-reject-observations)
-- [Phase 4: select and implement fixes](#phase-4-select-and-implement-fixes)
-- [Phase 5: release and verify](#phase-5-release-and-verify)
-- [Phase 6: finish artifacts and hand off](#phase-6-finish-artifacts-and-hand-off)
+- [Phase 3: admit an observation](#phase-3-admit-an-observation)
+- [Phase 4: design and implement a low-risk fix](#phase-4-design-and-implement-a-low-risk-fix)
+- [Phase 5: publish and verify](#phase-5-publish-and-verify)
+- [Phase 6: finalize and obtain human-view approval](#phase-6-finalize-and-obtain-human-view-approval)
 - [Safety boundaries](#safety-boundaries)
 
-## Non-negotiable invariants
+## Operating modes
 
-1. **Depth-first coverage:** finish the safe child states of one route, menu item, or tab before moving to its sibling. Inspecting only the default active state is partial coverage.
-2. **Observed findings only:** a source match, long translation, or reviewer suspicion is not a UI finding until the relevant runtime state visibly demonstrates the problem.
-3. **Attribution before fixing:** distinguish current-repository frontend copy, API/system copy, user-created data, shared/external UI, and unknown ownership before choosing a fix.
-4. **Evidence before status:** never assign `verifiedFixed` until the exact released commit is visible in the target environment and accepted after evidence exists.
-5. **No capacity regression:** a fix must not hide a component, shrink the useful visible range, expose fewer useful items, remove an editor or control, or merely move clipping to a neighboring element.
-6. **Report prevention, not reconstruction:** copy the supplied wireframe before inspection and populate that copy throughout the run. Do not recreate its structure, CSS, or interactions from memory.
-7. **One run identity per task:** reuse the first run folder and report for every loop on the same repository in the same Codex task. A new Codex task gets a new run identity.
+Record one authorization in `run.authorization` before changing code:
 
-## Required inputs
+- `inspect-only`: inspect and report; do not change source, commit, push, or publish.
+- `fix-local`: inspect and modify local source; do not push or publish.
+- `release-verify`: inspect, fix, commit, push, publish through the repository's authorized non-production release workflow, and verify the resulting deployment.
 
-Identify these before browser work:
+Do not infer publish authorization from a generic inspection request. Repository-specific runbooks may provide explicit standing authorization.
 
-- repository path when source attribution or fixing is expected;
-- existing browser and tab the user wants controlled;
-- entry URL and target locale;
-- report display language, which may differ from the inspected locale;
-- account, role, workspace, tenant, and test data when relevant;
-- viewport constraints;
-- release or preview workflow when local rendering cannot prove the fix;
-- user-provided glossary, style guide, product documentation, and environment-specific exclusions.
+## Hard gates
 
-Inspect only the requested locale and languages exposed by the current product environment. Locale files in source do not expand runtime scope by themselves.
+1. **Depth-first coverage:** finish the safe child states of one route, menu item, or tab before moving to its sibling.
+2. **Observed findings only:** source matches and static length warnings guide exploration but are not findings without visible runtime evidence.
+3. **Before evidence precedes edits:** do not edit, stage, or commit product source for a suspected issue until its exact before capture is proven to come from the published baseline commit, admitted from the saved pixels, independently reviewed as supporting the claim, source-attributed, written to `report.json`, and accepted by the validator.
+4. **Attribution before remediation:** identify local frontend copy, API system copy, user-created data, shared/external UI, or unknown ownership before choosing a fix.
+5. **Claim-level evidence:** every finding claim is bound to an immutable capture, a role-specific annotation, an independent evidence verdict, and the hashed raw reviewer artifact.
+6. **Facts derive status:** do not hand-author `verifiedFixed`, verification confidence, summary counts, or final report status.
+7. **Risk is a floor:** never claim risk below the risk calculated from the actual diff and independent code review.
+8. **No capacity or feature regression:** a fix must not hide controls, editors, tables, charts, labels, columns, tabs, validation, or useful visible range.
+9. **Exact deployment provenance:** a mutable branch Preview URL does not prove a commit. Verification evidence must reference a deployment whose build commit equals the current final release commit. Preserve Preview identity in the current capture URL whenever the application allows it. If an SPA removes that query during same-route navigation, record the exact requested state URL plus either an actually loaded resource carrying the identity or an inspectable runtime publication manifest containing the exact identity, release version, and loaded resource list. Hash the raw proof artifact; the current URL must still match the inspected product route/state.
+10. **Independent review or fail closed:** preflight distinct evidence, code-risk, and final-report reviewer sessions. If they are unavailable, keep the result partial or blocked; never invent a reviewer or approve your own work.
+11. **One run identity:** reuse the first run folder for every loop on the same repository in the same Codex task unless the user explicitly requests a new run.
 
-## Phase 0: bootstrap the run
+## Phase 0: initialize one durable run
 
-### 0.1 Choose the durable run folder
+Record before browser work:
 
-Prefer an ignored temporary directory already used by the repository. Create:
+- repository, branch, baseline commit, dirty-state notes, and authorization;
+- existing browser/profile requirements and entry URL;
+- target locale and report display language;
+- actual CSS viewport, device pixel ratio, browser zoom, and screen class;
+- account, role, tenant, workspace, and representative test data when relevant;
+- Preview/release workflow;
+- glossary, product documentation, and environment-specific exclusions.
+- availability and identities for three distinct reviewer sessions: evidence, code risk, and final report.
+
+Use the actual desktop viewport. Do not resize the browser to make a defect disappear or claim a larger visible capacity than the user has.
+
+Create the run once:
+
+```bash
+node <skill-dir>/scripts/init-ui-inspection-report.mjs \
+  --registry-root <absolute-report-registry-root> \
+  --run-dir <absolute-report-registry-root>/<repository>/<first-run-id> \
+  --run-id <first-run-id> \
+  --task-id <current-codex-task-id> \
+  --repository <repository> \
+  --branch <branch> \
+  --baseline-commit <commit> \
+  --target-url <url> \
+  --target-locale <locale-or-comma-separated-locales> \
+  --viewport-width <css-width> \
+  --viewport-height <css-height> \
+  --device-scale-factor <dpr> \
+  --browser-zoom <zoom-ratio> \
+  --screen-class <screen-label> \
+  --report-language <language> \
+  --authorization <inspect-only|fix-local|release-verify> \
+  --primary-inspector-id <current-agent-id>
+```
+
+This command copies the run-local report template and creates:
 
 ```text
-<ignored-temp>/i18n-ui-inspection-<first-run-id>/
+<run-directory>/
   inspection-log.md
   report.json
   report.html
+  artifacts/
   screenshots/
 ```
 
-If the current task already created a run for this repository, reuse it. Do not create a second timestamp folder for another loop in the same task.
-
-### 0.2 Copy the report wireframe before inspection
-
-This is a hard start condition:
-
-```text
-COPY skills/use-react-intl-universal/references/ui-inspection-report-wireframe.html
-TO   <run-folder>/report.html
-```
-
-Treat the copied file as an immutable structural base:
-
-- preserve its Bootstrap dependency, section hierarchy, badges, finding modal, image lightbox, nested Escape behavior, feedback controls, and right-side Back to top button;
-- replace sample values, findings, screenshots, metadata, and visible language in place;
-- add or remove repeated finding and screenshot entries only inside the existing content regions;
-- do not rewrite the page from scratch, substitute a simplified report, redesign its interaction model, or copy isolated fragments from memory;
-- do not leave sample findings, mock screenshots, template instructions, or `data-template-sample="true"` in the final report.
-
-Initialize it before exploration so each accepted observation can be written to the same report immediately. Keep `report.json` as the only report data model and regenerate the copied HTML with `render-ui-inspection-report.mjs`; do not separately hand-maintain counts, cards, screenshot lists, and annotations in HTML.
-
-### 0.3 Start the inspection log
-
-Record:
-
-- run identity and report path;
-- repository, branch, baseline commit, dirty-state notes, and target release branch;
-- URL, locale, report language, viewport, browser/tab, account/role if known, and start time;
-- glossary/context files actually read;
-- environment-specific exclusions;
-- source-risk searches and later coverage decisions.
+Generate the task token once at the start of the current Codex task and reuse it for every loop. The initializer recursively searches `--registry-root`; the same task/repository returns the existing run as machine-readable output with `reused: true`. It does not create or reject a second timestamped folder. `--target-url` is the canonical product entry known before publishing, not a future Preview URL.
 
 ## Phase 1: build the risk and coverage inventory
 
-### 1.1 Scan the current source
+### Scan source to target runtime states
 
-Use `rg` to locate high-risk UI patterns in the current route family:
+Use `rg` in the current route family to locate:
 
-- narrow fixed widths and compact inline styles;
-- form-label widths, required markers, and colon rendering;
-- fixed or locked table columns and action groups;
-- `ellipsis`, `overflow: hidden`, `white-space`, `word-break`, and line clamps;
-- grouped controls with wrapping, joined borders, or positional radius rules;
-- long labels, placeholders, table headers, menus, status labels, errors, empty states, and enum display names;
-- hardcoded source-language strings and locale fallbacks.
+- hardcoded source-language strings and locale fallbacks;
+- compact controls, long labels, placeholders, menus, status labels, errors, empty states, and enum names;
+- fixed widths, locked/fixed table columns, `ellipsis`, overflow, line clamp, wrapping, and word-break rules;
+- form-label punctuation and required-marker behavior;
+- grouped controls whose border/radius contract breaks when labels wrap;
+- shared constants, shared CSS, shared components, dependency/config changes, and locale keys with multiple consumers.
 
-Use this scan to target browser states. A source match is not yet a finding.
+Use source risk only to decide which UI states to inspect. Do not turn search output into a finding.
 
-### 1.2 Build the coverage tree
+### Build a source-backed parent/child coverage tree
 
-Create a live inventory from the visible product UI:
+Before browser exploration, derive the root denominator from route configuration, navigation configuration, registered tabs, or another inspectable product source. Save the raw inventory under `artifacts/coverage/` and record its hash, source references, discovered roots, in-scope roots, and explicit exclusions in `coverageInventory`. Every root coverage record must map to that inventory. Runtime-discovered child states can then extend the tree, but cannot replace the source-backed denominator with only the pages the Agent happened to open.
 
-- product primary and secondary navigation;
-- sidebars, trees, accordions, and side tabs;
-- page tabs and segmented controls;
-- dashboard modules and feature entry points;
-- filters, selects, search, date controls, and pagination;
-- create, configure, edit, and detail entries that can be opened without submission;
-- representative row actions, drawers, modals, popovers, tooltips, and empty/disabled/validation states.
+Open a route or state only through a visible product control, a task-provided canonical URL, or a route/query/hash shape confirmed in current source. Do not invent query parameters or guess hidden routes to increase coverage. A guessed URL that happens to render is not source-backed evidence.
 
-Each inventory item has one status:
+Inventory visible product UI:
 
-- `pending`
-- `in-progress`
-- `covered`
-- `partial`
-- `duplicate-sampled`
-- `skipped-risky`
-- `blocked`
-- `not-reached`
-- `external-out-of-scope`
+- primary and secondary navigation;
+- page tabs, side tabs, trees, accordions, and segmented controls;
+- filters, selects, search, date controls, pagination, and horizontal scrolling;
+- safe create/configure/edit/detail entries without final submission;
+- representative row actions, drawers, modals, popovers, tooltips, validation, empty, disabled, and loading states.
 
-Never silently omit an in-scope visible entry.
+Use these statuses:
+
+```text
+pending | in-progress | covered | partial | blocked | skipped-risky
+duplicate-sampled | external-out-of-scope | not-reached
+```
+
+Record a reason for `partial`, `blocked`, `skipped-risky`, `external-out-of-scope`, or `not-reached`. Every node records a renderer key. `duplicate-sampled` is limited to equivalent repeated controls/states with the same target, parent, URL, kind, and renderer key; record both representative and equivalence rationale. Never sample routes, tabs, modals, or drawers. A parent cannot be `covered` while a child remains pending, partial, blocked, or not reached.
 
 ## Phase 2: inspect depth-first
-
-### 2.1 Route traversal
 
 For each first-level route or menu item:
 
 1. mark it `in-progress`;
-2. open its initial state and wait for the page-specific main-content signal;
-3. record URL, action, locale, time, and an accepted coverage screenshot;
-4. inventory its child controls;
-5. inspect safe child controls recursively before returning to the parent inventory;
+2. open it and wait for a page-specific readiness signal;
+3. record canonical route/state, locale, viewport, data state, and scroll state;
+4. inventory visible child controls;
+5. inspect safe child controls recursively;
 6. close or cancel transient UI and restore a known state;
-7. mark the route `covered` only when its safe subtree is complete; otherwise use `partial` with explicit remaining items.
+7. mark it `covered` only after the safe subtree is complete.
 
-At minimum, attempt these layers when present:
+Treat every hard navigation, route transition, locale switch, reload, and browser-session replacement as a runtime-boundary event. Before saving the next screenshot, re-read and record the current route/state, target locale, CSS viewport, DPR, zoom, readiness, and exact deployment identity. Do not inherit those facts from the previous page. If deployment identity disappeared, restore the same source-backed product state through the deployment URL rules in [UI Inspection Evidence](ui-inspection-evidence.md), wait for readiness again, and verify the runtime proof before capture. A visually correct page from an unproven or different deployment is rejected evidence.
 
-- initial page state;
-- one representative filter or option set;
-- one safe primary create/configure/edit entry without final submission;
-- one representative row action or detail state;
-- pagination, page size, horizontal scroll, and fixed-column behavior;
+At minimum, attempt when present:
+
+- initial state;
+- one representative filter/option state;
+- one safe create/configure/edit entry without submission;
+- one row detail/action state;
+- pagination/page size and both horizontal-scroll extremes;
 - one tooltip, popover, drawer, or modal close/cancel flow;
-- one safe empty, disabled, loading, or validation state.
+- one empty, disabled, loading, or validation state.
 
-Sample repeated controls only when their rendering and text-length risks are equivalent. Mark the rest `duplicate-sampled`.
+Sample repeated controls only when their renderer, text-length risk, and interaction contract are equivalent.
 
-### 2.2 Scrollable containers
+### Blank or incomplete route
 
-Off-screen content is not automatically a defect. Before reporting a clipped table or tab strip:
+Do not report the first blank/loading frame.
 
-1. identify the intended scrollbar, scroll buttons, or fixed-column behavior;
-2. scroll in both directions;
-3. confirm all important content is reachable and fixed columns do not cover it at reachable positions;
-4. compare visible capacity before and after any attempted fix.
+1. Confirm the route is missing its page-specific main content.
+2. Reload the same deployment-bound state and wait at least 15 seconds.
+3. If still blank, reload the same deployment-bound state a second time and wait at least 15 seconds.
+4. If either reload recovers, inspect normally. Do not preserve the transient blank state as a finding, blocker, observation, or report screenshot.
+5. If both fail, record a coverage blocker. Treat it as i18n only when evidence connects the failure to locale loading or localized code.
 
-Report only unreachable content, unusable scrolling, fixed-column overlap, broken grouped-control styling, or translated text that breaks the intended component.
+For a Preview or other deployment-identified inspection, "reload the same deployment-bound state" does not mean blindly refreshing a mutable address bar. If navigation removed the deployment identity, reconstruct the same observed source-backed pathname/query/hash through the original deployment URL using a structured URL API, re-request it, and prove the loaded deployment again. Never accept a recovered page when the refresh silently fell back to a shared integration, pre-release, or other build.
 
-### 2.3 Blank or incomplete pages
+## Phase 3: admit an observation
 
-Do not create a finding from the first blank/white/loading state.
+An observation becomes an i18n finding only after all gates pass.
 
-1. Confirm the route is missing its expected main content, not merely empty data.
-2. Reload the same browser tab.
-3. Wait at least 15 seconds and check a page-specific main-content signal.
-4. If still blank, reload the same tab a second time.
-5. Wait at least 15 seconds again and check the signal.
-6. If either reload recovers, continue the normal i18n inspection from the recovered state. Do not list the transient blank state as a finding, blocker, non-i18n observation, or report screenshot.
-7. Only if both reloads fail may the route be recorded as a coverage blocker. It is an i18n finding only when evidence ties the failure to locale loading or localized code.
-
-Do not substitute hash re-entry, opening a new tab, or navigating away and back for the required same-tab reloads.
-
-### 2.4 Independent visual review
-
-For broad or high-assurance runs, an independent screenshot review is useful when subagents are available. Split it by route or small screenshot set. Give the reviewer locale, viewport, state, and raw screenshots, but not the primary inspector's suspected findings. The primary agent must triage every observation through Phase 3; reviewer output is never accepted automatically.
-
-## Phase 3: admit or reject observations
-
-An observation becomes a finding only after all four gates pass.
-
-### Gate A: runtime truth
-
-- The problem is visible in the named route and state.
-- The screenshot shows the described problem, not a nearby or later state.
-- The UI is fully loaded and the target locale is active.
-- The behavior is reproducible or otherwise clearly captured.
-
-### Gate B: i18n relevance
-
-Accept when translation, locale convention, target-language length, message rendering, or localized UI layout materially causes the problem.
-
-Reject or separate when it is generic product behavior, ordinary empty data, permissions, a recoverable load state, browser tooling, unrelated runtime failure, or user-created content.
-
-Do not change wording merely because a glossary contains a different term. A wording finding needs inaccurate/unnatural language, inconsistent product meaning, or a demonstrated UI-fit problem.
-
-### Gate C: source and ownership attribution
-
-For every visible unexpected-language string or questionable system label:
-
-1. search the current frontend source and locale files for the exact text and close variants;
-2. inspect the component, surrounding labels, and data flow;
-3. determine whether the value is local source, local locale data, API/system data, user-created data, shared/external UI, or unknown.
-
-Frontend-leaning system UI includes buttons, menus, tabs, navigation, toolbar actions, form commands, statuses, errors, empty-state instructions, and system enum display names. Treat these as frontend findings when source search confirms local ownership.
-
-User-created data includes file names, project/resource names, custom template names, titles, descriptions, tags, comments, custom fields, and imported record values. A wrong-language user value is not an i18n finding unless the product itself generated or mistranslated it.
-
-For API-returned text:
-
-- exclude it when business logic and the UI flow show it is user-created data;
-- mark it `needsHumanConfirmation` when it is fixed system metadata and ownership is backend-leaning or uncertain;
-- record the API/data-flow evidence and do not invent a local string-replacement map merely to make the screenshot look fixed.
-
-### Gate D: evidence admission
-
-Open [UI Inspection Evidence](ui-inspection-evidence.md) and complete this transition before assigning an ID or binding evidence to a finding:
+Use these transitions without skipping a state:
 
 ```text
-saved candidate
-  -> captureLedger.pendingPixelReview
-  -> primary agent opens the exact saved pixels
-  -> captureLedger.admitted -> screenshotManifest -> finding/coverage/report
-  OR captureLedger.rejected -> never enters the report
+runtime observation
+  -> evidence candidate
+  -> admitted Finding
+  -> fix planned
+  -> product source edited
 ```
 
-Do not treat a successful browser action, DOM snapshot, filename, recapture suffix, image dimensions, or another reviewer statement as pixel admission.
+An evidence candidate belongs only in the inspection log and coverage notes. It must not receive an `I18N-nnn` ID, remediation plan, code change, staging hunk, or commit until the admission checkpoint below passes. Source and DOM inspection may explain what the pixels show, but cannot replace the saved before image.
 
-### Finding record
+### Runtime truth
 
-Each accepted finding records:
+- The named route/state visibly demonstrates the claim.
+- The page is ready, the target locale is active, and the state is reproducible.
+- The saved pixels, not the live DOM or filename, show the problem.
+- The capture records actual device DPR separately from the saved file's sampling scale; Browser Use downsampling is not hidden by changing viewport metadata.
 
-- ID, title, severity, category, target locale, viewport, URL/state, and reproduction steps;
-- expected and actual behavior;
-- runtime evidence and accepted screenshot IDs;
-- source-search evidence, origin, owner, and user-data assessment;
-- fix recommendation, risk, acceptance criteria, and changed files when fixed;
-- lifecycle status and release commit used for verification.
+### I18n relevance
 
-Use these lifecycle states:
+Accept when localized wording, punctuation, target-language length, message rendering, locale conventions, or localized layout materially causes the defect.
 
-```text
-open -> fixedLocally -> committed -> publishedToPreview -> verifiedFixed
+Reject or separate ordinary product behavior, empty data, permission failures, recoverable loading, browser tooling, unrelated runtime errors, and user-created values.
+
+Do not create a terminology finding merely because a glossary uses another phrase. Require inaccurate or unnatural language, changed business meaning, inconsistent product terminology, or a demonstrated UI-fit defect.
+
+### Ownership
+
+For unexpected-language or questionable system copy:
+
+1. search exact text and close variants in source and locale files;
+2. inspect component and data flow;
+3. classify `frontend-source`, `frontend-locale-data`, `frontend-locale-fallback`, `api-system-copy`, `api-user-created-data`, `external-module`, or `unknown`;
+4. record searched terms, matches, owner, user-data assessment, and rationale.
+
+Buttons, menus, tabs, navigation, form commands, statuses, errors, empty-state instructions, and enum display names lean frontend only when source search confirms local ownership.
+
+File names, project/resource names, custom template names, titles, descriptions, tags, comments, custom fields, and imported record values usually lean user-created. Do not create an i18n finding for user-created data.
+
+For fixed API system copy with uncertain ownership, use `needs-human-confirmation`; do not build a local replacement map to make the screenshot look translated.
+
+### Evidence and independent reading
+
+Follow [UI Inspection Evidence](ui-inspection-evidence.md):
+
+1. save and register a capture;
+2. open that exact saved file by itself at original detail and admit or reject it; never decide from a contact sheet or bulk multi-image rendering;
+3. create a claim-specific evidence binding;
+4. give that one raw saved image, proposed claim, locale, and state to an independent reviewer without the primary inspector's expected verdict;
+5. record `supports`, `does-not-support`, or `uncertain` plus observed text and rationale;
+6. create the `I18N-nnn` finding only when an `issue-detail` binding receives `supports`.
+
+An element clip requires a supported `issue-context` full-viewport binding. A full-viewport screenshot may serve directly as `issue-detail` when the target is human-readable at original pixels.
+
+If the review surface shows black blocks, missing layers, or a suspicious composite, reopen the exact file individually and preserve both raw results. Reject persistent corruption; do not reject or approve saved pixels solely from a transient multi-image viewer artifact.
+
+### Baseline admission checkpoint before any code edit
+
+Before opening product source for modification, freeze the Finding's baseline evidence package in `report.json`:
+
+- the baseline deployment is `published` and its build commit equals `run.baselineCommit`;
+- the exact saved full-viewport or context-plus-detail pixels visibly prove the claim;
+- capture URL or deployment identity proof, target locale, viewport, DPR, zoom, state snapshot, readiness, hash, MIME, dimensions, and capture time are recorded;
+- pixel admission passed after opening the saved file at original detail;
+- an independent evidence reviewer returned `supports` for the exact claim and annotation;
+- source attribution and user-created-data assessment are complete;
+- the `finding-admitted` lifecycle event occurs after capture admission and independent evidence review;
+- the in-progress `report.json` passes structural and semantic validation.
+
+Only after this checkpoint may the lifecycle advance to `fix-planned` and product source editing begin. Keep the evidence package immutable. If the exact baseline cannot reproduce the issue, the reviewer returns `does-not-support` or `uncertain`, the deployment identity is not proven, or the validator fails, reject the candidate and do not remediate it. If code was already changed for such a candidate, remove that change from the release rather than manufacturing replacement before evidence afterward.
+
+## Phase 4: design and implement a low-risk fix
+
+### Select the narrowest semantically correct option
+
+1. fix hardcoded copy, locale punctuation, missing keys, or wrong locale data;
+2. improve inaccurate, unnatural, or needlessly verbose target-locale wording;
+3. apply a local leaf-component layout adjustment;
+4. change shared display behavior only when the defect is truly shared and all affected consumers can be checked;
+5. route backend, shared-shell, remote-module, or unknown ownership to the correct owner.
+
+Do not shorten correct copy only to conceal a layout defect. Do not expand a global selector to fix one component. Do not add language-independent whitespace when punctuation or spacing belongs to the locale message.
+
+When shorter copy is a legitimate part of the fix, review it as language before treating it as geometry: preserve the business meaning, grammatical number, workflow state, and distinction from neighboring labels. Compare the candidate against its source/default message, glossary context, all locale-key consumers, and the value or action it labels. A string that fits but changes meaning is a failed fix. Prefer natural compact wording; use an abbreviation only when it is conventional and still unambiguous in that product context.
+
+Before editing, search for duplicate route, package, module, feature-flag, or legacy implementations of the same visible surface. If the changed helper, message, type, or component has more than one consumer or build entry, include every affected implementation in the fix assessment and run the relevant build or focused check for each one. A fix that updates only the first matching implementation is incomplete; a shared change whose other consumers were not inspected cannot be called low risk.
+
+### Produce finding and release risk from Git
+
+Prefer one finding per commit. Group findings only when they share one inseparable root cause and the same affected consumers; otherwise a convenient batch increases the release blast radius and usually prevents a low-risk conclusion even when each visible fix is small.
+
+After a candidate fix is committed, generate its original finding-scoped facts and save the exact diff bytes:
+
+```bash
+node <skill-dir>/scripts/collect-ui-fix-evidence.mjs \
+  --repository <repository> \
+  --base <commit-before-this-fix> \
+  --fix <commit-that-introduced-this-fix> \
+  --report-root <run-directory> \
+  --diff-artifact artifacts/diffs/<finding-id>.diff \
+  --scope finding
 ```
 
-Use these terminal or exception states when needed:
+The generated classification is intentionally conservative. Read every diff and only narrow `changeKind`, affected surfaces, and risk factors when the code proves a smaller blast radius. The recorded changed-file set must equal the actual diff exactly; omitted files invalidate the report.
 
-```text
-verificationFailed
-needsHumanConfirmation
-notFixableInCurrentRepo
-deferred
-wontFix
+Do not rewrite that Finding assessment in later loops. Before each release candidate, separately generate top-level `releaseAssessment` for the complete current release:
+
+```bash
+node <skill-dir>/scripts/collect-ui-fix-evidence.mjs \
+  --repository <repository> \
+  --base <run-baseline-commit> \
+  --fix <current-final-release-commit> \
+  --report-root <run-directory> \
+  --diff-artifact artifacts/diffs/release-<final-commit>.diff \
+  --scope release \
+  --finding-ids <all-findings-with-code-fixes>
 ```
 
-`needsHumanConfirmation` remains an `I18N-xxx` finding because the visible system copy is an i18n candidate that still needs ownership confirmation. Keep blockers and non-i18n observations outside the normal `I18N-xxx` sequence.
+The release assessment must cover exactly `run.baselineCommit..run.finalCommit`, list every fixed Finding, and reference current passing validations. This preserves each Finding's original change history while making the complete cumulative release auditable.
 
-## Phase 4: select and implement fixes
+Risk floors:
 
-### 4.1 Fix order
+- high: dependency/lock/config/runtime, global CSS, shared foundations, business logic, request contracts, cross-module or unknown blast radius;
+- medium: local layout, table geometry, shared display maps, multi-consumer messages, or cross-locale rendering;
+- low: isolated leaf copy, locale-owned punctuation, or a display-only constant with no shared behavior.
 
-Choose the first option that preserves meaning and component behavior:
+To move risk toward low, redesign the fix to reduce its scope. Tests do not convert a global or behavioral change into a low-scope change.
 
-1. fix hardcoded text, locale punctuation, missing keys, or wrong locale data;
-2. improve inaccurate, unnatural, or needlessly verbose target-locale copy;
-3. apply a narrow local width, flex, grid, or label-layout adjustment;
-4. change a shared component only when the local problem represents a real shared contract and neighboring usages can be tested;
-5. route backend, shared-shell, remote-module, or unknown ownership to the correct owner instead of masking it locally.
+### Reuse source/locale validation
 
-A glossary is evidence, not an unconditional replacement source. Preserve product meaning first; when a canonical term is too long for a compact control, choose a natural shorter expression only when context remains unambiguous and record the tradeoff.
+When a UI finding modifies react-intl-universal messages or locale files, also follow the relevant daily workflow steps from `SKILL.md`: source-of-truth `.d()` update, extraction when configured, changed-key synchronization, ICU/tag contract checks, target-language review, and changed-key audit.
 
-### 4.2 Regression gate before accepting a fix
+Run proportional code checks and record structured validation entries. Preserve raw output with:
 
-Compare the same locale, viewport, route, interaction state, data state, and scroll position. Reject a fix when any of these is true:
+```bash
+node <skill-dir>/scripts/run-ui-inspection-validation.mjs \
+  --id <validation-id> \
+  --scope <source|locale|test|build|git|runtime|release|report> \
+  --report-root <run-directory> \
+  --artifact artifacts/validations/<validation-id>.json \
+  --cwd <repository> \
+  -- <command> <arguments...>
+```
 
-- fewer useful labels, columns, tabs, or controls are visible;
-- a neighboring label becomes clipped or a fixed column covers another column;
-- a component, editor, chart, action, or validation area disappears;
-- the fix only moves the problem to another element;
-- wording is less accurate, less grammatical, or no longer matches product meaning;
-- a broad CSS change affects unrelated routes without evidence.
+A command summary without its execution time, exit code, and hashed raw output is not sufficient.
 
-For potentially risky layout changes, inspect the target component plus its immediate siblings and one representative populated/empty state.
+### Independent code-risk review
 
-### 4.3 Code validation
+Before marking verification passed, give an independent SubAgent that is not the primary inspector:
 
-Run validation proportional to the changed code:
+- repository path and exact base/fix commits;
+- actual diff and changed tests;
+- relevant glossary/context files;
+- no desired risk conclusion.
 
-- parse changed locale JSON;
-- run extraction/synchronization checks when locale files are generated;
-- run targeted tests, typecheck, lint, or production build as available;
-- run `git diff --check`;
-- determine whether failures implicate changed files or are pre-existing.
+Require it to identify business, request, shared-component, CSS, dependency, cross-locale, editor/table/form, and missing-test regressions. Preserve the raw review under `artifacts/reviews/`, then record its exact report-compatible `finding` or `release` scope, complete finding ID set, `subagent` or `human` reviewer type, reviewer ID, unique review session ID, exact commits/diff hash, artifact hash, structured P0-P3 findings, and one string notes field. The validator compares these fields with the raw artifact exactly; do not normalize aliases, arrays, or missing IDs only during report assembly. The code reviewer and session must differ from evidence review. Review may happen before push. Unresolved P0/P1 blocks verification. An unresolved P2 blocks a `low` risk claim.
 
-Update the finding to `fixedLocally` only after the intended code and validation evidence exist.
+## Phase 5: publish and verify
 
-## Phase 5: release and verify
+For `release-verify` runs:
 
-When the local repository cannot render the authoritative environment, publish through the project's normal preview workflow.
+1. commit and push the exact fix set;
+2. publish through the repository's authorized Preview workflow;
+3. preserve the raw publish/provenance output under `artifacts/deployments/`, then record its hash, provider, publish/build IDs, build commit, Preview URL, publish time, command, and result summary;
+4. verify the deployment build commit equals `run.finalCommit`, the run-level release assessment covers `run.baselineCommit..run.finalCommit`, and its independent release review is approved;
+5. navigate to the exact product state from the recorded fix deployment Preview URL, preserving its Preview identity query, then restore the same state key, locale, viewport, data state, and scroll state; if the SPA removes the query, save `deploymentIdentityProof` with the exact requested state URL and either an actually loaded identity-bearing resource or a matching runtime publication manifest, plus the hashed raw proof artifact; never reuse a baseline deployment identity for final evidence;
+6. wait for page-specific readiness;
+7. inspect the original region, immediate neighbors, useful capacity, and key component presence. Treat the opened saved pixels as the final visual fact: DOM `scrollWidth`, computed styles, bounding boxes, and text measurements are diagnostics only. Sticky/fixed columns, masks, transforms, clipping ancestors, overlays, and z-index can hide content even when DOM metrics report enough width;
+8. capture, open, admit, bind, and independently review final evidence;
+9. reverify every previously fixed Finding on this latest deployment and set each `verification.verifiedAtCommit` to `run.finalCommit`; never carry an older after screenshot forward as current proof.
 
-1. Commit and push the exact fix set according to the repository workflow.
-2. Record the local commit and remote branch commit.
-3. Publish and confirm the release system used that exact commit.
-4. Mark affected findings `publishedToPreview`.
-5. Open the same route and interaction state in the target environment.
-6. Wait for page-specific readiness, not only global-shell text.
-7. Capture and admit after evidence under [UI Inspection Evidence](ui-inspection-evidence.md).
-8. Compare the target area, immediate neighbors, useful visible capacity, and required component presence.
+Every passed visual acceptance check must reference supported `verification-context`, `verification-detail`, or `regression-check` evidence. Before evidence cannot satisfy a final acceptance check. Truncation, overflow, overlap, alignment, component-integrity, word-break, form-label, and interaction fixes require a separate `regression-check` claim that identifies the protected neighbor, component, or visible capacity; do not overload the “problem disappeared” claim.
 
-If the released UI looks correct but every saved after candidate is rejected, leave the finding at `publishedToPreview`; record the rejected candidates and recapture. Do not infer `verifiedFixed` from the live page, source diff, or release success.
+The final Preview and regression claims may reference the same admitted full-viewport capture when that one image visibly proves both. Keep the bindings and reviews separate, but render the shared capture only once in the Finding's After column. Use distinct captures only when the claims require different states, viewports, locales, or visible regions.
 
-If verification fails:
+If final evidence is clipped, add a supported full-viewport `verification-context`. If verification fails, bind the actual released failure as `failed-verification`, keep it separate from baseline evidence, fix again, republish, and reverify.
 
-- preserve the failed verification screenshot with a precise reason;
-- set `verificationFailed`;
-- fix, validate, republish, and reverify;
-- do not relabel the failed screenshot as before or final after evidence.
+If an evidence or final-report reviewer finds a stale, swapped, irrelevant, unreadable, or wrongly annotated screenshot, invalidate the affected final binding and reopen the Finding. Correct the product, state reconstruction, capture, claim, or status, then repeat admission, independent evidence review, Preview verification, report validation, and final review. Do not obtain approval by editing only the caption or annotation when the saved pixels do not prove the claim.
 
-Only the final released commit's accepted screenshot can prove `verifiedFixed`. Earlier-release screenshots may document intermediate history but cannot stand in for final verification.
+## Phase 6: finalize and obtain human-view approval
 
-## Phase 6: finish artifacts and hand off
+1. Resolve all pending captures and active coverage. Use `complete-candidate` only when coverage is complete; use `partial` or `blocked` with explicit terminal coverage reasons when a complete inspection is impossible.
+2. Ensure every passed acceptance check has matching final visual evidence or a passing validation record.
+3. Set `run.status` to `complete-candidate`, `partial`, or `blocked`; do not add `reviews.finalReport` yet. A current failed validation blocks `complete-candidate`; a documented `failed-pre-existing` validation remains human attention and cannot support acceptance. Freeze substantive report data, `revision`, and `run.updatedAt` at this point.
+4. Run the validator and renderer from the run-local template. Preserve the report check output as a `scope: report` validation artifact before asking for final approval. This report-scope check intentionally runs after the frozen `run.updatedAt`; do not advance `run.updatedAt` merely to admit it. Source, locale, test, build, Git, runtime, and release validations must still predate the frozen report state:
 
-Use [UI Inspection Evidence](ui-inspection-evidence.md) as the single report/evidence contract.
+```bash
+node <skill-dir>/scripts/validate-ui-inspection-report.mjs \
+  --report-json <run-directory>/report.json \
+  --repository <repository> \
+  --json
 
-Before handoff:
+node <skill-dir>/scripts/render-ui-inspection-report.mjs \
+  --report-json <run-directory>/report.json \
+  --output <run-directory>/report.html \
+  --repository <repository>
 
-- every coverage item has a terminal coverage status;
-- every `verifiedFixed` finding has accepted before and final-release after evidence;
-- every open or confirmation-required finding has current-state evidence and an owner/follow-up;
-- every file referenced by a finding or appendix is `admitted` in `captureLedger`, and no rejected candidate is present in `screenshotManifest`;
-- blockers and non-i18n observations are separate and have screenshots when visually observable;
-- summary counts match the finding states;
-- the screenshot appendix contains filename, capture time, URL/state, action, status, and notes for every admitted screenshot;
-- report sample data and mock content are gone;
-- code validation and release metadata are recorded;
-- the same run folder/report has been reused across loops.
+node <skill-dir>/scripts/run-ui-inspection-validation.mjs \
+  --id <report-validation-id> \
+  --scope report \
+  --report-root <run-directory> \
+  --artifact artifacts/validations/<report-validation-id>.json \
+  --cwd <repository> \
+  -- node <skill-dir>/scripts/validate-ui-inspection-report.mjs \
+    --report-json <run-directory>/report.json \
+    --repository <repository> \
+    --json
+```
 
-Handoff with the paths to `inspection-log.md`, `report.json`, `report.html`, and `screenshots/`, plus a concise count of found, fixed, verified, and human-attention items. State any browser policy or access limitation without claiming the corresponding interaction was verified.
+5. Add the returned report validation record to `report.json`, validate and render the resulting draft, then give a fresh SubAgent that did not perform evidence or code-risk review only the rendered report, `report.json`, and saved screenshots. Ask it to review every finding as a human reader: claim/image/annotation consistency, before/after comparability, acceptance coverage, provenance, and whether fix risk is understandable.
+6. Preserve the raw final review under `artifacts/reviews/`. Record its distinct reviewer/session identity, artifact hash, `coverageAssessable`, `artifactUsable`, structured finding results, the validator's `reviewableContentSha256`, and current `revision` in `reviews.finalReport`.
+7. Validate and render again. An approved `complete-candidate` report derives `completed` or `completed-with-attention`; approved `partial` and `blocked` reports retain those honest statuses. Do not store a derived completed status as a manual run status.
+8. After the freeze, only the matching report-validation record and matching final-review record may be inserted without changing the revision or update time. Any other report, evidence, annotation, renderer, template, CSS, or JavaScript change invalidates both records: increment `revision`, set a new `run.updatedAt`, remove stale report validation and final review, render a new draft, and repeat validation and independent review.
+
+Capture raw screenshots without baked-in red boxes or labels. Store annotations on evidence bindings so the renderer can present each claim accurately in previews and lightboxes.
+
+The final reviewer must use `changes-requested` or `uncertain` when any finding is mismatched, insufficient, unreadable, or not risk-assessable. Do not edit the report merely to obtain an approval verdict; correct the underlying evidence, finding, fix, or status.
 
 ## Safety boundaries
 
 Explore safe states aggressively, but do not confirm destructive or irreversible actions without explicit authorization.
 
-Avoid final confirmation for delete, remove, archive, disable, publish, payment, send, invite, production settings, or real-data mutation. It is normally safe to open and cancel dialogs, menus, filters, date pickers, dropdowns, pagination, tabs, create/edit drawers before submission, validation states, and detail views.
+Do not submit delete, remove, archive, disable, production publish, payment, send, invite, or real-data mutation actions. It is normally safe to open and cancel dialogs, menus, filters, dropdowns, pagination, tabs, create/edit drawers before submission, validation states, and detail views.
 
-When an action may mutate data, capture the pre-action state, mark it `skipped-risky`, and record the exact untested action.
+When an action may mutate data, record `skipped-risky`, capture the pre-action state when useful, and state the exact untested action.

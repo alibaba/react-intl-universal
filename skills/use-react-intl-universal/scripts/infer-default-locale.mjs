@@ -23,6 +23,7 @@ import {
   splitCsv,
 } from "./lib/i18n-audit.mjs";
 
+/** Prints command-line usage information. */
 function printHelp() {
   console.log(`Usage:
   node skills/use-react-intl-universal/scripts/infer-default-locale.mjs --source src --locales src/locales
@@ -37,6 +38,7 @@ Options:
 `);
 }
 
+/** Prints the inferred default-locale result as a text report. */
 function printTextReport(report) {
   console.log(`Source: ${relativePath(report.sourcePath)}`);
   console.log(`Locales: ${relativePath(report.localesPath)}`);
@@ -65,6 +67,7 @@ function printTextReport(report) {
   }
 }
 
+/** Runs this script's command-line workflow. */
 function main() {
   const args = parseCliArgs(process.argv.slice(2));
 

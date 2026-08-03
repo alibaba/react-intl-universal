@@ -34,6 +34,7 @@ import {
   splitCsv,
 } from "./lib/i18n-audit.mjs";
 
+/** Prints command-line usage information. */
 function printHelp() {
   console.log(`Usage:
   node skills/use-react-intl-universal/scripts/audit-changed-locale-keys.mjs --tasks tmp/i18n-translation-tasks/manifest.json --locales src/locales --default-locale en-US
@@ -48,6 +49,7 @@ Options:
 `);
 }
 
+/** Reads and parses a JSON file. */
 function readJsonFile(filePath, label) {
   try {
     return JSON.parse(fs.readFileSync(resolveFromCwd(String(filePath)), "utf8"));
@@ -56,12 +58,14 @@ function readJsonFile(filePath, label) {
   }
 }
 
+/** Resolves an optional report path relative to the current repository. */
 function resolveReportPath(filePath) {
   return path.isAbsolute(String(filePath))
     ? String(filePath)
     : resolveFromCwd(String(filePath));
 }
 
+/** Reads and parses a translation task manifest when one is provided. */
 function readTaskFile(taskFile) {
   const jsonPath = taskFile.jsonPath ?? taskFile.path;
   if (!jsonPath) {
@@ -71,10 +75,12 @@ function readTaskFile(taskFile) {
   return readJsonFile(resolveReportPath(jsonPath), `translation task file ${jsonPath}`);
 }
 
+/** Returns the locale JSON path recorded for a translation task. */
 function getLocaleFilePath(localesPath, locale) {
   return path.join(localesPath, `${locale}.json`);
 }
 
+/** Returns the unique target locales referenced by translation tasks. */
 function getTaskLocales(manifest) {
   return [...new Set((manifest.taskFiles ?? [])
     .map((taskFile) => taskFile.locale)
@@ -127,6 +133,7 @@ function collectChangedItems(manifest) {
   };
 }
 
+/** Loads the locale files required to audit the changed task keys. */
 function loadLocaleTargets(localesPath, defaultLocale, taskLocales, targetLocales) {
   const requestedTargets = new Set(targetLocales);
   const localeFilePaths = new Map();
@@ -157,6 +164,7 @@ function loadLocaleTargets(localesPath, defaultLocale, taskLocales, targetLocale
     .sort((a, b) => (a.locale === defaultLocale ? -1 : b.locale === defaultLocale ? 1 : a.locale.localeCompare(b.locale)));
 }
 
+/** Reads one locale target and preserves any parse or file error. */
 function readLocaleTarget(target) {
   if (!fs.existsSync(target.filePath)) {
     return {
@@ -173,6 +181,7 @@ function readLocaleTarget(target) {
   };
 }
 
+/** Classifies a locale value as present, missing, invalid, or unchanged. */
 function getValueResult(localeTarget, key) {
   if (localeTarget.missingFile) {
     return {
@@ -196,6 +205,7 @@ function getValueResult(localeTarget, key) {
   };
 }
 
+/** Builds the audit result for one key in one locale file. */
 function createLocaleKeyResult({ item, localeTarget, defaultLocale, baselineContract, baselineMessage }) {
   const valueResult = getValueResult(localeTarget, item.key);
   const issues = [];
@@ -315,6 +325,7 @@ function createLocaleKeyResult({ item, localeTarget, defaultLocale, baselineCont
   };
 }
 
+/** Audits one changed source message across its target locales. */
 function auditChangedItem(item, localeTargets, defaultLocale) {
   const defaultTarget = localeTargets.find((target) => target.locale === defaultLocale);
   const defaultValue = defaultTarget ? getValueResult(defaultTarget, item.key) : null;
@@ -350,6 +361,7 @@ function auditChangedItem(item, localeTargets, defaultLocale) {
   };
 }
 
+/** Prints the changed-key audit as a human-readable text report. */
 function printTextReport(report) {
   console.log(`Changed-key audit: ${report.status}`);
   console.log(`Default locale: ${report.defaultLocale}`);
@@ -380,6 +392,7 @@ function printTextReport(report) {
   }
 }
 
+/** Runs this script's command-line workflow. */
 function main() {
   const args = parseCliArgs(process.argv.slice(2));
 

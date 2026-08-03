@@ -39,6 +39,7 @@ import {
   DEFAULT_SOURCE_EXTENSIONS,
 } from "./lib/i18n-audit.mjs";
 
+/** Prints command-line usage information. */
 function printHelp() {
   console.log(`Usage:
   node skills/use-react-intl-universal/scripts/review-translation-deltas.mjs --locales src/locales --default-locale zh_CN --deltas tmp/i18n-translation-results --tasks tmp/i18n-translation-tasks/manifest.json
@@ -60,14 +61,17 @@ Options:
 `);
 }
 
+/** Reads and parses a JSON file. */
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
 }
 
+/** Checks whether an object owns the requested property. */
 function hasOwn(object, key) {
   return Object.prototype.hasOwnProperty.call(object, key);
 }
 
+/** Returns sorted translation delta JSON files from the configured path. */
 function readDeltaFiles(deltasPath) {
   if (!fs.existsSync(deltasPath)) {
     return [];
@@ -99,28 +103,34 @@ function normalizeTranslations(delta) {
   return null;
 }
 
+/** Infers a locale identifier from a delta file's relative path. */
 function inferLocaleFromDeltaPath(deltaPath, deltasPath) {
   const name = getLocaleName(deltaPath, deltasPath);
   return name.replace(/\.part-\d+$/i, "");
 }
 
+/** Formats an actionable message for an ICU or rich-tag contract mismatch. */
 function createContractMismatchMessage(diff) {
   return `missing vars [${formatList(diff.missingVariables)}], extra vars [${formatList(diff.extraVariables)}], missing tags [${formatList(diff.missingTags)}], extra tags [${formatList(diff.extraTags)}]`;
 }
 
+/** Checks whether a message contains CJK characters. */
 function containsCjk(text) {
   return /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/u.test(String(text));
 }
 
+/** Checks whether a locale identifier represents a CJK language. */
 function isCjkLocale(locale) {
   const normalized = String(locale).toLowerCase().replace(/_/g, "-");
   return normalized.startsWith("zh") || normalized.startsWith("ja") || normalized.startsWith("ko");
 }
 
+/** Increments a named counter in a map. */
 function addCount(counts, key) {
   counts[key] = (counts[key] ?? 0) + 1;
 }
 
+/** Finds generated translation task JSON files below a path. */
 function findTaskJsonPaths(inputPath) {
   if (!inputPath) {
     return [];
@@ -151,6 +161,7 @@ function findTaskJsonPaths(inputPath) {
   throw new Error("--tasks must point to a task JSON file, manifest.json, or task output directory");
 }
 
+/** Loads assigned translation items and records malformed task files as issues. */
 function loadExpectedTaskItems(tasksPath, issues) {
   const byLocale = new Map();
   const taskFiles = [];
@@ -206,6 +217,7 @@ function loadExpectedTaskItems(tasksPath, issues) {
   return { byLocale, taskFiles };
 }
 
+/** Indexes extracted source messages by translation key. */
 function getSourceMessageByKey(sourceMessages) {
   const map = new Map();
   for (const message of sourceMessages) {
@@ -216,6 +228,7 @@ function getSourceMessageByKey(sourceMessages) {
   return map;
 }
 
+/** Loads delta files into per-locale indexes and detects duplicate key ownership. */
 function buildDeltaIndex({ deltasPath, targetLocales, issues }) {
   const translationsByLocale = new Map();
   const deltaFiles = [];
@@ -292,6 +305,7 @@ function buildDeltaIndex({ deltasPath, targetLocales, issues }) {
   return { translationsByLocale, deltaFiles };
 }
 
+/** Checks that delta files cover assigned keys without unassigned additions. */
 function reviewTaskCoverage({ expectedByLocale, translationsByLocale, issues, warnings }) {
   for (const [locale, expectedItems] of expectedByLocale) {
     const translations = translationsByLocale.get(locale) ?? new Map();
@@ -338,6 +352,7 @@ function reviewTaskCoverage({ expectedByLocale, translationsByLocale, issues, wa
   }
 }
 
+/** Checks translated values for contracts, copied text, CJK, and UI-fit risks. */
 function reviewTranslationValues({
   translationsByLocale,
   defaultLocale,
@@ -491,6 +506,7 @@ function reviewTranslationValues({
   }
 }
 
+/** Counts items by a key returned from a selector function. */
 function countBy(items) {
   const counts = {};
   for (const item of items) {
@@ -499,6 +515,7 @@ function countBy(items) {
   return counts;
 }
 
+/** Builds the final review report from coverage and translation-value checks. */
 function createReport({
   defaultLocale,
   deltaFiles,
@@ -537,6 +554,7 @@ function createReport({
   };
 }
 
+/** Prints translation delta review results as a text report. */
 function printTextReport(report) {
   console.log(`Status: ${report.status}`);
   console.log(`Delta files: ${report.deltaFileCount}`);
@@ -553,6 +571,7 @@ function printTextReport(report) {
   }
 }
 
+/** Runs this script's command-line workflow. */
 function main() {
   const args = parseCliArgs(process.argv.slice(2));
 

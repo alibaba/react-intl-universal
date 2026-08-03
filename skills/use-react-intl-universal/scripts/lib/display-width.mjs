@@ -165,6 +165,7 @@ const WIDE_RANGES = [
 
 const WIDE_FAST_PATH = findWideFastPathRange(WIDE_RANGES);
 
+/** Creates a Unicode-property regex when the current runtime supports it. */
 function createRegex(pattern, flags) {
   try {
     return new RegExp(pattern, flags);
@@ -173,6 +174,7 @@ function createRegex(pattern, flags) {
   }
 }
 
+/** Checks whether a code point belongs to any sorted inclusive range. */
 function isInRange(ranges, codePoint) {
   let low = 0;
   let high = Math.floor(ranges.length / 2) - 1;
@@ -193,6 +195,7 @@ function isInRange(ranges, codePoint) {
   return false;
 }
 
+/** Finds the cached wide-character range containing a code point. */
 function findWideFastPathRange(ranges) {
   const commonCjkCodePoint = 0x4E00;
   let fastPathStart = ranges[0];
@@ -215,12 +218,14 @@ function findWideFastPathRange(ranges) {
   return [fastPathStart, fastPathEnd];
 }
 
+/** Checks whether the input is full width. */
 function isFullWidth(codePoint) {
   return codePoint >= 12288
     && codePoint <= 65510
     && isInRange(FULLWIDTH_RANGES, codePoint);
 }
 
+/** Checks whether a code point has East Asian wide display width. */
 function isWide(codePoint) {
   if (codePoint >= WIDE_FAST_PATH[0] && codePoint <= WIDE_FAST_PATH[1]) {
     return true;
@@ -231,10 +236,12 @@ function isWide(codePoint) {
     && isInRange(WIDE_RANGES, codePoint);
 }
 
+/** Returns the East Asian Width category for a code point. */
 function eastAsianWidth(codePoint) {
   return isFullWidth(codePoint) || isWide(codePoint) ? 2 : 1;
 }
 
+/** Removes ANSI terminal escape sequences before measuring visible text. */
 function stripAnsiCodes(input) {
   if (!input.includes("\u001B") && !input.includes("\u009B")) {
     return input;
@@ -243,10 +250,12 @@ function stripAnsiCodes(input) {
   return input.replace(ANSI_REGEX, "");
 }
 
+/** Removes react-intl-universal rich-text tags before measuring a message. */
 export function stripRichTags(input) {
   return String(input).replace(RICH_TAG_REGEX, "");
 }
 
+/** Checks whether a code point is a combining mark using fallback ranges. */
 function isCombiningMarkFallback(codePoint) {
   return (codePoint >= 0x0300 && codePoint <= 0x036F)
     || (codePoint >= 0x1AB0 && codePoint <= 0x1AFF)
@@ -255,6 +264,7 @@ function isCombiningMarkFallback(codePoint) {
     || (codePoint >= 0xFE20 && codePoint <= 0xFE2F);
 }
 
+/** Checks whether a code point is default-ignorable using fallback ranges. */
 function isDefaultIgnorableFallback(codePoint) {
   return codePoint === 0x00AD
     || codePoint === 0x034F
@@ -268,6 +278,7 @@ function isDefaultIgnorableFallback(codePoint) {
     || (codePoint >= 0xE0100 && codePoint <= 0xE01EF);
 }
 
+/** Checks whether a character contributes zero visible display width. */
 function isNonPrintingChar(character) {
   if (nonPrintingCharRegex) {
     return nonPrintingCharRegex.test(character);
@@ -281,6 +292,7 @@ function isNonPrintingChar(character) {
     || (codePoint >= 0xD800 && codePoint <= 0xDFFF);
 }
 
+/** Checks whether a grapheme cluster has zero display width. */
 function isZeroWidthCluster(segment) {
   if (segment.length === 0) {
     return true;
@@ -295,6 +307,7 @@ function isZeroWidthCluster(segment) {
   return true;
 }
 
+/** Returns the visible base character for a grapheme cluster. */
 function baseVisible(segment) {
   let visible = "";
   let foundBase = false;
@@ -311,11 +324,13 @@ function baseVisible(segment) {
   return visible;
 }
 
+/** Checks whether a code point is pictographic using fallback ranges. */
 function isExtendedPictographicFallback(codePoint) {
   return (codePoint >= 0x1F000 && codePoint <= 0x1FAFF)
     || (codePoint >= 0x2600 && codePoint <= 0x27BF);
 }
 
+/** Counts pictographic code points in an emoji grapheme cluster. */
 function countExtendedPictographic(segment) {
   if (extendedPictographicRegex) {
     const matches = segment.match(extendedPictographicRegex);
@@ -332,6 +347,7 @@ function countExtendedPictographic(segment) {
   return count;
 }
 
+/** Checks whether a grapheme cluster is a double-width emoji sequence. */
 function isDoubleWidthEmojiCluster(segment) {
   if (rgiEmojiRegex?.test(segment)) {
     return true;
@@ -350,27 +366,32 @@ function isDoubleWidthEmojiCluster(segment) {
   return segment.includes("\uFE0F") && pictographicCount >= 1;
 }
 
+/** Checks whether a code point is a leading Hangul Jamo. */
 function isHangulLeadingJamo(codePoint) {
   return (codePoint >= 0x1100 && codePoint <= 0x115F)
     || (codePoint >= 0xA960 && codePoint <= 0xA97C);
 }
 
+/** Checks whether a code point is a vowel Hangul Jamo. */
 function isHangulVowelJamo(codePoint) {
   return (codePoint >= 0x1160 && codePoint <= 0x11A7)
     || (codePoint >= 0xD7B0 && codePoint <= 0xD7C6);
 }
 
+/** Checks whether a code point is a trailing Hangul Jamo. */
 function isHangulTrailingJamo(codePoint) {
   return (codePoint >= 0x11A8 && codePoint <= 0x11FF)
     || (codePoint >= 0xD7CB && codePoint <= 0xD7FB);
 }
 
+/** Checks whether a code point is any Hangul Jamo. */
 function isHangulJamo(codePoint) {
   return isHangulLeadingJamo(codePoint)
     || isHangulVowelJamo(codePoint)
     || isHangulTrailingJamo(codePoint);
 }
 
+/** Calculates the display width of a Hangul grapheme cluster. */
 function hangulClusterWidth(visibleSegment) {
   const codePoints = [];
 
@@ -416,6 +437,7 @@ function hangulClusterWidth(visibleSegment) {
   return width;
 }
 
+/** Calculates the width contributed by trailing halfwidth forms. */
 function trailingHalfwidthFormsWidth(visibleSegment) {
   let extra = 0;
   let first = true;
@@ -435,6 +457,7 @@ function trailingHalfwidthFormsWidth(visibleSegment) {
   return extra;
 }
 
+/** Segments text into grapheme clusters when Intl.Segmenter is available. */
 function segmentText(text) {
   if (!graphemeSegmenter) {
     return [...text];
@@ -443,6 +466,7 @@ function segmentText(text) {
   return [...graphemeSegmenter.segment(text)].map(({ segment }) => segment);
 }
 
+/** Estimates terminal-style display width for multilingual rich text. */
 export function estimateDisplayWidth(input) {
   if (typeof input !== "string" || input.length === 0) {
     return 0;

@@ -31,6 +31,7 @@ const HARD_BLOCKER_TYPES = new Set([
   "non-string-locale-message",
 ]);
 
+/** Prints command-line usage information. */
 function printHelp() {
   console.log(`Usage:
   node skills/use-react-intl-universal/scripts/create-i18n-handoff.mjs --audit tmp/i18n-audit.json --discovery tmp/i18n-discovery.json
@@ -59,6 +60,7 @@ Options:
 `);
 }
 
+/** Reads an optional JSON report while preserving missing and parse-error states. */
 function readJsonReport(filePath, label) {
   if (!filePath) {
     return { label, filePath: null, ok: false, missing: true, data: null, error: null };
@@ -86,6 +88,7 @@ function readJsonReport(filePath, label) {
   }
 }
 
+/** Counts items by a key returned from a selector function. */
 function countBy(items, getKey) {
   const counts = {};
   for (const item of items ?? []) {
@@ -95,6 +98,7 @@ function countBy(items, getKey) {
   return counts;
 }
 
+/** Resolves either an absolute path or a path relative to the current repository. */
 function resolveMaybeAbsolute(filePath) {
   if (!filePath) {
     return null;
@@ -105,6 +109,7 @@ function resolveMaybeAbsolute(filePath) {
     : resolveFromCwd(String(filePath));
 }
 
+/** Returns the current locale message count. */
 function getCurrentLocaleMessageCount(filePath) {
   const resolved = resolveMaybeAbsolute(filePath);
   if (!resolved || !fs.existsSync(resolved)) {
@@ -122,6 +127,7 @@ function getCurrentLocaleMessageCount(filePath) {
   };
 }
 
+/** Summarizes the locale report freshness. */
 function summarizeLocaleReportFreshness(locale) {
   const current = getCurrentLocaleMessageCount(locale.filePath);
   const stale = (
@@ -144,10 +150,12 @@ function summarizeLocaleReportFreshness(locale) {
   };
 }
 
+/** Returns locale summaries whose recorded message counts are stale. */
 function getStaleLocaleReports(summary) {
   return (summary.locales ?? summary.localeSummaries ?? []).filter((locale) => locale.stale);
 }
 
+/** Converts project-discovery output into the handoff's discovery summary. */
 function summarizeDiscovery(report) {
   if (!report.ok) {
     return { available: false, issue: report.missing ? "missing" : report.error };
@@ -193,6 +201,7 @@ function summarizeDiscovery(report) {
   };
 }
 
+/** Converts contract-audit output into blockers, warnings, and counts for handoff. */
 function summarizeAudit(report) {
   if (!report.ok) {
     return { available: false, issue: report.missing ? "missing" : report.error };
@@ -231,6 +240,7 @@ function summarizeAudit(report) {
   };
 }
 
+/** Converts locale-export verification output into handoff readiness facts. */
 function summarizeExportVerify(report) {
   if (!report.ok) {
     return { available: false, issue: report.missing ? "missing" : report.error };
@@ -254,10 +264,12 @@ function summarizeExportVerify(report) {
   };
 }
 
+/** Converts an artifact path into a repository-relative POSIX path. */
 function normalizeReportPath(filePath) {
   return relativePath(filePath).split(path.sep).join("/");
 }
 
+/** Checks whether a path matches a configured ignore pattern. */
 function matchesIgnorePattern(filePath, ignorePatterns) {
   if (!filePath || !ignorePatterns || ignorePatterns.length === 0) {
     return false;
@@ -267,6 +279,7 @@ function matchesIgnorePattern(filePath, ignorePatterns) {
   return ignorePatterns.some((pattern) => normalized.includes(pattern));
 }
 
+/** Summarizes hardcoded-CJK candidates after applying task ignore patterns. */
 function summarizeHardcoded(report, ignorePatterns = []) {
   if (!report.ok) {
     return { available: false, issue: report.missing ? "missing" : report.error };
@@ -290,8 +303,7 @@ function summarizeHardcoded(report, ignorePatterns = []) {
     filePath: relativePath(report.filePath),
     fileCount: data.fileCount ?? 0,
     candidateCount: data.candidateCount ?? candidates.length,
-    counts: data.priorityCounts ?? data.counts ?? countBy(candidates, (candidate) => candidate.priority),
-    priorityCounts: data.priorityCounts ?? data.counts ?? countBy(candidates, (candidate) => candidate.priority),
+    priorityCounts: data.priorityCounts ?? countBy(candidates, (candidate) => candidate.priority),
     kindCounts: data.kindCounts ?? countBy(candidates, (candidate) => candidate.kind),
     actionableCandidateCount: actionableCandidates.length,
     actionableCounts: countBy(actionableCandidates, (candidate) => candidate.priority),
@@ -302,6 +314,7 @@ function summarizeHardcoded(report, ignorePatterns = []) {
   };
 }
 
+/** Summarizes generated contract-audit fix task manifests. */
 function summarizeAuditFixTasks(report) {
   if (!report.ok) {
     return { available: false, issue: report.missing ? "missing" : report.error };
@@ -344,6 +357,7 @@ function summarizeAuditFixTasks(report) {
   };
 }
 
+/** Summarizes generated translation-length review task manifests. */
 function summarizeLengthReviewTasks(report) {
   if (!report.ok) {
     return { available: false, issue: report.missing ? "missing" : report.error };
@@ -393,6 +407,7 @@ function summarizeLengthReviewTasks(report) {
   };
 }
 
+/** Summarizes generated hardcoded-CJK fix task manifests. */
 function summarizeHardcodedFixTasks(report) {
   if (!report.ok) {
     return { available: false, issue: report.missing ? "missing" : report.error };
@@ -422,6 +437,7 @@ function summarizeHardcodedFixTasks(report) {
   };
 }
 
+/** Summarizes generated translation task manifests and item counts. */
 function summarizeTasks(report) {
   if (!report.ok) {
     return { available: false, issue: report.missing ? "missing" : report.error };
@@ -455,6 +471,7 @@ function summarizeTasks(report) {
   };
 }
 
+/** Summarizes generated translation-quality review task manifests. */
 function summarizeTranslationReviewTasks(report) {
   if (!report.ok) {
     return { available: false, issue: report.missing ? "missing" : report.error };
@@ -489,6 +506,7 @@ function summarizeTranslationReviewTasks(report) {
   };
 }
 
+/** Summarizes translation-delta application results for the handoff. */
 function summarizeApply(report) {
   if (!report.ok) {
     return { available: false, issue: report.missing ? "missing" : report.error };
@@ -523,6 +541,7 @@ function summarizeApply(report) {
   };
 }
 
+/** Summarizes translation-delta review issues, warnings, and expected tasks. */
 function summarizeDeltaReview(report) {
   if (!report.ok) {
     return { available: false, issue: report.missing ? "missing" : report.error };
@@ -558,6 +577,7 @@ function summarizeDeltaReview(report) {
   };
 }
 
+/** Summarizes the focused post-merge audit for changed locale keys. */
 function summarizeChangedKeyAudit(report) {
   if (!report.ok) {
     return { available: false, issue: report.missing ? "missing" : report.error };
@@ -618,6 +638,7 @@ function summarizeChangedKeyAudit(report) {
   };
 }
 
+/** Adds a prioritized next action with its reason and supporting evidence. */
 function pushAction(actions, priority, action, reason, evidence = []) {
   actions.push({
     priority,
@@ -627,6 +648,7 @@ function pushAction(actions, priority, action, reason, evidence = []) {
   });
 }
 
+/** Checks whether the handoff contains a locale-readiness blocker. */
 function hasLocaleReadinessBlocker({
   discovery,
   exportVerify,
@@ -637,6 +659,7 @@ function hasLocaleReadinessBlocker({
   );
 }
 
+/** Checks whether missing translation deltas are the only blocker. */
 function isMissingDeltasOnly(deltaReview) {
   if (!deltaReview.available || deltaReview.issueCount <= 0) {
     return false;
@@ -645,6 +668,7 @@ function isMissingDeltasOnly(deltaReview) {
   return deltaReview.issueCounts["missing-deltas-directory"] === deltaReview.issueCount;
 }
 
+/** Returns the translation task review mismatch. */
 function getTranslationTaskReviewMismatch(tasks, deltaReview) {
   if (!tasks.available || !deltaReview.available) {
     return null;
@@ -662,6 +686,7 @@ function getTranslationTaskReviewMismatch(tasks, deltaReview) {
     };
 }
 
+/** Describes workflow stages deferred by unresolved locale-readiness blockers. */
 function createDeferredStages({ localeReadinessBlocked, deltaReview }) {
   if (!(localeReadinessBlocked && isMissingDeltasOnly(deltaReview))) {
     return [];
@@ -684,6 +709,7 @@ function createDeferredStages({ localeReadinessBlocked, deltaReview }) {
   ];
 }
 
+/** Selects representative task files while balancing task types. */
 function selectTaskFileSamplesByType(taskFiles, limit = 3, includeTask = () => true) {
   const candidates = taskFiles.filter((task) => (
     task.markdownPath
@@ -718,6 +744,7 @@ function selectTaskFileSamplesByType(taskFiles, limit = 3, includeTask = () => t
   return samples;
 }
 
+/** Selects task-file samples containing non-blocking advisory work. */
 function selectAdvisoryTaskFileSamples(taskFiles, limit = 3) {
   return selectTaskFileSamplesByType(
     taskFiles,
@@ -726,6 +753,7 @@ function selectAdvisoryTaskFileSamples(taskFiles, limit = 3) {
   );
 }
 
+/** Derives prioritized next actions from all available audit artifacts. */
 function createNextActions({
   discovery,
   exportVerify,
@@ -881,14 +909,14 @@ function createNextActions({
     );
   }
 
-  if (hardcoded.available && (hardcoded.actionableCounts.high ?? hardcoded.counts.high ?? 0) > 0) {
+  if (hardcoded.available && (hardcoded.actionableCounts.high ?? 0) > 0) {
     pushAction(
       actions,
       "P1",
       "Review high-priority hardcoded CJK candidates.",
       "Visible hardcoded CJK text will not participate in locale switching or extraction.",
       [
-        `high=${hardcoded.actionableCounts.high ?? hardcoded.counts.high}`,
+        `high=${hardcoded.actionableCounts.high}`,
         hardcodedFixTasks.available ? `fixTasks=${hardcodedFixTasks.taskFileCount}` : "hardcoded fix task manifest missing",
       ]
     );
@@ -1036,6 +1064,7 @@ function createNextActions({
   ));
 }
 
+/** Summarizes the static UI fit review. */
 function summarizeStaticUiFitReview({
   audit,
   lengthReviewTasks,
@@ -1086,6 +1115,7 @@ function summarizeStaticUiFitReview({
   };
 }
 
+/** Combines every input report into the final structured handoff record. */
 function createHandoff(reports) {
   const discovery = summarizeDiscovery(reports.discovery);
   const exportVerify = summarizeExportVerify(reports.exportVerify);
@@ -1198,8 +1228,8 @@ function createHandoff(reports) {
     }
   }
 
-  if (hardcoded.available && (hardcoded.actionableCounts.high ?? hardcoded.counts.high ?? 0) > 0) {
-    const highCount = hardcoded.actionableCounts.high ?? hardcoded.counts.high;
+  if (hardcoded.available && (hardcoded.actionableCounts.high ?? 0) > 0) {
+    const highCount = hardcoded.actionableCounts.high;
     const qualifier = hardcoded.ignoredCandidateCount > 0 ? " actionable" : "";
     reviewItems.push(`Review ${highCount} high-priority${qualifier} hardcoded CJK candidate(s).`);
   }
@@ -1208,7 +1238,7 @@ function createHandoff(reports) {
     reviewItems.push("Audit hard blockers exist, but no audit fix task manifest was provided.");
   }
 
-  if (hardcoded.available && (hardcoded.counts.high ?? 0) > 0 && !hardcodedFixTasks.available) {
+  if (hardcoded.available && (hardcoded.priorityCounts.high ?? 0) > 0 && !hardcodedFixTasks.available) {
     reviewItems.push("High-priority hardcoded CJK candidates exist, but no hardcoded fix task manifest was provided.");
   }
 
@@ -1262,6 +1292,7 @@ function createHandoff(reports) {
   };
 }
 
+/** Formats grouped counts for handoff output. */
 function formatCounts(counts = {}) {
   const entries = Object.entries(counts);
   if (entries.length === 0) {
@@ -1270,6 +1301,7 @@ function formatCounts(counts = {}) {
   return entries.map(([key, value]) => `${key}: ${value}`).join(", ");
 }
 
+/** Formats a byte count for human-readable output. */
 function formatBytes(bytes) {
   if (!Number.isFinite(bytes)) {
     return "-";
@@ -1286,6 +1318,7 @@ function formatBytes(bytes) {
   return `${bytes} B`;
 }
 
+/** Appends a Markdown section and records missing-source status when needed. */
 function appendSection(lines, title, available, issue) {
   lines.push("");
   lines.push(`## ${title}`);
@@ -1296,10 +1329,12 @@ function appendSection(lines, title, available, issue) {
   return true;
 }
 
+/** Finds a deferred handoff stage by name. */
 function findDeferredStage(handoff, stage) {
   return (handoff.deferredStages ?? []).find((item) => item.stage === stage);
 }
 
+/** Formats one locale's file, key-count, and freshness details. */
 function formatLocaleSummary(locale) {
   const staleSuffix = locale.stale
     ? `, current=${locale.currentMessageCount ?? locale.currentParseError ?? "-"}`
@@ -1307,6 +1342,7 @@ function formatLocaleSummary(locale) {
   return `${locale.locale} (${locale.messageCount}${staleSuffix})`;
 }
 
+/** Renders the structured handoff record as Markdown. */
 function createMarkdown(handoff) {
   const lines = [
     "# i18n Handoff Report",
@@ -1619,6 +1655,7 @@ function createMarkdown(handoff) {
   return `${lines.join("\n")}\n`;
 }
 
+/** Runs this script's command-line workflow. */
 function main() {
   const args = parseCliArgs(process.argv.slice(2));
 

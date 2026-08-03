@@ -23,6 +23,7 @@ import {
 const PRIORITY_ORDER = { high: 0, medium: 1, low: 2 };
 const DEFAULT_PRIORITIES = ["high", "medium"];
 
+/** Prints command-line usage information. */
 function printHelp() {
   console.log(`Usage:
   node skills/use-react-intl-universal/scripts/create-hardcoded-cjk-fix-tasks.mjs --hardcoded tmp/i18n-hardcoded-cjk.json --output tmp/i18n-hardcoded-fix-tasks
@@ -38,6 +39,7 @@ Options:
 `);
 }
 
+/** Reads and validates the hardcoded-CJK scan report. */
 function readHardcodedReport(filePath) {
   try {
     return JSON.parse(fs.readFileSync(filePath, "utf8"));
@@ -46,19 +48,23 @@ function readHardcodedReport(filePath) {
   }
 }
 
+/** Normalizes a candidate file path for grouping and ignore matching. */
 function normalizePath(filePath) {
   return relativePath(filePath).split(path.sep).join("/");
 }
 
+/** Checks whether a hardcoded-text candidate should be ignored. */
 function shouldIgnore(filePath, ignorePatterns) {
   const normalized = normalizePath(filePath);
   return ignorePatterns.some((pattern) => normalized.includes(pattern));
 }
 
+/** Returns the numeric sorting rank for a priority. */
 function priorityRank(priority) {
   return PRIORITY_ORDER[priority] ?? 99;
 }
 
+/** Splits items into fixed-size batches. */
 function chunkItems(items, maxItemsPerTask) {
   if (!Number.isFinite(maxItemsPerTask) || maxItemsPerTask <= 0 || items.length <= maxItemsPerTask) {
     return [items];
@@ -71,6 +77,7 @@ function chunkItems(items, maxItemsPerTask) {
   return chunks;
 }
 
+/** Returns the file-name suffix for a task batch. */
 function getBatchSuffix(batchIndex, batchCount) {
   if (batchCount <= 1) {
     return "";
@@ -79,6 +86,7 @@ function getBatchSuffix(batchIndex, batchCount) {
   return `.part-${String(batchIndex + 1).padStart(3, "0")}`;
 }
 
+/** Converts a file path into a stable task-file slug. */
 function slugifyFilePath(filePath) {
   return normalizePath(filePath)
     .replace(/^src\//, "")
@@ -88,6 +96,7 @@ function slugifyFilePath(filePath) {
     .slice(0, 120) || "root";
 }
 
+/** Returns remediation guidance for a hardcoded-text category. */
 function getGuidance(kind) {
   switch (kind) {
     case "raw-jsx-text":
@@ -101,6 +110,7 @@ function getGuidance(kind) {
   }
 }
 
+/** Groups actionable hardcoded-text candidates by source file. */
 function groupCandidates(candidates, priorities, ignorePatterns) {
   const groups = new Map();
   const allowedPriorities = new Set(priorities);
@@ -143,6 +153,7 @@ function groupCandidates(candidates, priorities, ignorePatterns) {
     ));
 }
 
+/** Renders one source-file remediation batch as an actionable Markdown task. */
 function createTaskMarkdown(task) {
   const lines = [
     `# Hardcoded CJK fix task: ${task.filePath}${task.batchCount > 1 ? ` (${task.batchIndex + 1}/${task.batchCount})` : ""}`,
@@ -181,6 +192,7 @@ function createTaskMarkdown(task) {
   return `${lines.join("\n")}\n`;
 }
 
+/** Runs this script's command-line workflow. */
 function main() {
   const args = parseCliArgs(process.argv.slice(2));
 

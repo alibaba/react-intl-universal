@@ -1,6 +1,6 @@
 # use-react-intl-universal
 
-[![skills.sh](https://skills.sh/b/alibaba/react-intl-universal)](https://skills.sh/alibaba/react-intl-universal)
+[![skills.sh](https://www.skills.sh/b/alibaba/react-intl-universal)](https://www.skills.sh/alibaba/react-intl-universal/use-react-intl-universal)
 
 `use-react-intl-universal` is an internationalization practice skill for projects using `react-intl-universal`. It guides message authoring, default message extraction, locale synchronization, translation review, and localized UI quality checks.
 

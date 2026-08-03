@@ -36,6 +36,7 @@ import {
   splitCsv,
 } from "./lib/i18n-audit.mjs";
 
+/** Prints command-line usage information. */
 function printHelp() {
   console.log(`Usage:
   node skills/use-react-intl-universal/scripts/audit-i18n-contract.mjs --source src --locales src/locales
@@ -55,6 +56,7 @@ Options:
 `);
 }
 
+/** Groups items by a key returned from a selector function. */
 function groupBy(items, getKey) {
   const map = new Map();
 
@@ -68,6 +70,7 @@ function groupBy(items, getKey) {
   return map;
 }
 
+/** Creates a normalized hard-error record for the contract audit. */
 function createIssue(type, message, details = {}) {
   return {
     type,
@@ -76,6 +79,7 @@ function createIssue(type, message, details = {}) {
   };
 }
 
+/** Creates a normalized advisory record for the contract audit. */
 function createWarning(type, message, details = {}) {
   return {
     type,
@@ -84,6 +88,7 @@ function createWarning(type, message, details = {}) {
   };
 }
 
+/** Prints the contract audit findings as a human-readable text report. */
 function printTextReport(report) {
   console.log(`Source: ${relativePath(report.sourcePath)}`);
   console.log(`Locales: ${relativePath(report.localesPath)}`);
@@ -124,6 +129,7 @@ function printTextReport(report) {
   console.log(`Result: ${report.issues.length} error(s), ${report.warnings.length} warning(s)`);
 }
 
+/** Runs this script's command-line workflow. */
 function main() {
   const args = parseCliArgs(process.argv.slice(2));
 

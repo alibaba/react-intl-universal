@@ -62,6 +62,7 @@ const SEVERITY_ORDER = {
   low: 2,
 };
 
+/** Prints command-line usage information. */
 function printHelp() {
   console.log(`Usage:
   node skills/use-react-intl-universal/scripts/create-audit-fix-tasks.mjs --audit tmp/i18n-audit.json --output tmp/i18n-audit-fix-tasks
@@ -85,6 +86,7 @@ Options:
 `);
 }
 
+/** Reads and validates the contract audit report used to create fix tasks. */
 function readAuditReport(filePath) {
   try {
     return JSON.parse(fs.readFileSync(filePath, "utf8"));
@@ -93,6 +95,7 @@ function readAuditReport(filePath) {
   }
 }
 
+/** Counts items by a key returned from a selector function. */
 function countBy(items, keyFn) {
   const counts = {};
 
@@ -104,6 +107,7 @@ function countBy(items, keyFn) {
   return counts;
 }
 
+/** Splits items into fixed-size batches. */
 function chunkItems(items, maxItemsPerTask) {
   if (!Number.isFinite(maxItemsPerTask) || maxItemsPerTask <= 0 || items.length <= maxItemsPerTask) {
     return [items];
@@ -116,6 +120,7 @@ function chunkItems(items, maxItemsPerTask) {
   return chunks;
 }
 
+/** Returns the file-name suffix for a task batch. */
 function getBatchSuffix(batchIndex, batchCount) {
   if (batchCount <= 1) {
     return "";
@@ -124,6 +129,7 @@ function getBatchSuffix(batchIndex, batchCount) {
   return `.part-${String(batchIndex + 1).padStart(3, "0")}`;
 }
 
+/** Extracts the source file and line from a missing-key audit message. */
 function parseMissingKeySourceLocation(message) {
   const match = / from (.+):(\d+)$/.exec(String(message));
   if (!match) {
@@ -136,6 +142,7 @@ function parseMissingKeySourceLocation(message) {
   };
 }
 
+/** Parses source locations recorded for a conflicting default message. */
 function parseConflictLocations(message) {
   const match = /messages:\s*(.+)$/.exec(String(message));
   if (!match) {
@@ -153,10 +160,12 @@ function parseConflictLocations(message) {
     });
 }
 
+/** Normalizes source paths for stable task grouping and output. */
 function normalizeFilePath(filePath) {
   return filePath ? relativePath(filePath) : null;
 }
 
+/** Indexes extracted source messages by translation key. */
 function createSourceMessageIndex(sourceMessages) {
   const byKey = new Map();
 
@@ -169,10 +178,12 @@ function createSourceMessageIndex(sourceMessages) {
   return byKey;
 }
 
+/** Indexes loaded locale dictionaries by locale identifier. */
 function createLocaleIndex(localeData) {
   return new Map(localeData.map((item) => [item.locale, item]));
 }
 
+/** Returns source-code context for a message key and location. */
 function getSourceContext(key, context) {
   const messages = context.sourceByKey?.get(key) ?? [];
   if (messages.length === 0) {
@@ -195,6 +206,7 @@ function getSourceContext(key, context) {
   };
 }
 
+/** Extracts variables passed through an intl call's value object. */
 function extractPassedValueVariables(text) {
   const match = /(?:intl|IntlUtils)\s*\.\s*(?:getHTML|get)\s*\(\s*(['"`])[\w.-]+\1\s*,\s*\{([\s\S]*?)\}\s*\)/m.exec(String(text ?? ""));
   if (!match) {
@@ -213,6 +225,7 @@ function extractPassedValueVariables(text) {
   return [...variables].sort((a, b) => a.localeCompare(b));
 }
 
+/** Returns ICU variables missing from a translated locale value. */
 function getMissingValueVariables(defaultMessage, source) {
   const expected = getMessageContract(defaultMessage).variables;
   if (expected.length === 0) {
@@ -229,6 +242,7 @@ function getMissingValueVariables(defaultMessage, source) {
   return expected.filter((variable) => !valueVariables.has(variable));
 }
 
+/** Returns the locale value and source location for one key. */
 function getLocaleValueContext(key, locale, context) {
   const localeInfo = context.localeByName?.get(locale);
   if (!localeInfo || localeInfo.localeFile.parseError) {
@@ -259,16 +273,19 @@ function getLocaleValueContext(key, locale, context) {
   };
 }
 
+/** Returns available translated values and source locations for one key. */
 function getLocaleValuesForKey(key, locales, context) {
   return locales
     .map((locale) => getLocaleValueContext(key, locale, context))
     .filter(Boolean);
 }
 
+/** Escapes literal text before inserting it into a regular expression. */
 function escapeRegExp(value) {
   return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+/** Pairs missing ICU variables with likely renamed variables in a translation. */
 function createVariableReplacementPairs(expectedVariables, actualVariables) {
   const expectedSet = new Set(expectedVariables);
   const actualSet = new Set(actualVariables);
@@ -297,6 +314,7 @@ function createVariableReplacementPairs(expectedVariables, actualVariables) {
   return pairs;
 }
 
+/** Proposes a locale value that restores the source ICU and rich-tag contract. */
 function createContractPreservingLocaleValue(source, currentLocaleValue) {
   if (!source?.defaultMessage || !currentLocaleValue?.exists || typeof currentLocaleValue.value !== "string") {
     return null;
@@ -319,6 +337,7 @@ function createContractPreservingLocaleValue(source, currentLocaleValue) {
   return value === currentLocaleValue.value ? null : value;
 }
 
+/** Resolves the best source default message for a missing locale key. */
 function getSourceDefaultMessageForMissingKey(item, context) {
   if (item.source?.defaultMessage != null) {
     return item.source.defaultMessage;
@@ -334,6 +353,7 @@ function getSourceDefaultMessageForMissingKey(item, context) {
     : null;
 }
 
+/** Builds source-backed remediation suggestions for a missing locale key. */
 function createMissingLocaleSuggestions(item, context) {
   const sourceDefaultMessage = getSourceDefaultMessageForMissingKey(item, context);
 
@@ -358,6 +378,7 @@ function createMissingLocaleSuggestions(item, context) {
   });
 }
 
+/** Groups missing-locale issues by key and enriches them with source context. */
 function groupMissingLocaleKeys(issues, context) {
   const byKey = new Map();
 
@@ -393,6 +414,7 @@ function groupMissingLocaleKeys(issues, context) {
   }).sort((a, b) => a.key.localeCompare(b.key));
 }
 
+/** Converts template-literal default warnings into focused remediation items. */
 function createTemplateDefaultItems(warnings, context) {
   return warnings.map((warning) => {
     const source = warning.key ? getSourceContext(warning.key, context) : null;
@@ -419,6 +441,7 @@ function createTemplateDefaultItems(warnings, context) {
   ));
 }
 
+/** Normalizes an audit warning's source reference for task output. */
 function normalizeWarningSource(source) {
   if (!source) {
     return null;
@@ -432,6 +455,7 @@ function normalizeWarningSource(source) {
   };
 }
 
+/** Reads a specific source line for task context. */
 function readSourceLine(filePath, line) {
   if (!filePath || !line || !fs.existsSync(filePath)) {
     return null;
@@ -441,6 +465,7 @@ function readSourceLine(filePath, line) {
   return lines[line - 1] ?? null;
 }
 
+/** Converts deprecated intl.getHTML warnings into migration task items. */
 function createDeprecatedGetHTMLItems(warnings) {
   return warnings.map((warning) => ({
     type: warning.type,
@@ -455,6 +480,7 @@ function createDeprecatedGetHTMLItems(warnings) {
   ));
 }
 
+/** Converts static display-width warnings into locale review task items. */
 function createLongTranslationItems(warnings, context, severityFilter = []) {
   const severities = new Set(severityFilter.map((value) => value.toLowerCase()));
 
@@ -488,6 +514,7 @@ function createLongTranslationItems(warnings, context, severityFilter = []) {
     ));
 }
 
+/** Converts selected audit issues and warnings into normalized task items. */
 function createTaskItems(report, context, includeWarningTypes = [], warningSeverities = [], { warningsOnly = false } = {}) {
   const issues = report.issues ?? [];
   const warnings = report.warnings ?? [];
@@ -570,6 +597,7 @@ function createTaskItems(report, context, includeWarningTypes = [], warningSever
   return result;
 }
 
+/** Returns the task item covered issue count. */
 function getTaskItemCoveredIssueCount(type, item) {
   if (type === "missing-locale-key") {
     return item.missingLocales?.length ?? 1;
@@ -578,6 +606,7 @@ function getTaskItemCoveredIssueCount(type, item) {
   return 1;
 }
 
+/** Summarizes which blocking audit issues are covered by generated tasks. */
 function createCoverageSummary(report, itemsByType) {
   const issueCounts = countBy(report.issues ?? [], (issue) => issue.type);
   const warningCounts = countBy(report.warnings ?? [], (warning) => warning.type);
@@ -618,6 +647,7 @@ function createCoverageSummary(report, itemsByType) {
   };
 }
 
+/** Returns remediation instructions tailored to an audit task type. */
 function getInstructions(type) {
   switch (type) {
     case "conflicting-default-message":
@@ -684,6 +714,7 @@ function getInstructions(type) {
   }
 }
 
+/** Renders one audit remediation batch as an actionable Markdown task. */
 function createTaskMarkdown(task) {
   const lines = [
     `# Audit fix task: ${task.type}${task.batchCount > 1 ? ` (${task.batchIndex + 1}/${task.batchCount})` : ""}`,
@@ -793,6 +824,7 @@ function createTaskMarkdown(task) {
   return `${lines.join("\n")}\n`;
 }
 
+/** Runs this script's command-line workflow. */
 function main() {
   const args = parseCliArgs(process.argv.slice(2));
 

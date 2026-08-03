@@ -50,6 +50,7 @@ const CONNECTION_PATTERNS = [
   { name: "extraction command string", pattern: /react-intl-universal-extract/ },
 ];
 
+/** Prints command-line usage information. */
 function printHelp() {
   console.log(`Usage:
   node skills/use-react-intl-universal/scripts/discover-project-i18n.mjs --source src --locales src/locales
@@ -67,6 +68,7 @@ Options:
 `);
 }
 
+/** Reads and parses a JSON file when it exists, otherwise returns null. */
 function readJsonIfExists(filePath) {
   if (!fs.existsSync(filePath)) {
     return null;
@@ -77,6 +79,46 @@ function readJsonIfExists(filePath) {
   } catch {
     return null;
   }
+}
+
+/** Walks upward from a path to find the nearest package.json directory. */
+function findNearestPackageRoot(inputPath) {
+  let currentPath = path.resolve(inputPath);
+
+  if (!fs.existsSync(currentPath) || !fs.statSync(currentPath).isDirectory()) {
+    currentPath = path.dirname(currentPath);
+  }
+
+  while (true) {
+    if (fs.existsSync(path.join(currentPath, "package.json"))) {
+      return currentPath;
+    }
+
+    const parentPath = path.dirname(currentPath);
+    if (parentPath === currentPath) {
+      return null;
+    }
+    currentPath = parentPath;
+  }
+}
+
+/** Resolves the explicit project root or infers it from absolute input paths. */
+function resolveProjectRoot(args) {
+  if (args.root) {
+    return resolveFromCwd(String(args.root));
+  }
+
+  const inferredRoots = [args.source, args.locales]
+    .filter((value) => typeof value === "string" && path.isAbsolute(value))
+    .map((value) => findNearestPackageRoot(value))
+    .filter(Boolean);
+  const uniqueRoots = [...new Set(inferredRoots)];
+
+  if (uniqueRoots.length > 1) {
+    throw new Error("Absolute --source and --locales paths resolve to different package roots. Pass --root explicitly.");
+  }
+
+  return uniqueRoots[0] ?? process.cwd();
 }
 
 // Find commands in the same places a developer would normally get them:
@@ -95,6 +137,7 @@ function commandExists(rootPath, commandName) {
   return pathEntries.some((entry) => fs.existsSync(path.join(entry, commandName)));
 }
 
+/** Selects dependencies that reveal the project's internationalization stack. */
 function pickRelevantDependencies(packageJson) {
   const sections = ["dependencies", "devDependencies", "peerDependencies", "resolutions"];
   const result = {};
@@ -116,14 +159,17 @@ function pickRelevantDependencies(packageJson) {
   return result;
 }
 
+/** Returns the installed node_modules path for a package name. */
 function getNodeModulePath(rootPath, packageName) {
   return path.join(rootPath, "node_modules", ...packageName.split("/"));
 }
 
+/** Normalizes locale separators and casing for package support checks. */
 function normalizeLocale(locale) {
   return String(locale).trim().replace(/_/g, "-").toLowerCase();
 }
 
+/** Converts an application locale into a package locale name. */
 function packageLocaleName(locale, packageName) {
   const normalized = normalizeLocale(locale);
 
@@ -144,6 +190,7 @@ function packageLocaleName(locale, packageName) {
   return normalized;
 }
 
+/** Checks whether a package file format can contribute locale messages. */
 function checkLocalePackageFileSupport(rootPath, packageName, localeDir, expectedLocales) {
   const packagePath = getNodeModulePath(rootPath, packageName);
   const directoryPath = path.join(packagePath, localeDir);
@@ -192,6 +239,7 @@ function checkLocalePackageFileSupport(rootPath, packageName, localeDir, expecte
   };
 }
 
+/** Collects format and loader support checks for discovered locale files. */
 function collectLocaleSupportChecks(rootPath, dependencies, expectedLocales) {
   if (expectedLocales.length === 0) {
     return [];
@@ -210,6 +258,7 @@ function collectLocaleSupportChecks(rootPath, dependencies, expectedLocales) {
   return checks;
 }
 
+/** Selects package scripts that extract, synchronize, or validate locales. */
 function pickRelevantScripts(packageJson) {
   const scripts = packageJson?.scripts;
   if (!scripts || typeof scripts !== "object") {
@@ -225,6 +274,7 @@ function pickRelevantScripts(packageJson) {
     }));
 }
 
+/** Extracts locale identifiers from an extraction command's export option. */
 function extractExportLanguages(command) {
   const match = /--export-language(?:=|\s+)([^\s]+)/.exec(String(command));
   if (!match) {
@@ -237,6 +287,7 @@ function extractExportLanguages(command) {
     .filter(Boolean);
 }
 
+/** Summarizes discovered locale files and their message counts. */
 function summarizeLocaleFiles(localesPath, ignorePatterns) {
   const files = filterIgnoredFiles(collectLocaleFiles(localesPath), ignorePatterns);
 
@@ -255,6 +306,7 @@ function summarizeLocaleFiles(localesPath, ignorePatterns) {
   });
 }
 
+/** Finds source locations that connect locale data or providers to the app. */
 function collectConnectionPoints(sourcePath, extensions, ignorePatterns) {
   if (!fs.existsSync(sourcePath)) {
     return [];
@@ -297,6 +349,7 @@ function collectConnectionPoints(sourcePath, extensions, ignorePatterns) {
   ));
 }
 
+/** Classifies a discovered i18n connection point by runtime relevance. */
 function classifyConnectionPoint(type, sourceText, lineText) {
   if (type === "component locale provider") {
     const isImportOnly = /^import\b/.test(lineText)
@@ -348,6 +401,7 @@ function classifyConnectionPoint(type, sourceText, lineText) {
   };
 }
 
+/** Derives setup recommendations from dependencies, scripts, locales, and wiring. */
 function createRecommendations({
   packageJson,
   localeSummaries,
@@ -406,6 +460,7 @@ function createRecommendations({
   return recommendations;
 }
 
+/** Prints the project internationalization discovery report. */
 function printTextReport(report) {
   console.log(`Root: ${relativePath(report.rootPath)}`);
   console.log(`Source: ${relativePath(report.sourcePath)}`);
@@ -488,6 +543,7 @@ function printTextReport(report) {
   }
 }
 
+/** Runs this script's command-line workflow. */
 function main() {
   const args = parseCliArgs(process.argv.slice(2));
 
@@ -496,7 +552,7 @@ function main() {
     return;
   }
 
-  const rootPath = args.root ? resolveFromCwd(String(args.root)) : process.cwd();
+  const rootPath = resolveProjectRoot(args);
   const sourcePath = path.resolve(rootPath, String(args.source ?? "src"));
   const localesPath = path.resolve(rootPath, String(args.locales ?? "src/locales"));
   const expectedLocales = splitCsv(args["expected-locales"], []);

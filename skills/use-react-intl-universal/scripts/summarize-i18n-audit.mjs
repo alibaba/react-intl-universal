@@ -31,6 +31,7 @@ const TYPE_ORDER = [
   "unknown-default-locale",
 ];
 
+/** Prints command-line usage information. */
 function printHelp() {
   console.log(`Usage:
   node skills/use-react-intl-universal/scripts/summarize-i18n-audit.mjs --report tmp/i18n-audit.json
@@ -43,6 +44,7 @@ Options:
 `);
 }
 
+/** Returns a normalized source location for an audit item. */
 function getLocation(item) {
   if (!item.filePath) {
     return "-";
@@ -51,6 +53,7 @@ function getLocation(item) {
   return `${relativePath(item.filePath)}${item.line ? `:${item.line}` : ""}`;
 }
 
+/** Groups audit items by issue type. */
 function groupByType(items) {
   const grouped = new Map();
 
@@ -63,6 +66,7 @@ function groupByType(items) {
   return grouped;
 }
 
+/** Sorts audit items by severity, source location, and issue type. */
 function sortItems(type, items) {
   if (type === "long-translation") {
     // For layout risk, show high severity and high UI-risk candidates first.
@@ -86,6 +90,7 @@ function sortItems(type, items) {
   ));
 }
 
+/** Creates a compact representative example for one audit issue group. */
 function createExample(type, item) {
   const example = {
     type,
@@ -119,6 +124,7 @@ function createExample(type, item) {
   return example;
 }
 
+/** Groups raw audit findings into a concise handoff summary. */
 function createSummary(report, maxPerType) {
   const allItems = [...(report.issues ?? []), ...(report.warnings ?? [])];
   const grouped = groupByType(allItems);
@@ -153,6 +159,7 @@ function createSummary(report, maxPerType) {
   };
 }
 
+/** Prints the summarized audit findings as a text report. */
 function printTextReport(summary) {
   console.log(`Source: ${summary.sourcePath ? relativePath(summary.sourcePath) : "-"}`);
   console.log(`Locales: ${summary.localesPath ? relativePath(summary.localesPath) : "-"}`);
@@ -195,6 +202,7 @@ function printTextReport(summary) {
   }
 }
 
+/** Runs this script's command-line workflow. */
 function main() {
   const args = parseCliArgs(process.argv.slice(2));
 

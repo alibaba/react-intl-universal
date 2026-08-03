@@ -21,22 +21,26 @@ import { detectGroupedControlVisualIntegrityRisk, estimateDisplayWidth, getLengt
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const NODE = process.execPath;
 
+/** Throws an error when an assertion condition is false. */
 function assert(condition, message) {
   if (!condition) {
     throw new Error(message);
   }
 }
 
+/** Serializes a value and writes it to a JSON file. */
 function writeJson(filePath, value) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   fs.writeFileSync(filePath, `${JSON.stringify(value, null, 2)}\n`);
 }
 
+/** Writes text content to a file, creating parent directories as needed. */
 function writeText(filePath, text) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   fs.writeFileSync(filePath, text);
 }
 
+/** Runs a helper script against the temporary test repository. */
 function runScript(repoPath, scriptName, args, { expectFailure = false } = {}) {
   const result = spawnSync(NODE, [path.join(SCRIPT_DIR, scriptName), ...args], {
     cwd: repoPath,
@@ -55,10 +59,12 @@ function runScript(repoPath, scriptName, args, { expectFailure = false } = {}) {
   return result;
 }
 
+/** Reads and parses a JSON file. */
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
 }
 
+/** Creates the temporary fixture data used by the test. */
 function createFixture() {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "use-react-intl-universal-self-test-"));
 
@@ -82,6 +88,7 @@ function createFixture() {
   writeText(path.join(root, "src", "App.tsx"), `
 import intl from "react-intl-universal";
 
+/** Renders the sample application used by the script smoke test. */
 export function App() {
   const username = "Tony";
   const count = 3;
@@ -116,6 +123,7 @@ const LOCALE = {
   EN_US: "en_US",
 };
 
+/** Returns the sample application locale used by the fixture. */
 function getCurrentLocale() {
   return LOCALE.ZH_CN;
 }
@@ -125,6 +133,7 @@ const localeData = {
   [LOCALE.EN_US]: () => import("../locales/en_US.json"),
 };
 
+/** Initializes internationalization in the sample fixture. */
 export async function initIntl() {
   const currentLocale = await getCurrentLocale();
   await intl.init({
@@ -137,12 +146,14 @@ export async function initIntl() {
   writeText(path.join(root, "src", "UnusedProviderImport.tsx"), `
 import { ConfigProvider } from "antd";
 
+/** Renders the fixture that exercises an unused provider import. */
 export function UnusedProviderImport() {
   return <div>provider import is unused here</div>;
 }
 `);
 
   writeText(path.join(root, "src", "Hardcoded.tsx"), `
+/** Renders the fixture containing intentionally hardcoded UI text. */
 export function Hardcoded() {
   const suggestionLangMap = {
     en: "Add schedule parameter {aaa}",
@@ -158,6 +169,7 @@ export function Hardcoded() {
 `);
 
   writeText(path.join(root, "src", "modules", "demo", "Demo.tsx"), `
+/** Renders the display-width test fixture. */
 export function Demo() {
   return <div>演示中文</div>;
 }
@@ -200,6 +212,7 @@ export function Demo() {
   return root;
 }
 
+/** Runs this script's command-line workflow. */
 function main() {
   const root = createFixture();
   const keep = process.argv.includes("--keep");
@@ -268,6 +281,16 @@ function main() {
       && point.taskRelevant === false
       && point.role === "import-only"
     )), "discovery should mark import-only ConfigProvider matches as low-relevance evidence");
+
+    const absoluteDiscoveryResult = runScript(SCRIPT_DIR, "discover-project-i18n.mjs", [
+      "--source", path.join(root, "src"),
+      "--locales", path.join(root, "src", "locales"),
+      "--expected-locales", "en_US,zh_CN",
+      "--json",
+    ]);
+    const absoluteDiscoveryReport = JSON.parse(absoluteDiscoveryResult.stdout);
+    assert(absoluteDiscoveryReport.rootPath === root, "discovery should infer the project root from absolute source and locale paths");
+    assert(absoluteDiscoveryReport.scripts.some((script) => script.name === "intl:export"), "absolute-path discovery should read the inferred repository package.json");
     writeJson(path.join(root, "tmp", "discovery.json"), discoveryReport);
 
     const exportResult = runScript(root, "verify-locale-export.mjs", [
@@ -801,114 +824,8 @@ function main() {
     assert(translationReadyHandoff.blockers.some((item) => item.includes("Translation delta review failed")), "handoff should block on missing translation deltas when locale readiness is not blocked");
     assert(translationReadyHandoff.nextActions.some((item) => item.action.includes("Create translation delta JSON")), "handoff should recommend translation deltas after locale readiness blockers are absent");
 
-    writeJson(path.join(root, "tmp", "ui-report.json"), {
-      schemaVersion: "2.1",
-      runId: "self-test",
-      startedAt: "2026-01-01T00:00:00Z",
-      updatedAt: "2026-01-01T00:00:01Z",
-      inspectionStatus: "completed",
-      reportDisplayLanguage: "en-US",
-      inspectionLogPath: "inspection-log.md",
-      reportHtmlPath: "report.html",
-      screenshotDirectory: "screenshots/",
-      targets: [{ url: "https://example.test/#/overview", locale: "en_US", viewport: "1280x720" }],
-      coverageEvidence: [],
-      captureLedger: [],
-      screenshotManifest: [],
-      screenshotAnnotations: [],
-      findings: [],
-      blockers: [],
-      nonI18nObservations: [],
-      summary: {
-        coverage: { total: 0, byStatus: {} },
-        issues: { found: 0, fixed: 0, needAttention: 0, bySeverity: {}, byStatus: {} },
-      },
-    });
-    const renderedReportPath = path.join(root, "tmp", "ui-report.html");
-    runScript(root, "render-ui-inspection-report.mjs", [
-      "--report-json", "tmp/ui-report.json",
-      "--template", path.join(SCRIPT_DIR, "..", "references", "ui-inspection-report-wireframe.html"),
-      "--output", renderedReportPath,
-    ]);
-    const renderedReport = fs.readFileSync(renderedReportPath, "utf8");
-    assert(!renderedReport.includes('data-template-sample="true"'), "rendered UI report should remove the template sample marker");
-    assert(!renderedReport.includes('<div class="mock-shot"'), "rendered UI report should remove sample mock screenshots");
-    assert(renderedReport.includes('id="finding-overview"'), "rendered UI report should preserve the finding overview section");
-    assert(renderedReport.includes('id="lightbox"'), "rendered UI report should preserve wireframe interactions");
-    assert(renderedReport.includes('.real-shot {'), "rendered UI report should preserve original-pixel image styling");
-    assert(renderedReport.includes('width: max-content;'), "rendered UI report should keep image stages sized from their content");
-    assert(renderedReport.includes('.lightbox-stage .annotated-stage:not(.with-image)'), "lightbox mock sizing should not affect real screenshot geometry");
-    const invalidUiReport = readJson(path.join(root, "tmp", "ui-report.json"));
-    invalidUiReport.findings = [{ id: "I18N-001", severity: "low", status: "verifiedFixed" }];
-    invalidUiReport.summary.issues = {
-      found: 1,
-      fixed: 1,
-      needAttention: 0,
-      bySeverity: { low: 1 },
-      byStatus: { verifiedFixed: 1 },
-    };
-    writeJson(path.join(root, "tmp", "invalid-ui-report.json"), invalidUiReport);
-    const invalidReportResult = runScript(root, "render-ui-inspection-report.mjs", [
-      "--report-json", "tmp/invalid-ui-report.json",
-      "--template", path.join(SCRIPT_DIR, "..", "references", "ui-inspection-report-wireframe.html"),
-      "--output", path.join(root, "tmp", "invalid-ui-report.html"),
-    ], { expectFailure: true });
-    assert(invalidReportResult.stderr.includes("verifiedFixed without verification screenshots"), "renderer should reject verifiedFixed findings without final evidence");
-    const pendingUiReport = readJson(path.join(root, "tmp", "ui-report.json"));
-    pendingUiReport.captureLedger = [{
-      id: "candidate-001",
-      screenshotRef: "screenshots/001.png",
-      capturedAt: "2026-01-01T00:00:00Z",
-      locale: "en_US",
-      viewport: "1280x720",
-      page: "Overview",
-      url: "https://example.test/#/overview",
-      action: "Capture the initial route.",
-      intendedUse: "coverage",
-      state: "pendingPixelReview",
-      rejectionReasons: [],
-      notes: "Awaiting primary-agent pixel review.",
-    }];
-    writeJson(path.join(root, "tmp", "pending-ui-report.json"), pendingUiReport);
-    const pendingReportResult = runScript(root, "render-ui-inspection-report.mjs", [
-      "--report-json", "tmp/pending-ui-report.json",
-      "--template", path.join(SCRIPT_DIR, "..", "references", "ui-inspection-report-wireframe.html"),
-      "--output", path.join(root, "tmp", "pending-ui-report.html"),
-    ], { expectFailure: true });
-    assert(pendingReportResult.stderr.includes("pending pixel review candidates"), "renderer should reject completed reports with pending pixel review candidates");
-
-    const malformedValidationReport = readJson(path.join(root, "tmp", "ui-report.json"));
-    malformedValidationReport.validationEvidence = [{ check: "Build", status: "passed" }];
-    writeJson(path.join(root, "tmp", "malformed-validation-ui-report.json"), malformedValidationReport);
-    const malformedValidationResult = runScript(root, "render-ui-inspection-report.mjs", [
-      "--report-json", "tmp/malformed-validation-ui-report.json",
-      "--template", path.join(SCRIPT_DIR, "..", "references", "ui-inspection-report-wireframe.html"),
-      "--output", path.join(root, "tmp", "malformed-validation-ui-report.html"),
-    ], { expectFailure: true });
-    assert(malformedValidationResult.stderr.includes("validationEvidence item 1 is missing command"), "renderer should reject malformed validation evidence");
-
-    const absoluteScreenshotReport = readJson(path.join(root, "tmp", "ui-report.json"));
-    absoluteScreenshotReport.captureLedger = [{
-      id: "candidate-absolute",
-      screenshotRef: "/tmp/screenshots/absolute.png",
-      capturedAt: "2026-01-01T00:00:00Z",
-      locale: "en_US",
-      viewport: "1280x720",
-      page: "Overview",
-      url: "https://example.test/#/overview",
-      action: "Capture the initial route.",
-      intendedUse: "coverage",
-      state: "rejected",
-      rejectionReasons: ["not-pixel-reviewed"],
-      notes: "Synthetic invalid absolute path fixture.",
-    }];
-    writeJson(path.join(root, "tmp", "absolute-screenshot-ui-report.json"), absoluteScreenshotReport);
-    const absoluteScreenshotResult = runScript(root, "render-ui-inspection-report.mjs", [
-      "--report-json", "tmp/absolute-screenshot-ui-report.json",
-      "--template", path.join(SCRIPT_DIR, "..", "references", "ui-inspection-report-wireframe.html"),
-      "--output", path.join(root, "tmp", "absolute-screenshot-ui-report.html"),
-    ], { expectFailure: true });
-    assert(absoluteScreenshotResult.stderr.includes("report-relative screenshotRef"), "renderer should reject absolute screenshot paths");
+    const uiInspectionReportTests = runScript(root, "ui-inspection-report-self-test.mjs", []);
+    assert(uiInspectionReportTests.stdout.includes("# fail 0"), "UI inspection report contract tests should all pass");
 
     console.log(JSON.stringify({
       ok: true,
@@ -931,9 +848,9 @@ function main() {
         "length-risk short enum calibration",
         "changed-key audit handoff summary",
         "create-i18n-handoff blockers",
-        "render-ui-inspection-report wireframe population",
-        "render-ui-inspection-report evidence-state guards",
-        "render-ui-inspection-report portable-path and validation-schema guards",
+        "UI inspection report structure and semantic guards",
+        "immutable screenshot asset and claim-binding mutation tests",
+        "render-ui-inspection-report run-local wireframe population",
       ],
     }, null, 2));
   } finally {

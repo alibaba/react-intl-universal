@@ -3,7 +3,7 @@
 Use these scripts when the repository has locale JSON files and deterministic i18n checks are useful.
 All scripts use only Node.js standard library modules. The display-width helper used for daily static UI-fit risk review is bundled under `scripts/lib/display-width.mjs`; it follows the default behavior of `string-width` closely enough for lightweight localization review, but does not require installing `string-width` or any other npm package. These display-width warnings are static review prompts, not browser pixel measurements or proof that a real layout will break. They also do not prove component visual integrity: a tabs/segmented-control/button-group/chip-group can have no text overflow and still look broken if same-group items wrap and borders, radius, active state, or icon/text/arrow relationships no longer form one coherent control.
 
-UI Inspection Mode uses `render-ui-inspection-report.mjs` to populate the copied wireframe from `report.json`. Keep `report.json` as the only report data model; do not independently hand-maintain HTML counts, finding cards, screenshot lists, or annotations. The renderer replaces only the wireframe content region, so Bootstrap, styling, modal/lightbox behavior, feedback controls, and Back to top remain template-owned.
+UI Inspection Mode uses the initialized `report.json` as its only data model. Initialize a run once, derive image and Git facts with the helper scripts, validate the full contract, and only then render the copied run-local wireframe. Do not independently hand-maintain HTML counts, finding cards, screenshot roles, annotations, risk, or status.
 
 After generating or editing `report.html`, run the focused integrity checks from [UI Inspection Evidence](ui-inspection-evidence.md). When browser access is available, open the report and spot-check representative wireframe interactions. If browser policy blocks the local report, state that browser interaction verification was unavailable and do not circumvent the policy.
 Set `SKILL_DIR` to the absolute path of the directory that contains this skill's `SKILL.md`:
@@ -15,6 +15,11 @@ export SKILL_DIR=/absolute/path/to/use-react-intl-universal
 ## Table of Contents
 
 - [Discover Existing I18n Setup](#discover-existing-i18n-setup)
+- [Initialize UI Inspection Report](#initialize-ui-inspection-report)
+- [Inspect UI Screenshot](#inspect-ui-screenshot)
+- [Collect UI Fix Evidence](#collect-ui-fix-evidence)
+- [Run UI Inspection Validation](#run-ui-inspection-validation)
+- [Validate UI Inspection Report](#validate-ui-inspection-report)
 - [Render UI Inspection Report](#render-ui-inspection-report)
 - [Daily Development Changed-Key Workflow](#daily-development-changed-key-workflow)
 - [Export Verification](#export-verification)
@@ -35,25 +40,117 @@ export SKILL_DIR=/absolute/path/to/use-react-intl-universal
 
 ```bash
 node "$SKILL_DIR/scripts/discover-project-i18n.mjs" \
+  --root <absolute-repository-path> \
   --source src \
   --locales src/locales \
   --expected-locales zh_CN,en_US,zh_TW
 ```
 
-Use this first in unfamiliar repositories. It reports relevant `package.json` scripts, installed i18n dependencies, locale files, extraction export languages, command availability, expected-locale support in known locale provider/UI/date packages, and source files that wire locale imports or providers. For normal copy, extraction, translation, or audit work, use it to understand the existing setup.
+Use this first in unfamiliar repositories. Prefer explicit `--root` when the current working directory is not the inspected repository; relative `--source` and `--locales` paths resolve beneath that root. When `--root` is omitted and absolute source/locale paths resolve to the same nearest package root, the script infers that root; conflicting package roots fail and require `--root`. It reports relevant `package.json` scripts, installed i18n dependencies, locale files, extraction export languages, command availability, expected-locale support in known locale provider/UI/date packages, and source files that wire locale imports or providers. For normal copy, extraction, translation, or audit work, use it to understand the existing setup.
+
+## Initialize UI Inspection Report
+
+Run this once before product navigation or publishing. Generate `taskId` once at the start of the current Codex task as a stable token, then reuse that exact token for every initializer call and inspection loop in that task. Do not derive it from a run ID, timestamp, locale, or publish attempt.
+
+```bash
+node "$SKILL_DIR/scripts/init-ui-inspection-report.mjs" \
+  --registry-root <absolute-report-registry-root> \
+  --run-dir <absolute-report-registry-root>/<repository>/<run-id> \
+  --run-id <run-id> \
+  --task-id <stable-current-codex-task-token> \
+  --authorization <inspect-only|fix-local|release-verify> \
+  --repository <absolute-repository-path> \
+  --branch <branch> \
+  --baseline-commit <commit> \
+  --target-url <canonical-app-entry-url> \
+  --target-locale en_US,zh_CN \
+  --viewport-width <actual-css-width> \
+  --viewport-height <actual-css-height> \
+  --device-scale-factor <actual-dpr> \
+  --browser-zoom <actual-zoom> \
+  --primary-inspector-id <current-agent-id>
+```
+
+`--registry-root` and `--repository` are required. The initializer recursively scans every `report.json` beneath the registry root. When it finds the same `taskId` and resolved repository path, it exits successfully with machine-readable JSON containing `reused: true` and the existing run, report, log, screenshot, and artifact paths; it does not create the requested new run directory. A newly created run returns the same path fields with `reused: false`. Keep `--run-dir` inside the registry root.
+
+`--target-locale` accepts one locale or a comma-separated list and creates one deterministic `TARGET-nnn` record per locale. `--target-url` is the canonical application entry known before publishing and is shared by those locale targets. For multiple locales, use a locale-neutral entry URL rather than fixing one locale in its query. Do not put a not-yet-created Preview URL there; record concrete baseline and fix Preview URLs later in `deployments[]` and deployment-backed captures.
+
+For a new task/repository identity, the command requires explicit authorization, copies the wireframe to `report.html`, records its shell hash, and creates `report.json`, `inspection-log.md`, `screenshots/`, and `artifacts/`. Fill the generated inventory and provenance fields; do not create another report model.
+
+## Inspect UI Screenshot
+
+After taking a browser capture, explicitly persist the returned bytes when the browser surface does not write its `path` option. Confirm the file exists, then derive facts from its actual bytes:
+
+```bash
+node "$SKILL_DIR/scripts/inspect-ui-screenshot.mjs" \
+  --file <run-folder>/screenshots/<file>.png \
+  --report-root <run-folder>
+```
+
+Use the returned relative path, SHA-256, MIME, byte length, and decoded dimensions in `captures[]`. Admission and claim review still require opening the exact saved asset.
+
+Do not queue screenshots in memory and write them after visiting several routes. Persist and inspect each state before the next navigation; otherwise timestamps, filenames, and route claims can drift apart.
+
+Also record `captureScaleFactor`. For a `full-viewport` capture, compute it from decoded pixels divided by the recorded CSS viewport and confirm width and height produce the same ratio. Keep `viewport.deviceScaleFactor` as the actual page DPR. Chrome Browser Use can return 1x JPEG bytes on a DPR 2 display; use the returned MIME and a `.jpg` extension instead of renaming the bytes or falsifying DPR.
+
+## Collect UI Fix Evidence
+
+After committing a candidate fix, obtain conservative Git evidence:
+
+```bash
+node "$SKILL_DIR/scripts/collect-ui-fix-evidence.mjs" \
+  --repository <repository> \
+  --base <base-commit> \
+  --fix <fix-or-final-commit> \
+  --report-root <run-folder> \
+  --diff-artifact artifacts/diffs/<scope>.diff \
+  --scope <finding|release> \
+  --finding-ids <required-for-release-scope>
+```
+
+The script saves the exact `git diff --binary --full-index` bytes, records their artifact/hash and changed paths, classifies obvious shared/config/dependency/global-style risks, and leaves unknown path classifications high until reviewed. `--full-index` keeps the evidence bytes stable when Git configurations choose different abbreviated object-ID lengths. Finding scope records the commit that originally introduced one fix. Release scope adds the Finding IDs and is used for the complete `run.baselineCommit..run.finalCommit` assessment. It is an evidence skeleton, not an automatic approval.
+
+## Run UI Inspection Validation
+
+Run deterministic checks through this wrapper so the exact command, working directory, execution time, exit code, stdout, and stderr are retained as a hashed artifact:
+
+```bash
+node "$SKILL_DIR/scripts/run-ui-inspection-validation.mjs" \
+  --id VAL-GIT-001 \
+  --scope git \
+  --report-root <run-folder> \
+  --artifact artifacts/validations/VAL-GIT-001.json \
+  --cwd <repository> \
+  -- git diff --check
+```
+
+The command after `--` is executed directly without a shell. The raw artifact keeps argv in `command` and its canonical shell-display form in `commandText`; the printed report validation uses that exact `commandText`. Add the printed `validation` object to `report.json` without reconstructing or reformatting the command. A nonzero child exit keeps the raw artifact and returns a failed validation record; decide separately whether it is caused by the current diff or is a documented pre-existing failure.
+
+## Validate UI Inspection Report
+
+Validate before rendering, before final review, and after recording final review:
+
+```bash
+node "$SKILL_DIR/scripts/validate-ui-inspection-report.mjs" \
+  --report-json <run-folder>/report.json \
+  --repository <repository> \
+  --json
+```
+
+The validator checks the report structure, task authorization, source-backed coverage and valid source lines, cross-record references, chronology, capture admission, fully decoded saved pixels, report shell, exact structured supporting artifacts, per-claim annotations and isolated reviews, acceptance evidence, finding/release risk floors, exact Git diffs, deployment URL/commit identity, latest-release reverification, lifecycle, and final-review digest. Use its `reviewableContentSha256` when recording the final report review.
 
 ## Render UI Inspection Report
 
-After updating the capture ledger, admitted screenshot manifest, findings, annotations, and summary in `report.json`, render the same run report:
+After validation succeeds, update the same run-local report:
 
 ```bash
 node "$SKILL_DIR/scripts/render-ui-inspection-report.mjs" \
   --report-json <run-folder>/report.json \
-  --template "$SKILL_DIR/references/ui-inspection-report-wireframe.html" \
-  --output <run-folder>/report.html
+  --output <run-folder>/report.html \
+  --repository <repository>
 ```
 
-The renderer accepts schema `2.1` and keeps rejected capture candidates out of the HTML because it reads only `screenshotManifest`. It fails on incomplete capture metadata, pending pixel review in a completed report, duplicate or conflicting admission, missing image files, rejected-capture leakage, invalid references or annotations, summary drift, `verifiedFixed` without admitted before evidence, or final after evidence from the wrong commit. It also fails if the wireframe content region is missing or sample DOM survives population. Run it after each coherent evidence batch and before handoff.
+Without `--template`, the renderer reads `report.html` as its own run-local template and replaces only the marked content region. It accepts only records that pass the current contract validator. Bootstrap, desktop layout, two-column finding previews, natural-pixel lightboxes, modal stack, session-only feedback controls, and Back to top remain template-owned. Finding bindings that share one capture render one image with separate claim records. Validated Finding diff artifacts render inline in the detail card and therefore also appear in the Finding modal. Copy the wireframe only during initialization; do not recopy it on later loops.
 
 ## Daily Development Changed-Key Workflow
 

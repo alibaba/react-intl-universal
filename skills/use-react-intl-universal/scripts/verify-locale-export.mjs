@@ -24,6 +24,7 @@ import {
   splitCsv,
 } from "./lib/i18n-audit.mjs";
 
+/** Prints command-line usage information. */
 function printHelp() {
   console.log(`Usage:
   node skills/use-react-intl-universal/scripts/verify-locale-export.mjs --locales tmp/export --expected-locales zh_CN,en_US,ja_JP
@@ -39,6 +40,7 @@ Options:
 `);
 }
 
+/** Converts a value to a finite number or returns a fallback. */
 function toNumber(value, fallback = null) {
   if (value === undefined || value === null || value === "") {
     return fallback;
@@ -48,6 +50,7 @@ function toNumber(value, fallback = null) {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
+/** Reads exported locale JSON files and summarizes their message counts. */
 function readExportedLocales(localesPath) {
   if (!fs.existsSync(localesPath)) {
     return [];
@@ -68,6 +71,7 @@ function readExportedLocales(localesPath) {
   });
 }
 
+/** Creates a normalized locale-export verification issue. */
 function createIssue(type, locale, message, extra = {}) {
   return {
     type,
@@ -77,6 +81,7 @@ function createIssue(type, locale, message, extra = {}) {
   };
 }
 
+/** Verifies expected locale files, JSON shape, keys, and minimum message counts. */
 function verifyExport({
   localesPath,
   expectedLocales,
@@ -200,6 +205,7 @@ function verifyExport({
   };
 }
 
+/** Prints locale export verification results as a text report. */
 function printTextReport(report) {
   console.log(`Locale export: ${relativePath(report.localesPath)}`);
   console.log(`Status: ${report.status}`);
@@ -239,6 +245,7 @@ function printTextReport(report) {
   }
 }
 
+/** Runs this script's command-line workflow. */
 function main() {
   const args = parseCliArgs(process.argv.slice(2));
 

@@ -153,6 +153,15 @@ test("Test extract", () => {
   expect(getOriginal(result, 'var5')).toBe('Hello5, ${name}. Welcome to ${where}!');
   expect(getTransformed(result, 'var5')).toBe('Hello5, {name}. Welcome to {where}!');
 
+  expect(getOriginal(result, 'literal_template_syntax_single')).toBe('${name} is shown as template syntax');
+  expect(getTransformed(result, 'literal_template_syntax_single')).toBe('${name} is shown as template syntax');
+
+  expect(getOriginal(result, 'literal_template_syntax_double')).toBe('${name} is shown as template syntax');
+  expect(getTransformed(result, 'literal_template_syntax_double')).toBe('${name} is shown as template syntax');
+
+  expect(getOriginal(result, 'quoted_escape_newline')).toBe('First line\\nSecond line');
+  expect(getTransformed(result, 'quoted_escape_newline')).toBe('First line\\nSecond line');
+
   expect(getOriginal(result, 'rich_get1')).toBe('Hello, {name}. Read the <link>documentation</link>.');
   expect(getTransformed(result, 'rich_get1')).toBe('Hello, {name}. Read the <link>documentation</link>.');
 

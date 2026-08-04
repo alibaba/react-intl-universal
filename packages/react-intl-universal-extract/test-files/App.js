@@ -81,6 +81,15 @@ class App extends Component {
             where,
           }).defaultMessage(`Hello5, ${name}. Welcome to ${where}!`)
         }
+        {
+          intl.get(`literal_template_syntax_single`).d('${name} is shown as template syntax')
+        }
+        {
+          intl.get(`literal_template_syntax_double`).defaultMessage("${name} is shown as template syntax")
+        }
+        {
+          intl.get('quoted_escape_newline').d('First line\nSecond line')
+        }
 
         {/* Rich tag formatter with intl.get */}
         {

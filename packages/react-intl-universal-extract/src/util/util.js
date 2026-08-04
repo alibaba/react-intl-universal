@@ -111,8 +111,11 @@ function extractMessages(content, path) {
     let key = match[keyIndex];
     let defaultMessage = match[messageIndex];
 
-    // Trim "${variable}" to "{variable}"
-    const shouldTrim = /\.(d|defaultMessage)\([\s\S]*`[\s\S]*\)/.test(match[0]);
+    // Convert template interpolation only when the default message itself uses backticks.
+    const defaultMessageDelimiter = match[0].match(/\.(?:d|defaultMessage)\s*\(\s*([`"'])/);
+    const shouldTrim = keyIndex === 3
+      ? _.get(defaultMessageDelimiter, '[1]') === '`'
+      : /\.(d|defaultMessage)\([\s\S]*`[\s\S]*\)/.test(match[0]);
     _messages.push(addSourceMetadata({
       key,
       path,

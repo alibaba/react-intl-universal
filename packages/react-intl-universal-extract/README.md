@@ -23,7 +23,44 @@ This tool will generate a json file which contains the extracted messages.
 }
 ```
 
-Note that if the default message contains variables in ES6 template strings format (`Hello ${name}`), it will be transformed to ICU format (`Hello {name}`).
+## Default message syntax
+
+Only interpolation in an ES6 template literal is transformed to ICU format:
+
+```jsx
+intl.get('greeting', { name }).d(`Hello ${name}`)
+// Extracted as: "Hello {name}"
+```
+
+`${...}` inside a single- or double-quoted string is ordinary text and is preserved:
+
+```jsx
+intl.get('template_help').d('Use ${name} in the template')
+// Extracted as: "Use ${name} in the template"
+```
+
+### Escaped newlines in quoted strings
+
+For compatibility, the extractor preserves JavaScript escape sequences in single- and double-quoted default messages as source text. It does not evaluate `\n` as a line break:
+
+```jsx
+intl.get('quoted_lines').d('First line\nSecond line')
+```
+
+The parsed locale value contains a literal backslash followed by `n`:
+
+```json
+{
+  "quoted_lines": "First line\\nSecond line"
+}
+```
+
+Use a multiline template literal when the locale value requires an actual line break:
+
+```jsx
+intl.get('multiline').d(`First line
+Second line`)
+```
 
 ## Install
 ```sh

@@ -1,4 +1,6 @@
 // import intl from 'react-intl-universal';  // test npm code
-import intl from '../../../src/index'; // test local code
+import intlValue from '../../../es/index'; // test local build output
+
+const intl = intlValue as any;
 
 export default intl;

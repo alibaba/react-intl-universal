@@ -1,11 +1,15 @@
 import intl from "react-intl-universal";
 import React, { Component } from "react";
+
+const Badge = ({ children }) => <span>{children}</span>;
+
 class App extends Component {
 
   render() {
     const name = 'Tony';
     const where = 'Alibaba';
     const webLink = 'https://www.npmjs.com/package/react-intl-extract';
+    const docsUrl = 'https://example.com/docs';
 
     // HTML
     return (
@@ -17,6 +21,15 @@ class App extends Component {
         <div>{intl.get('basic4').d('Default message for basic(4) with 中文')}</div>
         <div>{intl.get('basic5').d('Default message for basic5 with 中文(5)')}</div>
         <div>{intl.get('basic6').d('Default message for basic6 with "123(中文)"')}</div>
+        <div>{
+          intl
+            .get("trailing_comma1")
+            .d(
+
+              '你好',
+
+            )
+        }</div>
 
         {/* New line */}
         {
@@ -36,6 +49,13 @@ class App extends Component {
           intl
             .get('newline4')
             .d('Default message for newline2')
+        }
+        {
+          intl
+            .get('trailing_comma2')
+            .d(
+              'Default message with trailing comma',
+            )
         }
 
         {/* Variable */}
@@ -60,6 +80,50 @@ class App extends Component {
             name,
             where,
           }).defaultMessage(`Hello5, ${name}. Welcome to ${where}!`)
+        }
+        {
+          intl.get(`literal_template_syntax_single`).d('${name} is shown as template syntax')
+        }
+        {
+          intl.get(`literal_template_syntax_double`).defaultMessage("${name} is shown as template syntax")
+        }
+        {
+          intl.get('quoted_escape_newline').d('First line\nSecond line')
+        }
+
+        {/* Rich tag formatter with intl.get */}
+        {
+          intl
+            .get('rich_get1', {
+              name,
+              link: chunks => <a href={docsUrl}>{chunks}</a>,
+            })
+            .d('Hello, {name}. Read the <link>documentation</link>.')
+        }
+        {
+          intl
+            .get('rich_get2', {
+              count: 2,
+              badge: chunks => <Badge>{chunks}</Badge>,
+            })
+            .defaultMessage('You have {count} <badge>urgent tasks</badge>.')
+        }
+        {
+          intl
+            .get('rich_get3', {
+              name,
+              strong: chunks => <strong>{chunks}</strong>,
+              link: chunks => <a href={docsUrl}>{chunks}</a>,
+            })
+            .d('Hello, <strong>{name}</strong>. Visit <link>the guide</link>.')
+        }
+        {
+          intl
+            .get('rich_get4', {
+              name,
+              link: chunks => <a href={docsUrl}>{chunks}</a>,
+            })
+            .d(`Hello, ${name}. Read the <link>documentation</link>.`)
         }
 
         {/* more character */}

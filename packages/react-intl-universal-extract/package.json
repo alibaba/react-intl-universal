@@ -1,6 +1,6 @@
 {
   "name": "react-intl-universal-extract",
-  "version": "1.0.8",
+  "version": "1.2.0",
   "description": "A react-intl-universal message extractor",
   "keywords": [
     "intl",
@@ -15,6 +15,13 @@
     "react-intl-universal-extract": "bin/index.js"
   },
   "main": "./src/index.js",
+  "files": [
+    "bin",
+    "src/index.js",
+    "src/extract/index.js",
+    "src/util",
+    "config.js"
+  ],
   "scripts": {
     "test": "jest --coverage",
     "test:watch": "jest --watch --verbose --coverage",
@@ -27,33 +34,15 @@
   "dependencies": {
     "chalk": "2.1.0",
     "commander": "2.11.0",
-    "cross-spawn": "5.1.0",
-    "fs-extra": "4.0.1",
-    "git-user-name": "2.0.0",
-    "ignore": "^5.0.5",
-    "invariant": "2.2.2",
-    "lodash": "4.17.21",
-    "parse-git-config": "2.0.3",
-    "path": "0.12.7",
-    "pify": "3.0.0",
-    "request": "2.81.0",
-    "request-promise": "4.2.1",
-    "sort-keys": "2.0.0"
+    "ignore": "5.0.5",
+    "lodash": "4.18.1"
   },
   "devDependencies": {
-    "babel-cli": "^6.2.0",
-    "babel-eslint": "^7.1.1",
     "babel-jest": "^19.0.0",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.24.1",
     "babel-preset-es2015": "^6.1.18",
-    "babel-preset-es2015-rollup": "^3.0.0",
     "jest": "^19.0.2",
-    "jest-cli": "^19.0.2",
-    "path": "^0.12.7",
-    "rimraf": "^2.4.2",
-    "rollup": "^0.41.4",
-    "rollup-plugin-babel": "^2.3.9",
-    "rollup-plugin-commonjs": "^7.0.0"
+    "rimraf": "^2.4.2"
   },
   "babel": {
     "presets": [

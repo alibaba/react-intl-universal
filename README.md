@@ -6,8 +6,6 @@
 ## ✨ Features
 - Can be used not only in React component but also in Vanilla JS.
 - Simple API surface centered around `intl.get`.
-- Display locale-aware numbers.
-- Stable date/time helpers: `formatDate`, `formatTime`, and `formatDateTime` return deterministic `YYYY-MM-DD`, `HH:mm:ss`, and `YYYY-MM-DD HH:mm:ss`. This avoids native `Intl` output drift across runtimes, which has caused SSR and CI issues in [tc39/ecma402#1028](https://github.com/tc39/ecma402/issues/1028), [nodejs/node#44454](https://github.com/nodejs/node/issues/44454), [nodejs/node#46123](https://github.com/nodejs/node/issues/46123), and [formatjs/formatjs#1319](https://github.com/formatjs/formatjs/issues/1319).
 - Pluralize labels in strings.
 - Support variables in message.
 - Support [React rich text component interpolation in message](https://alibaba.github.io/react-intl-universal#intl-usage).

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>提交服务器</title>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://g.alicdn.com/dwfe/common/0.0.4/vue/index.css">
+    <!-- 引入组件库 -->
+    <script src="https://g.alicdn.com/dwfe/common/0.0.4/vue/index.js"></script>
+    <script src="https://g.alicdn.com/dwfe/common/0.0.4/vue/element.js"></script>
+    <style type="type/css">
+      .input {
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+      <div id="app">
+        <el-form ref="form" :model="form" label-width="80px">
+          <el-form-item label="Key">
+            <el-input
+              placeholder="请输入内容"
+              v-model="form.intlKey"
+              clearable>
+            </el-input>
+            <el-button v-on:click="autoCreateKey" type="text">自动生成key</el-button>
+          </el-form-item>
+          <el-form-item label="Text">
+            <el-input
+              type="textarea"
+              placeholder="请输入内容"
+              v-model="form.intlText"
+              clearable>
+            </el-input>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" @click="submitKey">上传到服务器</el-button><br /><br />
+            <el-button type="primary" @click="submitKeyWidthUpdate">上传到服务器并更新到编辑器</el-button><br /><br />
+            <el-button type="primary" @click="submitKeyWidthUpdateAndKuo">上传到服务器并更新到编辑器并添加大括号</el-button><br /><br />
+            <el-button type="primary" @click="updateEditor">更新到编辑器</el-button><br /><br />
+            <el-button type="primary" @click="updateEditorWithKuo">更新到编辑器并添加大括号</el-button><br />
+          </el-form-item>
+        </el-form>
+      </div>
+      <script>
+        const vscode = acquireVsCodeApi()
+        function createKey() {
+          window.postMessage();
+        }
+        
+        window.app = new Vue({
+          el: '#app',
+          data() {
+            return {
+              form: {
+                intlKey: null,
+                intlText: null,
+              },
+              range: null,
+              type: null,
+            }
+          },
+        computed: {
+          
+        },
+        created() {
+          //   window.onmessage = (e) => {
+          //   const {type, data} = e.data;
+          //   document.getElementById('keyInput').value = data.key;
+          //   document.getElementById('textInput').value = data.text;
+          // }
+          vscode.postMessage({
+            type: 'react-intl-universal-event.REQUEST_READY_INITDATA',
+            data: {
+              text: this.form.intlText
+            }
+          });
+          window.addEventListener('message', ({ data: eventData }) => {
+            const { data, type } = eventData
+            switch (type) {
+              case 'react-intl-universal-event.ADD_TO_MEIDUSHA': {
+                this.form.intlKey = data.key;
+                this.form.intlText = data.text;
+                this.range = data.range;
+                this.hasParams = data.hasParams;
+                this.getMethod = data.getMethod;
+                this.replaceParams = data.replaceParams;
+                this.type = data.type;
+                break;
+              }
+              case 'react-intl-universal-event.AUTO_TRANS_KEY': {
+                this.form.intlKey = data;
+                break;
+              }
+              default:
+            }
+          })
+          // vscode.postMessage({ type: EVENT_TYPE.READY })
+        },
+        methods: {
+          onSubmit(){},
+          updateEditor() {
+            this._updateEditor(false);
+          },
+          _updateEditor(hasKuo) {
+            vscode.postMessage({
+              type: 'react-intl-universal-event.UPDATE_EDITOR_TEXT',
+              data: {
+                text: this.form.intlText,
+                key: this.form.intlKey,
+                range: this.range,
+                hasParams: this.hasParams,
+                getMethod: this.getMethod,
+                replaceParams: this.replaceParams,
+                type: this.type,
+                hasKuo: hasKuo || false
+              }
+            });
+          },
+          updateEditorWithKuo() {
+            this._updateEditor(true);
+          },
+          submitKeyWidthUpdate() {
+            this._submitKey(true);
+          },
+          submitKeyWidthUpdateAndKuo() {
+            this._submitKey(true, true);
+          },
+          submitKey() {
+            this._submitKey(false, false);
+          },
+          _submitKey(isUpdate, hasKuo) {
+            vscode.postMessage({
+              type: 'react-intl-universal-event.SUBMIT_TO_MEIDUSHA',
+              data: {
+                text: this.form.intlText,
+                key: this.form.intlKey,
+                range: this.range,
+                hasParams: this.hasParams,
+                getMethod: this.getMethod,
+                replaceParams: this.replaceParams,
+                type: this.type,
+                isUpdate: isUpdate || false,
+                hasKuo: hasKuo || false
+              }
+            });
+          },
+          autoCreateKey() {
+            vscode.postMessage({
+              type: 'react-intl-universal-event.AUTO_CREATE_KEY',
+              data: {
+                text: this.form.intlText
+              }
+            });
+          }
+        }
+      });
+      </script>
+  </body>
+</html>

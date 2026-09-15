@@ -1,0 +1,5 @@
+{
+  "example.app.greeting": "Լավ օր, {name}!",
+  "example.app.hello": "Բարեւ Ձեզ!!",
+  "example.app.input.label": "Մուտքագրեք ձեր անունը"
+}

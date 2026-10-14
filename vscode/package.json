@@ -1,0 +1,78 @@
+{
+  "name": "react-intl-universal",
+  "publisher": "rongpingli",
+  "displayName": "react-intl-universal",
+  "description": "react 国际化自动填充插件",
+  "version": "0.0.9",
+  "engines": {
+    "vscode": "^1.43.0"
+  },
+  "repository": "https://github.com/lirongfei123/react-intl-universal",
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:extension.helloWorld",
+    "onCommand:react-intl-universal.OPEN_WEBVIEW",
+    "onCommand:react-intl-universal.CHECK_ALL_FILES",
+    "onLanguage:javascript",
+    "onLanguage:typescript",
+    "onLanguage:typescriptreact"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "react-intl-universal.CHECK_ALL_FILES",
+        "title": "Check: 文件国际化"
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "react-intl-universal",
+      "properties": {
+        "react-intl-universal.localConfigFileName": {
+          "type": "string",
+          "default": "intl.config.js",
+          "description": "具体配置的配置文件名, 插件会查找当前文件上层文件夹中的这个文件, 一直向上插件, 直到找到为止"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "yarn run compile",
+    "compile": "tsc -p ./",
+    "lint": "eslint src --ext ts",
+    "watch": "tsc -watch -p ./",
+    "pretest": "yarn run compile && yarn run lint",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/glob": "^7.1.1",
+    "@types/mocha": "^7.0.1",
+    "@types/node": "^12.11.7",
+    "@types/vscode": "^1.43.0",
+    "@typescript-eslint/eslint-plugin": "^2.18.0",
+    "@typescript-eslint/parser": "^2.18.0",
+    "eslint": "^6.8.0",
+    "glob": "^7.1.6",
+    "mocha": "^7.0.1",
+    "typescript": "^3.7.5",
+    "vscode-test": "^1.3.0"
+  },
+  "dependencies": {
+    "@babel/core": "^7.9.0",
+    "@babel/generator": "^7.9.4",
+    "@babel/plugin-proposal-class-properties": "^7.8.3",
+    "@babel/plugin-proposal-decorators": "^7.8.3",
+    "@babel/preset-react": "^7.8.3",
+    "@babel/preset-typescript": "^7.8.3",
+    "@babel/types": "^7.10.4",
+    "@types/lodash": "^4.14.149",
+    "crc-32": "^1.2.0",
+    "lodash": "^4.17.15",
+    "node-readfiles": "^0.2.0",
+    "request": "^2.88.2",
+    "request-promise": "^4.2.5"
+  }
+}
